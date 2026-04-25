@@ -11,6 +11,9 @@ import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from httpx import AsyncClient
 
+# Configure pytest-asyncio
+pytest_plugins = ('pytest_asyncio',)
+
 # Add the Backend directory to the Python path
 backend_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(backend_dir))
