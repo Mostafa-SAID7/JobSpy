@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import FormInput from '../FormInput.vue'
 
@@ -64,8 +64,9 @@ describe('FormInput Component', () => {
       })
 
       await wrapper.find('input').setValue('test value')
-      expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-      expect(wrapper.emitted('update:modelValue')[0]).toEqual(['test value'])
+      const emitted = wrapper.emitted('update:modelValue')
+      expect(emitted).toBeTruthy()
+      expect(emitted?.[0]).toEqual(['test value'])
     })
 
     it('should display initial modelValue', () => {
@@ -76,7 +77,8 @@ describe('FormInput Component', () => {
         },
       })
 
-      expect(wrapper.find('input').element.value).toBe('initial value')
+      const inputElement = wrapper.find('input').element as HTMLInputElement
+      expect(inputElement.value).toBe('initial value')
     })
   })
 

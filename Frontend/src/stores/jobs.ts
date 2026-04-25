@@ -80,7 +80,7 @@ export const useJobsStore = defineStore('jobs', () => {
   }
 
   // Saved Jobs Methods
-  const addSavedJob = async (jobId: string, notes?: string) => {
+  const addSavedJob = async (jobId: number, notes?: string) => {
     try {
       isLoading.value = true
       error.value = null
@@ -104,7 +104,7 @@ export const useJobsStore = defineStore('jobs', () => {
     }
   }
 
-  const removeSavedJob = async (savedJobId: string) => {
+  const removeSavedJob = async (savedJobId: number) => {
     try {
       isLoading.value = true
       error.value = null
@@ -146,7 +146,7 @@ export const useJobsStore = defineStore('jobs', () => {
     }
   }
 
-  const isSavedJob = (jobId: string): boolean => {
+  const isSavedJob = (jobId: number): boolean => {
     return savedJobs.value.some(j => j.id === jobId)
   }
 

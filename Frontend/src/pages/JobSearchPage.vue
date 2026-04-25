@@ -82,11 +82,11 @@
         <div v-else class="space-y-4">
           <JobCard
             v-for="job in jobs"
-            :key="job.job_id"
+            :key="job.id"
             :job="job"
-            :is-saved="isSaved(job.job_id)"
-            @toggle-save="toggleSaveJob(job.job_id)"
-            @view-details="goToJobDetails(job.job_id)"
+            :is-saved="isSaved(job.id)"
+            @toggle-save="toggleSaveJob(job.id)"
+            @view-details="goToJobDetails(job.id)"
           />
         </div>
 
@@ -142,19 +142,19 @@ const filterState = ref({
   minSalary: 0,
   maxSalary: 500000,
   location: '',
-  jobTypes: [],
-  remote: [],
+  jobTypes: [] as string[],
+  remote: [] as string[],
   experienceLevel: '',
   postedDate: '',
-  companySizes: []
+  companySizes: [] as string[]
 })
 
 /**
  * Check if a job is saved
  * Validates: Requirements 5.1, 5.3
  */
-const isSaved = (jobId: string) => {
-  return jobsStore.savedJobs.some(job => job.job_id === jobId)
+const isSaved = (jobId: string | number) => {
+  return jobsStore.savedJobs.some(job => job.id === Number(jobId))
 }
 
 /**
@@ -302,13 +302,13 @@ const searchJobs = async () => {
  * Toggle save job
  * Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5
  */
-const toggleSaveJob = async (jobId: string) => {
+const toggleSaveJob = async (jobId: string | number) => {
   try {
     if (isSaved(jobId)) {
-      await jobsStore.removeSavedJob(jobId)
+      await jobsStore.removeSavedJob(Number(jobId))
     } else {
       // Find the job to save
-      const jobToSave = jobs.value.find(j => j.job_id === jobId)
+      const jobToSave = jobs.value.find(j => j.id === Number(jobId))
       if (jobToSave) {
         await jobsStore.addSavedJob(jobToSave)
       }
@@ -321,8 +321,8 @@ const toggleSaveJob = async (jobId: string) => {
 /**
  * Navigate to job details page
  */
-const goToJobDetails = (jobId: string) => {
-  router.push({ name: 'JobDetails', params: { id: jobId } })
+const goToJobDetails = (jobId: string | number) => {
+  router.push({ name: 'JobDetails', params: { id: String(jobId) } })
 }
 
 /**

@@ -71,7 +71,7 @@ describe('Navigation Component', () => {
 
     it('should show user menu when authenticated', async () => {
       const store = useAuthStore()
-      store.user = { id: '1', email: 'test@example.com', full_name: 'Test User' }
+      store.user = { id: 1, email: 'test@example.com', full_name: 'Test User', created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
       store.token = 'test-token'
 
       const wrapper = mount(Navigation, {
@@ -86,7 +86,7 @@ describe('Navigation Component', () => {
 
     it('should show logout button when authenticated', async () => {
       const store = useAuthStore()
-      store.user = { id: '1', email: 'test@example.com', full_name: 'Test User' }
+      store.user = { id: 1, email: 'test@example.com', full_name: 'Test User', created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
       store.token = 'test-token'
 
       const wrapper = mount(Navigation, {
@@ -156,7 +156,7 @@ describe('Navigation Component', () => {
       const toggleButton = wrapper.find('button.md\\:hidden')
       if (toggleButton.exists()) {
         await toggleButton.trigger('click')
-        expect(wrapper.vm.showMobileMenu).toBe(true)
+        expect((wrapper.vm as any).showMobileMenu).toBe(true)
       }
     })
   })
@@ -164,7 +164,7 @@ describe('Navigation Component', () => {
   describe('Logout functionality', () => {
     it('should call logout when logout button is clicked', async () => {
       const store = useAuthStore()
-      store.user = { id: '1', email: 'test@example.com', full_name: 'Test User' }
+      store.user = { id: 1, email: 'test@example.com', full_name: 'Test User', created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
       store.token = 'test-token'
       const logoutSpy = vi.spyOn(store, 'logout').mockResolvedValue(undefined)
 

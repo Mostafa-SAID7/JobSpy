@@ -84,7 +84,7 @@ describe('JobSearchPage', () => {
 
     it('should perform search on form submit', async () => {
       const store = useJobsStore()
-      const searchSpy = vi.spyOn(store, 'searchJobs').mockResolvedValue(undefined)
+      vi.spyOn(store, 'searchJobs').mockResolvedValue(undefined)
 
       const wrapper = mount(JobSearchPage, {
         global: {
@@ -126,16 +126,22 @@ describe('JobSearchPage', () => {
       const store = useJobsStore()
       store.jobs = [
         {
-          id: '1',
+          id: 1,
           title: 'Senior Developer',
           company: 'Tech Corp',
           location: 'Remote',
           salary_min: 100000,
           salary_max: 150000,
+          salary_currency: 'USD',
+          job_type: 'fulltime',
           description: 'Looking for a senior developer',
-          url: 'https://example.com/job/1',
+          source_url: 'https://example.com/job/1',
+          source_job_id: 'job_1',
           posted_date: new Date().toISOString(),
           source: 'linkedin',
+          is_remote: 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
       ]
 
@@ -214,7 +220,7 @@ describe('JobSearchPage', () => {
         salary_min: 100000,
         salary_max: 150000,
         description: 'Job description',
-        url: 'https://example.com',
+        source_url: 'https://example.com', source_job_id: 'job_1',
         posted_date: new Date().toISOString(),
         source: 'linkedin',
       })
@@ -237,7 +243,7 @@ describe('JobSearchPage', () => {
 
     it('should load next page on pagination click', async () => {
       const store = useJobsStore()
-      const searchSpy = vi.spyOn(store, 'searchJobs').mockResolvedValue(undefined)
+      vi.spyOn(store, 'searchJobs').mockResolvedValue(undefined)
 
       const wrapper = mount(JobSearchPage, {
         global: {
@@ -259,7 +265,7 @@ describe('JobSearchPage', () => {
   describe('Save job functionality', () => {
     it('should save job when save button is clicked', async () => {
       const store = useJobsStore()
-      const saveSpy = vi.spyOn(store, 'addSavedJob').mockResolvedValue(undefined)
+      vi.spyOn(store, 'addSavedJob').mockResolvedValue(undefined)
 
       const wrapper = mount(JobSearchPage, {
         global: {

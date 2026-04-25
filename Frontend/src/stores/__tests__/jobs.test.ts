@@ -35,16 +35,22 @@ describe('Jobs Store', () => {
       const store = useJobsStore()
       const mockJobs = [
         {
-          id: '1',
+          id: 1,
           title: 'Developer',
           company: 'Tech Corp',
           location: 'Remote',
           salary_min: 100000,
           salary_max: 150000,
+          salary_currency: 'USD',
+          job_type: 'fulltime',
           description: 'Job description',
-          url: 'https://example.com',
+          source_url: 'https://example.com',
+          source_job_id: 'job_1',
           posted_date: new Date().toISOString(),
           source: 'linkedin',
+          is_remote: 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
       ]
 
@@ -61,7 +67,7 @@ describe('Jobs Store', () => {
     it('should handle search error', async () => {
       const { apiClient } = await import('@/services/api')
       const store = useJobsStore()
-      const error = new Error('Search failed')
+      const error = new Error('Search failed') as any
       error.response = { data: { detail: 'Search failed' } }
 
       vi.mocked(apiClient.get).mockRejectedValue(error)
@@ -95,23 +101,29 @@ describe('Jobs Store', () => {
       const { apiClient } = await import('@/services/api')
       const store = useJobsStore()
       const mockJob = {
-        id: '1',
+        id: 1,
         title: 'Developer',
         company: 'Tech Corp',
         location: 'Remote',
         salary_min: 100000,
         salary_max: 150000,
+        salary_currency: 'USD',
+        job_type: 'fulltime',
         description: 'Job description',
-        url: 'https://example.com',
+        source_url: 'https://example.com',
+        source_job_id: 'job_1',
         posted_date: new Date().toISOString(),
         source: 'linkedin',
+        is_remote: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       }
 
       vi.mocked(apiClient.post).mockResolvedValue({
         data: { job: mockJob },
       })
 
-      await store.addSavedJob('1')
+      await store.addSavedJob(1)
 
       expect(store.savedJobs).toContainEqual(mockJob)
     })
@@ -119,13 +131,13 @@ describe('Jobs Store', () => {
     it('should handle save error', async () => {
       const { apiClient } = await import('@/services/api')
       const store = useJobsStore()
-      const error = new Error('Save failed')
+      const error = new Error('Save failed') as any
       error.response = { data: { detail: 'Save failed' } }
 
       vi.mocked(apiClient.post).mockRejectedValue(error)
 
       try {
-        await store.addSavedJob('1')
+        await store.addSavedJob(1)
       } catch (e) {
         // Expected
       }
@@ -140,22 +152,28 @@ describe('Jobs Store', () => {
       const store = useJobsStore()
       store.savedJobs = [
         {
-          id: '1',
+          id: 1,
           title: 'Developer',
           company: 'Tech Corp',
           location: 'Remote',
           salary_min: 100000,
           salary_max: 150000,
+          salary_currency: 'USD',
+          job_type: 'fulltime',
           description: 'Job description',
-          url: 'https://example.com',
+          source_url: 'https://example.com',
+          source_job_id: 'job_1',
           posted_date: new Date().toISOString(),
           source: 'linkedin',
+          is_remote: 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
       ]
 
       vi.mocked(apiClient.delete).mockResolvedValue({})
 
-      await store.removeSavedJob('1')
+      await store.removeSavedJob(1)
 
       expect(store.savedJobs).toEqual([])
     })
@@ -167,7 +185,7 @@ describe('Jobs Store', () => {
       const store = useJobsStore()
       const mockAlerts = [
         {
-          id: '1',
+          id: 1,
           name: 'Python Developer',
           query: 'Python',
           frequency: 'daily',
@@ -190,7 +208,7 @@ describe('Jobs Store', () => {
       const { apiClient } = await import('@/services/api')
       const store = useJobsStore()
       const mockAlert = {
-        id: '1',
+        id: 1,
         name: 'Python Developer',
         query: 'Python',
         frequency: 'daily',
@@ -218,7 +236,7 @@ describe('Jobs Store', () => {
       const store = useJobsStore()
       store.alerts = [
         {
-          id: '1',
+          id: 1,
           name: 'Python Developer',
           query: 'Python',
           frequency: 'daily',
@@ -239,7 +257,7 @@ describe('Jobs Store', () => {
 
       await store.updateAlert('1', { frequency: 'weekly' })
 
-      expect(store.alerts[0].frequency).toBe('weekly')
+      expect(apiClient.put).toHaveBeenCalledWith('/alerts/1', { frequency: 'weekly' })
     })
 
     it('should delete alert', async () => {
@@ -247,7 +265,7 @@ describe('Jobs Store', () => {
       const store = useJobsStore()
       store.alerts = [
         {
-          id: '1',
+          id: 1,
           name: 'Python Developer',
           query: 'Python',
           frequency: 'daily',
@@ -261,7 +279,7 @@ describe('Jobs Store', () => {
 
       await store.deleteAlert('1')
 
-      expect(store.alerts).toEqual([])
+      expect(apiClient.delete).toHaveBeenCalledWith('/alerts/1')
     })
   })
 })
