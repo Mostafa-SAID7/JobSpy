@@ -4,7 +4,7 @@ Tests system breaking point and degradation patterns
 """
 
 import pytest
-from stress_test import StressTester
+from .stress_test import StressTester
 
 
 @pytest.mark.performance

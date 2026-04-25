@@ -1,181 +1,182 @@
 <template>
-  <div class="w-full">
-    <div class="flex flex-col gap-4 md:flex-row md:items-end">
+  <div class="w-full space-y-4">
+    <div class="flex flex-col gap-3 md:flex-row md:items-end">
       <!-- Main Search Input -->
       <div class="flex-1">
-        <label for="search-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {{ $t('search.keyword') || 'Search Jobs' }}
+        <label for="search-input" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 px-1">
+          Keywords
         </label>
-        <div class="relative">
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="w-5 h-5 text-gray-400 group-focus-within:text-[#0078d4] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
           <input
             id="search-input"
             v-model="localQuery"
             type="text"
-            :placeholder="$t('search.placeholder') || 'Job title, company, or keyword...'"
-            class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            placeholder="Job title, skills, or company..."
+            class="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded focus:outline-none focus:ring-2 focus:ring-[#0078d4]/20 focus:border-[#0078d4] dark:text-white transition-all shadow-sm"
             @keyup.enter="handleSearch"
           />
           <button
+            v-if="localQuery"
             type="button"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             @click="clearSearch"
           >
-            <svg v-if="localQuery" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </button>
         </div>
       </div>
 
       <!-- Site Selection -->
-      <div class="w-full md:w-48">
-        <label for="site-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {{ $t('search.site') || 'Job Site' }}
+      <div class="w-full md:w-56">
+        <label for="site-select" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 px-1">
+          Source
         </label>
-        <select
-          id="site-select"
-          v-model="localSite"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-        >
-          <option value="">{{ $t('search.allSites') || 'All Sites' }}</option>
-          <option value="linkedin">LinkedIn</option>
-          <option value="indeed">Indeed</option>
-          <option value="wuzzuf">Wuzzuf</option>
-          <option value="bayt">Bayt</option>
-        </select>
+        <div class="relative">
+          <select
+            id="site-select"
+            v-model="localSite"
+            class="w-full appearance-none pl-4 pr-10 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded focus:outline-none focus:ring-2 focus:ring-[#0078d4]/20 focus:border-[#0078d4] dark:text-white transition-all shadow-sm font-medium"
+          >
+            <option value="">All Sources</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="indeed">Indeed</option>
+            <option value="wuzzuf">Wuzzuf</option>
+            <option value="bayt">Bayt</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
       </div>
 
       <!-- Advanced Search Toggle -->
-      <button
-        type="button"
-        class="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 border border-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
+      <FormButton
+        variant="secondary"
+        label="Advanced"
+        class="w-full md:w-auto"
         @click="toggleAdvanced"
       >
-        {{ showAdvanced ? $t('search.hideAdvanced') || 'Hide Advanced' : $t('search.showAdvanced') || 'Advanced' }}
-      </button>
+        <svg class="w-4 h-4 transition-transform" :class="showAdvanced ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+        <span>Advanced</span>
+      </FormButton>
 
       <!-- Search Button -->
-      <button
-        type="button"
-        class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors"
+      <FormButton
+        label="Search Jobs"
+        class="w-full md:w-auto"
         @click="handleSearch"
-      >
-        {{ $t('search.search') || 'Search' }}
-      </button>
+      />
     </div>
 
     <!-- Advanced Search Options -->
     <transition name="slide-down">
-      <div v-if="showAdvanced" class="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div v-if="showAdvanced" class="fluent-card mt-2 p-6 bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 shadow-xl">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <!-- Job Type -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {{ $t('search.jobType') || 'Job Type' }}
-            </label>
+          <div class="space-y-3">
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Job Type</label>
             <div class="space-y-2">
-              <label class="flex items-center">
+              <label v-for="type in ['Full-time', 'Part-time', 'Contract', 'Internship']" :key="type" class="flex items-center group cursor-pointer">
                 <input
                   v-model="filters.jobTypes"
                   type="checkbox"
-                  value="full-time"
-                  class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                  :value="type.toLowerCase()"
+                  class="w-4 h-4 text-[#0078d4] border-gray-300 rounded focus:ring-[#0078d4] transition-all cursor-pointer"
                 />
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $t('search.fullTime') || 'Full Time' }}</span>
-              </label>
-              <label class="flex items-center">
-                <input
-                  v-model="filters.jobTypes"
-                  type="checkbox"
-                  value="part-time"
-                  class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                />
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $t('search.partTime') || 'Part Time' }}</span>
-              </label>
-              <label class="flex items-center">
-                <input
-                  v-model="filters.jobTypes"
-                  type="checkbox"
-                  value="contract"
-                  class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                />
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $t('search.contract') || 'Contract' }}</span>
+                <span class="ml-2.5 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">{{ type }}</span>
               </label>
             </div>
           </div>
 
           <!-- Remote -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {{ $t('search.remote') || 'Remote' }}
-            </label>
+          <div class="space-y-3">
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Work Mode</label>
             <div class="space-y-2">
-              <label class="flex items-center">
+              <label class="flex items-center group cursor-pointer">
                 <input
                   v-model="filters.remote"
                   type="checkbox"
                   value="remote"
-                  class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                  class="w-4 h-4 text-[#0078d4] border-gray-300 rounded focus:ring-[#0078d4] transition-all cursor-pointer"
                 />
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $t('search.remoteOnly') || 'Remote Only' }}</span>
+                <span class="ml-2.5 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">Remote Only</span>
               </label>
-              <label class="flex items-center">
+              <label class="flex items-center group cursor-pointer">
                 <input
                   v-model="filters.remote"
                   type="checkbox"
                   value="hybrid"
-                  class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                  class="w-4 h-4 text-[#0078d4] border-gray-300 rounded focus:ring-[#0078d4] transition-all cursor-pointer"
                 />
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $t('search.hybrid') || 'Hybrid' }}</span>
+                <span class="ml-2.5 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">Hybrid</span>
               </label>
             </div>
           </div>
 
           <!-- Experience Level -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {{ $t('search.experience') || 'Experience Level' }}
-            </label>
-            <select
-              v-model="filters.experienceLevel"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-              <option value="">{{ $t('search.any') || 'Any' }}</option>
-              <option value="entry">{{ $t('search.entry') || 'Entry Level' }}</option>
-              <option value="mid">{{ $t('search.mid') || 'Mid Level' }}</option>
-              <option value="senior">{{ $t('search.senior') || 'Senior' }}</option>
-            </select>
+          <div class="space-y-3">
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Experience</label>
+            <div class="relative">
+              <select
+                v-model="filters.experienceLevel"
+                class="w-full appearance-none px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-sm focus:ring-2 focus:ring-[#0078d4]/20 focus:border-[#0078d4] dark:text-white transition-all"
+              >
+                <option value="">Any Level</option>
+                <option value="entry">Entry Level</option>
+                <option value="mid">Mid Level</option>
+                <option value="senior">Senior Level</option>
+              </select>
+              <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
 
           <!-- Posted Date -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {{ $t('search.postedDate') || 'Posted Date' }}
-            </label>
-            <select
-              v-model="filters.postedDate"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-              <option value="">{{ $t('search.anytime') || 'Anytime' }}</option>
-              <option value="1">{{ $t('search.last24h') || 'Last 24 hours' }}</option>
-              <option value="7">{{ $t('search.last7d') || 'Last 7 days' }}</option>
-              <option value="30">{{ $t('search.last30d') || 'Last 30 days' }}</option>
-            </select>
+          <div class="space-y-3">
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Date Posted</label>
+            <div class="relative">
+              <select
+                v-model="filters.postedDate"
+                class="w-full appearance-none px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-sm focus:ring-2 focus:ring-[#0078d4]/20 focus:border-[#0078d4] dark:text-white transition-all"
+              >
+                <option value="">Anytime</option>
+                <option value="1">Last 24 hours</option>
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+              </select>
+              <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Clear Filters Button -->
-        <div class="mt-4 flex justify-end">
+        <!-- Advanced Footer -->
+        <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
           <button
             type="button"
-            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            class="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors uppercase tracking-widest"
             @click="clearFilters"
           >
-            {{ $t('search.clearFilters') || 'Clear Filters' }}
+            Reset all filters
           </button>
+          <FormButton label="Apply Filters" size="sm" @click="handleSearch" />
         </div>
       </div>
     </transition>
@@ -183,7 +184,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+import FormButton from '@/components/forms/FormButton.vue'
 
 interface SearchFilters {
   jobTypes: string[]
@@ -252,16 +254,12 @@ const clearFilters = () => {
 <style scoped>
 .slide-down-enter-active,
 .slide-down-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.slide-down-enter-from {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
+.slide-down-enter-from,
 .slide-down-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-8px);
 }
 </style>

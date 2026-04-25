@@ -50,8 +50,8 @@ describe('SavedJobsPage', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('Saved Jobs')
-    expect(wrapper.text()).toContain('Manage jobs you saved for later review')
+    expect(wrapper.text()).toContain('Your Saved Careers')
+    expect(wrapper.text()).toContain('Manage and track the opportunities you\'ve bookmarked for your future.')
   })
 
   it('shows empty state when no saved jobs', () => {
@@ -109,7 +109,7 @@ describe('SavedJobsPage', () => {
     await wrapper.vm.$nextTick()
 
     // Check that the page renders and has the header
-    expect(wrapper.text()).toContain('Saved Jobs')
+    expect(wrapper.text()).toContain('Your Saved Careers')
   })
 
   it('filters jobs by search query', async () => {

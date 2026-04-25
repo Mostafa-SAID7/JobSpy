@@ -5,7 +5,7 @@ Tests for search API endpoint availability and accessibility
 
 import pytest
 from fastapi.testclient import TestClient
-from Backend.app.main import app
+from app.main import app
 
 
 @pytest.fixture

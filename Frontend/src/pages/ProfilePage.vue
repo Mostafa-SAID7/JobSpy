@@ -1,9 +1,22 @@
 <template>
-  <div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="space-y-8 pb-12">
     <!-- Page Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Profile</h1>
-      <p class="text-gray-600 dark:text-gray-400 mt-2">Manage your account information and settings</p>
+    <div class="relative overflow-hidden py-12 px-6 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 border border-gray-100 dark:border-gray-800 shadow-sm mb-8 flex flex-col md:flex-row md:items-center gap-8">
+      <!-- Profile Avatar Placeholder -->
+      <div class="relative z-10 w-24 h-24 bg-[#0078d4]/10 rounded-2xl border-4 border-white dark:border-gray-800 shadow-xl flex items-center justify-center overflow-hidden flex-shrink-0">
+        <span class="text-3xl font-extrabold text-[#0078d4]">{{ authStore.user?.full_name?.charAt(0) || 'U' }}</span>
+        <div class="absolute inset-0 bg-gradient-to-tr from-[#0078d4]/20 to-transparent"></div>
+      </div>
+
+      <div class="relative z-10">
+        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+          Hello, <span class="text-[#0078d4]">{{ authStore.user?.full_name || 'Professional' }}</span>
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">
+          Manage your professional presence and account settings.
+        </p>
+      </div>
+      <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-[#0078d4]/5 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
     <!-- Loading State -->
@@ -13,227 +26,210 @@
     <ErrorState v-else-if="error" :message="error" class="mb-6" />
 
     <!-- Profile Content -->
-    <div v-else class="space-y-6">
-      <!-- Stats Section -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div v-else class="max-w-5xl mx-auto space-y-8">
+      <!-- Stats Overview -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatsCard
-          label="Saved Jobs"
+          label="Saved Careers"
           :value="stats.savedJobsCount"
           variant="primary"
-          :icon="BookmarkIcon"
         />
         <StatsCard
           label="Active Alerts"
           :value="stats.activeAlertsCount"
           variant="success"
-          :icon="BellIcon"
         />
         <StatsCard
-          label="Member Since"
+          label="Membership"
           :value="memberSinceText"
           variant="info"
-          :icon="CalendarIcon"
         />
       </div>
 
-      <!-- User Info Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Account Information</h2>
-        
-        <!-- Success Message -->
-        <div v-if="profileSuccess" class="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-          <div class="flex items-start">
-            <svg class="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            <p class="text-green-800 dark:text-green-200 text-sm">{{ profileSuccess }}</p>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Form Area -->
+        <div class="lg:col-span-2 space-y-8">
+          <!-- User Info Card -->
+          <div class="fluent-card bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-8 shadow-sm">
+            <div class="flex items-center justify-between mb-8">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">Account Information</h2>
+              <FormButton
+                v-if="!isEditing"
+                variant="secondary"
+                size="sm"
+                @click="startEdit"
+              >
+                Edit Profile
+              </FormButton>
+            </div>
+            
+            <!-- Messages -->
+            <transition name="fade">
+              <div v-if="profileSuccess" class="mb-6 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <p class="text-sm font-bold text-green-700 dark:text-green-400">{{ profileSuccess }}</p>
+              </div>
+            </transition>
+
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormInput
+                  v-model="formData.full_name"
+                  label="Full Name"
+                  :disabled="!isEditing"
+                  :error="isEditing ? fieldErrors.full_name : ''"
+                  @blur="validateField('full_name')"
+                />
+                <FormInput
+                  v-model="formData.email"
+                  label="Email Address"
+                  disabled
+                  hint="Managed account email"
+                />
+              </div>
+              
+              <FormInput
+                v-model="formData.phone"
+                label="Phone Number"
+                placeholder="+1 (555) 000-0000"
+                :disabled="!isEditing"
+                :error="fieldErrors.phone"
+                @blur="validateField('phone')"
+              />
+
+              <div>
+                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-widest text-[10px]">Professional Bio</label>
+                <textarea
+                  v-model="formData.bio"
+                  placeholder="Share a brief overview of your professional background..."
+                  :disabled="!isEditing"
+                  class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-transparent focus:border-[#0078d4] rounded-xl text-sm focus:ring-4 focus:ring-[#0078d4]/10 dark:text-white transition-all shadow-inner disabled:opacity-60 resize-none"
+                  rows="4"
+                ></textarea>
+                <p v-if="fieldErrors.bio" class="text-red-500 text-xs mt-2 font-medium">{{ fieldErrors.bio }}</p>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <transition name="fade">
+              <div v-if="isEditing" class="flex gap-4 mt-8 pt-8 border-t border-gray-50 dark:border-gray-800">
+                <FormButton
+                  variant="primary"
+                  class="flex-1"
+                  :loading="savingProfile"
+                  :disabled="!isFormValid"
+                  @click="saveProfile"
+                >
+                  Save Changes
+                </FormButton>
+                <FormButton
+                  variant="secondary"
+                  class="flex-1"
+                  @click="cancelEdit"
+                  :disabled="savingProfile"
+                >
+                  Cancel
+                </FormButton>
+              </div>
+            </transition>
+          </div>
+
+          <!-- Preferences Card -->
+          <div class="fluent-card bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-8 shadow-sm">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-8">Communication Preferences</h2>
+            
+            <div class="space-y-6">
+              <FormCheckbox
+                v-model="preferences.emailNotifications"
+                label="Instant Job Alerts"
+                hint="Receive an email the moment a matching job is found"
+              />
+
+              <FormCheckbox
+                v-model="preferences.pushNotifications"
+                label="Browser Notifications"
+                hint="Stay updated with real-time desktop alerts"
+              />
+
+              <FormCheckbox
+                v-model="preferences.weeklyDigest"
+                label="Weekly Career Digest"
+                hint="A curated summary of opportunities every Monday"
+              />
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-gray-50 dark:border-gray-800">
+              <FormButton
+                variant="primary"
+                :loading="savingPreferences"
+                @click="savePreferences"
+              >
+                Update Preferences
+              </FormButton>
+            </div>
           </div>
         </div>
 
-        <!-- Error Message -->
-        <div v-if="profileError" class="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <div class="flex items-start">
-            <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-            </svg>
-            <p class="text-red-800 dark:text-red-200 text-sm">{{ profileError }}</p>
-          </div>
-        </div>
-        
-        <div class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormInput
-              v-model="formData.full_name"
-              type="text"
-              label="Full Name"
-              :disabled="!isEditing"
-              :error="isEditing ? fieldErrors.full_name : ''"
-              @blur="validateField('full_name')"
-            />
-            <FormInput
-              v-model="formData.email"
-              type="email"
-              label="Email"
-              disabled
-              hint="Email cannot be changed"
-            />
-          </div>
-          <FormInput
-            v-if="isEditing"
-            v-model="formData.phone"
-            type="tel"
-            label="Phone Number"
-            placeholder="Example: +1234567890"
-            :disabled="!isEditing"
-            :error="fieldErrors.phone"
-            @blur="validateField('phone')"
-          />
-          <div v-if="isEditing">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bio</label>
-            <textarea
-              v-model="formData.bio"
-              placeholder="Tell us about yourself..."
-              :disabled="!isEditing"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
-              rows="4"
-            ></textarea>
-            <p v-if="fieldErrors.bio" class="text-red-600 dark:text-red-400 text-sm mt-1">{{ fieldErrors.bio }}</p>
-          </div>
-        </div>
+        <!-- Sidebar Area -->
+        <div class="space-y-8">
+          <!-- Password Change Card -->
+          <div class="fluent-card bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6">Security</h2>
+            
+            <div class="space-y-4">
+              <FormInput
+                v-model="passwordData.currentPassword"
+                type="password"
+                label="Current Password"
+              />
 
-        <!-- Action Buttons -->
-        <div class="flex gap-3 mt-6">
-          <FormButton
-            v-if="!isEditing"
-            variant="primary"
-            label="Edit"
-            @click="startEdit"
-          />
-          <template v-else>
+              <FormInput
+                v-model="passwordData.newPassword"
+                type="password"
+                label="New Password"
+              />
+
+              <FormInput
+                v-model="passwordData.confirmPassword"
+                type="password"
+                label="Confirm New"
+              />
+            </div>
+
             <FormButton
-              variant="success"
-              :disabled="savingProfile || !isFormValid"
-              :loading="savingProfile"
-              label="Save Changes"
-              @click="saveProfile"
-            />
+              variant="secondary"
+              class="w-full mt-6"
+              :loading="changingPassword"
+              @click="changePassword"
+            >
+              Change Password
+            </FormButton>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="fluent-card bg-red-50/30 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/30 p-6 shadow-sm">
+            <h2 class="text-lg font-bold text-red-700 dark:text-red-400 mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              Danger Zone
+            </h2>
+            
+            <p class="text-xs text-red-600 dark:text-red-400/70 mb-6 leading-relaxed font-medium">
+              Once you delete your account, there is no going back. Please be certain.
+            </p>
+
             <FormButton
-              variant="outline"
-              label="Cancel"
-              @click="cancelEdit"
-              :disabled="savingProfile"
-            />
-          </template>
-        </div>
-      </div>
-
-      <!-- Password Change Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Change Password</h2>
-        
-        <div class="space-y-4">
-          <FormInput
-            v-model="passwordData.currentPassword"
-            type="password"
-            label="Current Password"
-          />
-
-          <FormInput
-            v-model="passwordData.newPassword"
-            type="password"
-            label="New Password"
-          />
-
-          <FormInput
-            v-model="passwordData.confirmPassword"
-            type="password"
-            label="Confirm New Password"
-          />
-        </div>
-
-        <FormButton
-          variant="primary"
-          :disabled="changingPassword"
-          :loading="changingPassword"
-          label="Update Password"
-          @click="changePassword"
-          class="mt-6"
-        />
-      </div>
-
-      <!-- Preferences Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Preferences</h2>
-        
-        <!-- Success Message -->
-        <div v-if="preferencesSuccess" class="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-          <div class="flex items-start">
-            <svg class="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            <p class="text-green-800 dark:text-green-200 text-sm">{{ preferencesSuccess }}</p>
+              variant="danger"
+              class="w-full"
+              @click="deleteAccount"
+            >
+              Delete My Account
+            </FormButton>
           </div>
         </div>
-
-        <!-- Error Message -->
-        <div v-if="preferencesError" class="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <div class="flex items-start">
-            <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-            </svg>
-            <p class="text-red-800 dark:text-red-200 text-sm">{{ preferencesError }}</p>
-          </div>
-        </div>
-        
-        <div class="space-y-4">
-          <FormCheckbox
-            v-model="preferences.emailNotifications"
-            label="Receive Email Notifications"
-            hint="Get notified when new jobs matching your criteria are available"
-          />
-
-          <FormCheckbox
-            v-model="preferences.pushNotifications"
-            label="Receive Web Notifications"
-            hint="Get instant notifications in the browser"
-          />
-
-          <FormCheckbox
-            v-model="preferences.weeklyDigest"
-            label="Receive Weekly Digest"
-            hint="Get a weekly digest of new jobs"
-          />
-
-          <FormCheckbox
-            v-model="preferences.darkMode"
-            label="Dark Mode"
-            hint="Use dark mode to reduce eye strain"
-          />
-        </div>
-
-        <FormButton
-          variant="primary"
-          :disabled="savingPreferences"
-          :loading="savingPreferences"
-          label="Save Preferences"
-          @click="savePreferences"
-          class="mt-6"
-        />
-      </div>
-
-      <!-- Danger Zone -->
-      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-        <h2 class="text-xl font-semibold text-red-900 dark:text-red-200 mb-4">Danger Zone</h2>
-        
-        <p class="text-red-800 dark:text-red-300 mb-4">
-          Deleting your account will delete all profile data, saved jobs, and alerts. This action cannot be undone.
-        </p>
-
-        <FormButton
-          variant="danger"
-          label="Delete Account"
-          @click="deleteAccount"
-        />
       </div>
     </div>
   </div>

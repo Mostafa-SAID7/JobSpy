@@ -1,9 +1,16 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-8 pb-12">
     <!-- Page Header -->
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Saved Jobs</h1>
-      <p class="text-gray-600 dark:text-gray-400 mt-2">Manage jobs you saved for later review</p>
+    <div class="relative overflow-hidden py-12 px-6 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
+      <div class="relative z-10 max-w-3xl">
+        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+          Your <span class="text-[#0078d4]">Saved Careers</span>
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-400 mt-4 max-w-xl leading-relaxed">
+          Manage and track the job opportunities you've bookmarked for later consideration.
+        </p>
+      </div>
+      <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-[#0078d4]/5 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
     <!-- Loading State -->
@@ -12,112 +19,133 @@
     <!-- Error State -->
     <ErrorState v-else-if="error" :message="error" />
 
-    <!-- Empty State -->
-    <EmptyState
-      v-else-if="savedJobs.length === 0"
-      title="You haven't saved any jobs yet"
-      message="Start saving jobs you're interested in to return to them later"
-      action-text="Search for Jobs"
-      action-route="/jobs"
-    >
-      <template #icon>
-        <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 19V5z" />
-        </svg>
-      </template>
-    </EmptyState>
+    <!-- Content Area -->
+    <div v-else>
+      <!-- Empty State -->
+      <EmptyState
+        v-if="savedJobs.length === 0"
+        title="No saved jobs yet"
+        message="Start exploring and save jobs you're interested in to build your shortlist."
+        action-text="Browse Jobs"
+        action-route="/jobs"
+      >
+        <template #icon>
+          <div class="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 border border-gray-100 dark:border-gray-700">
+            <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 5a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 19V5z" />
+            </svg>
+          </div>
+        </template>
+      </EmptyState>
 
-    <!-- Saved Jobs List -->
-    <div v-else class="space-y-4">
-      <!-- Filter and Sort -->
-      <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div class="flex-1">
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search saved jobs..."
-            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      <!-- Saved Jobs List -->
+      <div v-else class="space-y-8">
+        <!-- Controls Bar -->
+        <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="flex-1 relative group">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="w-4 h-4 text-gray-400 group-focus-within:text-[#0078d4] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Filter by title or company..."
+              class="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-transparent focus:border-[#0078d4] rounded text-sm focus:ring-4 focus:ring-[#0078d4]/10 dark:text-white transition-all shadow-inner"
+            />
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Sort</label>
+            <div class="relative min-w-[160px]">
+              <select
+                v-model="sortBy"
+                class="w-full appearance-none px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-transparent focus:border-[#0078d4] rounded text-sm font-medium focus:ring-4 focus:ring-[#0078d4]/10 dark:text-white transition-all cursor-pointer"
+              >
+                <option value="recent">Date Added</option>
+                <option value="salary-high">Max Salary</option>
+                <option value="salary-low">Min Salary</option>
+                <option value="title">Job Title</option>
+              </select>
+              <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Jobs Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <transition-group name="list">
+            <div
+              v-for="job in filteredJobs"
+              :key="job.id"
+              class="fluent-card group bg-white dark:bg-gray-900 rounded border border-gray-100 dark:border-gray-800 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
+              @click="goToJobDetails(job.id)"
+            >
+              <!-- Hover Accent -->
+              <div class="absolute top-0 left-0 w-1 h-full bg-[#0078d4] transform scale-y-0 group-hover:scale-y-100 transition-transform origin-top"></div>
+
+              <!-- Content -->
+              <div class="flex items-start justify-between mb-6">
+                <div class="flex-1">
+                  <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-[#0078d4] transition-colors leading-tight mb-1">{{ job.title }}</h3>
+                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ job.company }}</p>
+                </div>
+                <button
+                  @click.stop="removeSavedJob(job.id)"
+                  class="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all"
+                  title="Remove from saved"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="space-y-3 mb-6">
+                <div class="flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                  <svg class="w-3.5 h-3.5 mr-2 text-[#0078d4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  </svg>
+                  {{ job.location }}
+                </div>
+                <div class="flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                  <svg class="w-3.5 h-3.5 mr-2 text-[#0078d4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {{ getJobTypeLabel(job.job_type) }}
+                </div>
+              </div>
+
+              <div class="pt-5 border-t border-gray-100 dark:border-gray-800 flex justify-between items-end">
+                <div>
+                  <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tighter mb-1">Target Salary</span>
+                  <span class="text-sm font-extrabold text-gray-900 dark:text-white">{{ formatSalary(job) }}</span>
+                </div>
+                <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded">
+                  {{ formatDate(job.posted_date) }}
+                </span>
+              </div>
+            </div>
+          </transition-group>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pt-8">
+          <Pagination
+            v-if="filteredJobs.length > 0"
+            :current-page="currentPage"
+            :page-size="pageSize"
+            :total-items="filteredJobs.length"
+            @update:current-page="handlePageChange"
+            @update:page-size="handlePageSizeChange"
           />
         </div>
-        <select
-          v-model="sortBy"
-          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="recent">Newest First</option>
-          <option value="salary-high">Salary (Highest First)</option>
-          <option value="salary-low">Salary (Lowest First)</option>
-          <option value="title">Name (A-Z)</option>
-        </select>
       </div>
-
-      <!-- Jobs Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div
-          v-for="job in filteredJobs"
-          :key="job.id"
-          class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-          @click="goToJobDetails(job.id)"
-        >
-          <!-- Header -->
-          <div class="flex items-start justify-between mb-4">
-            <div class="flex-1">
-              <h3 class="font-bold text-gray-900 dark:text-white">{{ job.title }}</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">{{ job.company }}</p>
-            </div>
-            <button
-              @click.stop="removeSavedJob(job.id)"
-              class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
-            >
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Meta Info -->
-          <div class="space-y-2 mb-4 text-sm">
-            <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              </svg>
-              {{ job.location }}
-            </div>
-            <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {{ getJobTypeLabel(job.job_type) }}
-            </div>
-          </div>
-
-          <!-- Salary and Date -->
-          <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-            <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Salary</p>
-              <p class="font-bold text-gray-900 dark:text-white">{{ formatSalary(job) }}</p>
-            </div>
-            <div class="text-right">
-              <p class="text-xs text-gray-500 dark:text-gray-500">{{ formatDate(job.posted_date) }}</p>
-            </div>
-          </div>
-
-          <!-- Notes -->
-          <div v-if="job.notes" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <p class="text-sm text-gray-600 dark:text-gray-400">My Notes:</p>
-            <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">{{ job.notes }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pagination -->
-      <Pagination
-        v-if="filteredJobs.length > 0"
-        :current-page="currentPage"
-        :page-size="pageSize"
-        :total-items="filteredJobs.length"
-        @update:current-page="handlePageChange"
-        @update:page-size="handlePageSizeChange"
-      />
     </div>
   </div>
 </template>

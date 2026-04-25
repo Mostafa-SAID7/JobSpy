@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Boolean, Index
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import UUID
 import uuid
 
 from app.core.database import Base
@@ -34,3 +34,4 @@ class User(Base):
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"
+

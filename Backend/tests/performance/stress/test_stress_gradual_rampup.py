@@ -5,7 +5,7 @@ Tests system behavior with gradual increase in load
 
 import pytest
 import time
-from stress_test import StressTester
+from .stress_test import StressTester
 
 
 @pytest.mark.performance

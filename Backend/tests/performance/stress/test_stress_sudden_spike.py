@@ -4,7 +4,7 @@ Tests system behavior with sudden load increase
 """
 
 import pytest
-from stress_test import StressTester
+from .stress_test import StressTester
 
 
 @pytest.mark.performance

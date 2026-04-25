@@ -10,7 +10,8 @@ import secrets
 
 from app.main import app
 from app.models.user import User
-from app.models.job import SavedJob, Job
+from app.models.job import Job
+from app.models.saved_job import SavedJob
 from app.models.alert import Alert
 from app.utils.security import hash_password
 from app.repositories.user_repo import UserRepository

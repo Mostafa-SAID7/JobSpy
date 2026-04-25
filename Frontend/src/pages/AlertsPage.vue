@@ -1,184 +1,180 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-8 pb-12">
     <!-- Page Header -->
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Alerts</h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-2">Manage job alerts and receive notifications when new jobs matching your criteria are available</p>
+    <div class="relative overflow-hidden py-12 px-6 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 border border-gray-100 dark:border-gray-800 shadow-sm mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="relative z-10 max-w-2xl">
+        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+          Job <span class="text-[#0078d4]">Alerts</span>
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
+          Stay ahead of the curve. Get notified the moment new jobs matching your interests are posted.
+        </p>
       </div>
-      <button
-        @click="openCreateModal"
-        class="px-6 py-2 rounded-lg font-medium transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center justify-center gap-2"
-      >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        New Alert
-      </button>
+      <div class="relative z-10 flex-shrink-0">
+        <FormButton
+          variant="primary"
+          @click="openCreateModal"
+          class="shadow-lg shadow-[#0078d4]/20"
+        >
+          <template #icon>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+          </template>
+          Create Alert
+        </FormButton>
+      </div>
+      <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-[#0078d4]/5 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
-    <!-- Loading State -->
-    <LoadingSpinner v-if="isLoading && alerts.length === 0" text="Loading alerts..." />
-
-    <!-- Error State -->
-    <ErrorState v-else-if="error" :message="error" />
-
-    <!-- Empty State -->
-    <EmptyState
-      v-else-if="alerts.length === 0"
-      title="No alerts created yet"
-      message="Create alerts to receive notifications when new jobs matching your criteria are available"
-      action-text="Create Alert Now"
-      @action-click="openCreateModal"
-    >
-      <template #icon>
-        <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
-      </template>
-    </EmptyState>
-
-    <!-- Statistics Cards -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Statistics Overview -->
+    <div v-if="alerts.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <StatsCard
         label="Total Alerts"
         :value="totalAlerts"
         variant="primary"
-        :icon="BellIcon"
       />
       <StatsCard
-        label="Active Alerts"
+        label="Active Now"
         :value="activeAlerts"
         variant="success"
-        :icon="CheckCircleIcon"
       />
       <StatsCard
-        label="New Jobs"
+        label="New Matches"
         :value="totalNewJobs"
         variant="info"
-        :icon="BriefcaseIcon"
       />
     </div>
 
-    <!-- Alerts List -->
-    <div v-if="alerts.length > 0" class="space-y-4">
-      <AlertCard
-        v-for="alert in alerts"
-        :key="alert.id"
-        :alert="alert"
-        :is-operating="operatingAlertId === alert.id"
-        @toggle-active="toggleAlert(alert.id)"
-        @edit="editAlert(alert)"
-        @delete="deleteAlert(alert.id)"
-      />
+    <!-- Loading State -->
+    <LoadingSpinner v-if="isLoading && alerts.length === 0" text="Syncing alerts..." />
+
+    <!-- Error State -->
+    <ErrorState v-else-if="error" :message="error" />
+
+    <!-- Content Area -->
+    <div v-else class="max-w-4xl mx-auto w-full">
+      <!-- Empty State -->
+      <EmptyState
+        v-if="alerts.length === 0"
+        title="Never miss an opportunity"
+        message="Create your first job alert and we'll let you know as soon as matching positions appear."
+        action-text="Setup My First Alert"
+        @action-click="openCreateModal"
+      >
+        <template #icon>
+          <div class="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 border border-gray-100 dark:border-gray-700">
+            <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </div>
+        </template>
+      </EmptyState>
+
+      <!-- Alerts List -->
+      <div v-if="alerts.length > 0" class="space-y-4">
+        <transition-group name="list">
+          <AlertCard
+            v-for="alert in alerts"
+            :key="alert.id"
+            :alert="alert"
+            :is-operating="operatingAlertId === alert.id"
+            @toggle-active="toggleAlert(alert.id)"
+            @edit="editAlert(alert)"
+            @delete="deleteAlert(alert.id)"
+          />
+        </transition-group>
+      </div>
     </div>
 
     <!-- Create/Edit Alert Modal -->
-    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full shadow-xl">
+    <div v-if="showModal" class="fixed inset-0 flex items-center justify-center z-50 p-4">
+      <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="closeModal"></div>
+      
+      <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full shadow-2xl relative z-10 overflow-hidden border border-gray-100 dark:border-gray-800 transform transition-all scale-100">
         <!-- Modal Header -->
-        <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-            {{ editingAlert ? 'Edit Alert' : 'Create New Alert' }}
-          </h2>
+        <div class="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/50">
+          <div>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+              {{ editingAlert ? 'Edit Alert' : 'New Job Alert' }}
+            </h2>
+            <p class="text-xs text-gray-500 mt-1 font-medium">Define your search criteria</p>
+          </div>
           <button
             @click="closeModal"
-            :disabled="isSubmitting"
-            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 disabled:opacity-50"
-            aria-label="Close"
+            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         <!-- Modal Body -->
-        <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
-          <!-- Form Error Message -->
-          <div v-if="formError" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-            <div class="flex items-start">
-              <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <form @submit.prevent="handleSubmit" class="p-6 space-y-5">
+          <!-- Form Messages -->
+          <transition name="fade">
+            <div v-if="formError" class="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 flex items-center gap-3">
+              <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
               </svg>
-              <p class="text-red-800 dark:text-red-200 text-sm">{{ formError }}</p>
+              <p class="text-xs font-bold text-red-700 dark:text-red-400">{{ formError }}</p>
+            </div>
+          </transition>
+
+          <div class="space-y-4">
+            <FormInput
+              v-model="formData.name"
+              label="Alert Label"
+              placeholder="e.g., Senior Vue Developer - Hybrid"
+              required
+              @blur="validateField('name')"
+              :error="fieldErrors.name"
+            />
+
+            <FormInput
+              v-model="formData.query"
+              label="Search Terms"
+              placeholder="e.g., frontend engineer, typescript"
+              required
+              @blur="validateField('query')"
+              :error="fieldErrors.query"
+            />
+
+            <div class="grid grid-cols-2 gap-4">
+              <FormSelect
+                v-model="formData.frequency"
+                label="Check Frequency"
+                :options="frequencyOptions"
+              />
+
+              <FormSelect
+                v-model="formData.notification_method"
+                label="Delivery"
+                :options="notificationOptions"
+              />
             </div>
           </div>
-
-          <!-- Form Success Message -->
-          <div v-if="formSuccess" class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
-            <div class="flex items-start">
-              <svg class="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              <p class="text-green-800 dark:text-green-200 text-sm">{{ formSuccess }}</p>
-            </div>
-          </div>
-
-          <FormInput
-            v-model="formData.name"
-            type="text"
-            label="Alert Name"
-            placeholder="Example: Software Engineer in Cairo"
-            required
-            :disabled="isSubmitting"
-            aria-label="Alert Name"
-            @blur="validateField('name')"
-          />
-          <p v-if="fieldErrors.name" class="text-red-600 dark:text-red-400 text-sm mt-1">{{ fieldErrors.name }}</p>
-
-          <FormInput
-            v-model="formData.query"
-            type="text"
-            label="Search Query"
-            placeholder="Example: Vue.js Developer"
-            required
-            :disabled="isSubmitting"
-            aria-label="Search Query"
-            @blur="validateField('query')"
-          />
-          <p v-if="fieldErrors.query" class="text-red-600 dark:text-red-400 text-sm mt-1">{{ fieldErrors.query }}</p>
-
-          <FormSelect
-            v-model="formData.frequency"
-            label="Alert Frequency"
-            :options="frequencyOptions"
-            :disabled="isSubmitting"
-            aria-label="Alert Frequency"
-          />
-
-          <FormSelect
-            v-model="formData.notification_method"
-            label="Notification Method"
-            :options="notificationOptions"
-            :disabled="isSubmitting"
-            aria-label="Notification Method"
-          />
 
           <!-- Modal Footer -->
-          <div class="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              type="submit"
-              :disabled="isSubmitting || !isFormValid"
-              class="flex-1 px-6 py-2 rounded-lg font-medium transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span v-if="isSubmitting" class="flex items-center justify-center">
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Processing...
-              </span>
-              <span v-else>{{ editingAlert ? 'Update Alert' : 'Create Alert' }}</span>
-            </button>
-            <button
+          <div class="flex gap-3 pt-4">
+            <FormButton
               type="button"
+              variant="secondary"
+              class="flex-1"
               @click="closeModal"
-              :disabled="isSubmitting"
-              class="flex-1 px-6 py-2 rounded-lg font-medium transition-all duration-200 bg-gray-200 text-gray-800 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
-            </button>
+            </FormButton>
+            <FormButton
+              type="submit"
+              variant="primary"
+              class="flex-1"
+              :loading="isSubmitting"
+              :disabled="!isFormValid"
+            >
+              {{ editingAlert ? 'Update' : 'Activate' }}
+            </FormButton>
           </div>
         </form>
       </div>

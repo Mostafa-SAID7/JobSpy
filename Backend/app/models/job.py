@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Float, Integer, Text, Index, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import UUID, JSON
 from sqlalchemy.orm import relationship
 import uuid
 
@@ -19,8 +19,8 @@ class Job(Base):
     salary_currency = Column(String(10), nullable=True)
     job_type = Column(String(50), nullable=True, index=True)  # Full-time, Part-time, Contract, etc.
     description = Column(Text, nullable=True)
-    requirements = Column(JSONB, nullable=True)  # Array of requirements
-    benefits = Column(JSONB, nullable=True)  # Array of benefits
+    requirements = Column(JSON, nullable=True)  # Array of requirements
+    benefits = Column(JSON, nullable=True)  # Array of benefits
     source = Column(String(50), nullable=False, index=True)  # LinkedIn, Indeed, Wuzzuf, Bayt
     source_url = Column(String(500), nullable=False, unique=True)
     source_job_id = Column(String(255), nullable=True, index=True)
@@ -29,7 +29,7 @@ class Job(Base):
     company_logo_url = Column(String(500), nullable=True)
     company_website = Column(String(500), nullable=True)
     experience_level = Column(String(50), nullable=True)  # Entry, Mid, Senior
-    skills = Column(JSONB, nullable=True)  # Array of required skills
+    skills = Column(JSON, nullable=True)  # Array of required skills
     is_remote = Column(Integer, default=0)  # 0: On-site, 1: Remote, 2: Hybrid
     view_count = Column(Integer, default=0)
     apply_count = Column(Integer, default=0)
@@ -52,3 +52,4 @@ class Job(Base):
 
     def __repr__(self):
         return f"<Job(id={self.id}, title={self.title}, company={self.company})>"
+

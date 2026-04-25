@@ -1,151 +1,157 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+  <div class="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 bg-gray-50 dark:bg-gray-950">
     <div class="w-full max-w-md">
       <!-- Card -->
-      <div class="bg-white rounded-lg shadow-lg p-8">
+      <div class="fluent-card bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-10">
         <!-- Header -->
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Reset Password</h1>
-          <p class="text-gray-600">Enter your email to reset your password</p>
+        <div class="text-center mb-10">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-[#0078d4]/10 rounded-2xl mb-6">
+            <svg class="w-8 h-8 text-[#0078d4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+          </div>
+          <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Recover Account</h1>
+          <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mt-3">Follow the steps to reset your security</p>
         </div>
 
-        <!-- Success Message -->
-        <div
-          v-if="successMessage"
-          class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg"
-        >
-          <p class="text-green-700 text-sm">{{ successMessage }}</p>
-        </div>
+        <!-- Feedback Messages -->
+        <transition name="fade">
+          <div
+            v-if="successMessage"
+            class="mb-8 p-4 bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/20 rounded-xl flex items-center gap-3"
+          >
+            <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <p class="text-green-800 dark:text-green-400 text-xs font-bold">{{ successMessage }}</p>
+          </div>
+        </transition>
 
-        <!-- Error Message -->
-        <div
-          v-if="errorMessage"
-          class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
-        >
-          <p class="text-red-700 text-sm">{{ errorMessage }}</p>
-        </div>
+        <transition name="fade">
+          <div
+            v-if="errorMessage"
+            class="mb-8 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl flex items-center gap-3"
+          >
+            <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-red-700 dark:text-red-400 text-xs font-bold">{{ errorMessage }}</p>
+          </div>
+        </transition>
 
         <!-- Step 1: Email Input -->
-        <div v-if="currentStep === 'email'" class="space-y-4">
-          <form @submit.prevent="handleSendReset" class="space-y-4">
-            <!-- Email Input -->
+        <div v-if="currentStep === 'email'" class="space-y-6">
+          <form @submit.prevent="handleSendReset" class="space-y-6">
             <FormInput
               v-model="formData.email"
               type="email"
-              label="Email"
-              placeholder="example@email.com"
+              label="Professional Email"
+              placeholder="name@company.com"
               :error="errors.email"
               required
             />
 
-            <!-- Submit Button -->
             <FormButton
-              label="Send Reset Link"
+              label="Initiate Recovery"
               type="submit"
+              variant="primary"
+              class="w-full !py-4 shadow-lg shadow-blue-500/20"
               :loading="isLoading"
               :disabled="isLoading"
-              class="w-full"
             />
           </form>
         </div>
 
         <!-- Step 2: Reset Code Input -->
-        <div v-if="currentStep === 'code'" class="space-y-4">
-          <p class="text-sm text-gray-600 mb-4">
-            Verification code sent to your email. Enter it below.
-          </p>
+        <div v-if="currentStep === 'code'" class="space-y-6">
+          <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl mb-6">
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-widest text-center leading-relaxed">
+              A security code has been dispatched to 
+              <span class="text-[#0078d4]">{{ formData.email }}</span>
+            </p>
+          </div>
 
-          <form @submit.prevent="handleVerifyCode" class="space-y-4">
-            <!-- Code Input -->
+          <form @submit.prevent="handleVerifyCode" class="space-y-6">
             <FormInput
               v-model="formData.code"
               type="text"
-              label="Verification Code"
-              placeholder="000000"
+              label="Security Verification Code"
+              placeholder="000 000"
               :error="errors.code"
-              hint="Enter the 6-digit code"
+              hint="Enter the 6-digit verification sequence"
               required
             />
 
-            <!-- Submit Button -->
             <FormButton
-              label="Verify Code"
+              label="Verify Identity"
               type="submit"
+              variant="primary"
+              class="w-full !py-4"
               :loading="isLoading"
               :disabled="isLoading"
-              class="w-full"
             />
           </form>
 
-          <!-- Resend Code -->
-          <p class="text-center text-sm text-gray-600">
-            Didn't receive the code?
+          <div class="text-center">
             <button
               @click="handleResendCode"
               :disabled="isLoading || resendCountdown > 0"
-              class="text-blue-600 hover:text-blue-700 font-medium disabled:text-gray-400"
+              class="text-xs font-bold uppercase tracking-widest transition-colors"
+              :class="resendCountdown > 0 ? 'text-gray-400' : 'text-[#0078d4] hover:underline'"
             >
-              {{ resendCountdown > 0 ? `Resend after ${resendCountdown}s` : 'Resend' }}
+              {{ resendCountdown > 0 ? `Retry in ${resendCountdown}s` : 'Resend Security Code' }}
             </button>
-          </p>
+          </div>
         </div>
 
         <!-- Step 3: New Password Input -->
-        <div v-if="currentStep === 'password'" class="space-y-4">
-          <p class="text-sm text-gray-600 mb-4">
-            Enter your new password.
-          </p>
+        <div v-if="currentStep === 'password'" class="space-y-6">
+          <div class="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl mb-6">
+            <p class="text-xs font-bold text-[#0078d4] uppercase tracking-widest text-center">
+              Identity Confirmed. Establish New Credentials.
+            </p>
+          </div>
 
-          <form @submit.prevent="handleResetPassword" class="space-y-4">
-            <!-- New Password Input -->
+          <form @submit.prevent="handleResetPassword" class="space-y-6">
             <FormInput
               v-model="formData.newPassword"
               type="password"
-              label="New Password"
+              label="New Security Password"
               placeholder="••••••••"
               :error="errors.newPassword"
-              hint="Must be at least 8 characters and contain letters and numbers"
+              hint="Min 8 characters, letters & numbers"
               required
             />
 
-            <!-- Confirm Password Input -->
             <FormInput
               v-model="formData.confirmPassword"
               type="password"
-              label="Confirm Password"
+              label="Confirm Credentials"
               placeholder="••••••••"
               :error="errors.confirmPassword"
               required
             />
 
-            <!-- Submit Button -->
             <FormButton
-              label="Update Password"
+              label="Secure Account"
               type="submit"
+              variant="primary"
+              class="w-full !py-4 shadow-lg shadow-blue-500/20"
               :loading="isLoading"
               :disabled="isLoading"
-              class="w-full"
             />
           </form>
         </div>
 
-        <!-- Divider -->
-        <div class="my-6 flex items-center gap-4">
-          <div class="flex-1 h-px bg-gray-300"></div>
-          <span class="text-gray-500 text-sm">or</span>
-          <div class="flex-1 h-px bg-gray-300"></div>
-        </div>
-
-        <!-- Back to Login -->
-        <p class="text-center text-gray-600">
-          Remembered your password?
+        <!-- Footer -->
+        <div class="mt-10 pt-8 border-t border-gray-50 dark:border-gray-800 text-center">
           <RouterLink
             to="/auth/login"
-            class="text-blue-600 hover:text-blue-700 font-medium"
+            class="text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-[#0078d4] transition-colors"
           >
-            Back to Login
+            ← Return to Sign In
           </RouterLink>
-        </p>
+        </div>
       </div>
     </div>
   </div>

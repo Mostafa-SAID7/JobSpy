@@ -5,7 +5,7 @@ Tests system recovery to normal operation after stress
 
 import pytest
 import time
-from stress_test import StressTester
+from .stress_test import StressTester
 
 
 @pytest.mark.performance

@@ -5,7 +5,7 @@ Tests for search endpoint query parameter validation
 
 import pytest
 from fastapi.testclient import TestClient
-from Backend.app.main import app
+from app.main import app
 
 
 @pytest.fixture

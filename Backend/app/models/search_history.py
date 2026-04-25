@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Integer, ForeignKey, Index, Text
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import UUID, JSON
 from sqlalchemy.orm import relationship
 import uuid
 
@@ -14,7 +14,7 @@ class SearchHistory(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     job_id = Column(UUID(as_uuid=True), ForeignKey("jobs.id", ondelete="CASCADE"), nullable=True, index=True)
     query = Column(String(500), nullable=False)
-    filters = Column(JSONB, nullable=True)  # Stored search filters
+    filters = Column(JSON, nullable=True)  # Stored search filters
     results_count = Column(Integer, default=0)
     search_type = Column(String(50), nullable=False)  # "keyword", "advanced", "alert"
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -32,3 +32,4 @@ class SearchHistory(Base):
 
     def __repr__(self):
         return f"<SearchHistory(user_id={self.user_id}, query={self.query})>"
+

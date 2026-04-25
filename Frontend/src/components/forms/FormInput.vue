@@ -12,13 +12,8 @@
       :disabled="disabled"
       :required="required"
       :class="[
-        'w-full px-4 py-2 border rounded-lg transition-colors',
-        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-        'dark:bg-gray-800 dark:text-white',
-        error
-          ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-          : 'border-gray-300 bg-white dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500',
-        disabled ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' : ''
+        'fluent-input',
+        error ? 'border-red-500 bg-red-50 dark:bg-red-900/20 focus:ring-red-500 focus:border-red-500' : ''
       ]"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       @blur="$emit('blur')"

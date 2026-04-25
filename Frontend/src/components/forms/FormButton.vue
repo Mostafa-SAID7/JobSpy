@@ -3,26 +3,25 @@
     :type="type"
     :disabled="disabled || loading"
     :class="[
-      'px-6 py-2 rounded font-semibold transition-all duration-150',
-      'focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900',
-      'flex items-center justify-center gap-2',
+      'fluent-button',
       variantClasses,
       sizeClasses,
-      disabled || loading ? 'opacity-60 cursor-not-allowed shadow-none' : 'cursor-pointer active:scale-[0.98]'
+      loading ? 'relative !text-transparent' : ''
     ]"
     @click="$emit('click')"
   >
-    <svg
-      v-if="loading"
-      class="w-4 h-4 animate-spin"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    </svg>
-    <slot v-else>
+    <div v-if="loading" class="absolute inset-0 flex items-center justify-center">
+      <svg
+        class="w-5 h-5 animate-spin text-current"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+    <slot>
       <span>{{ label }}</span>
     </slot>
   </button>
@@ -35,7 +34,7 @@ type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'outline' 
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 interface Props {
-  label: string
+  label?: string
   type?: 'button' | 'submit' | 'reset'
   variant?: ButtonVariant
   size?: ButtonSize
@@ -44,6 +43,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  label: '',
   type: 'button',
   variant: 'primary',
   size: 'md',
@@ -53,16 +53,16 @@ const props = withDefaults(defineProps<Props>(), {
 
 defineEmits<{
   click: []
->()
+}>()
 
 const variantClasses = computed(() => {
   const variants: Record<ButtonVariant, string> = {
-    primary: 'bg-[#0078d4] text-white hover:bg-[#106ebe] shadow-sm focus:ring-[#0078d4]',
-    secondary: 'bg-[#f3f2f1] dark:bg-gray-800 text-[#323130] dark:text-gray-200 hover:bg-[#edebe9] dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-gray-400',
-    danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm focus:ring-red-500',
-    success: 'bg-[#107c10] text-white hover:bg-[#0b5a0b] shadow-sm focus:ring-[#107c10]',
-    outline: 'border border-[#0078d4] text-[#0078d4] hover:bg-blue-50 dark:hover:bg-gray-800 focus:ring-[#0078d4]',
-    ghost: 'text-[#0078d4] hover:bg-blue-50 dark:hover:bg-gray-800 focus:ring-[#0078d4]'
+    primary: 'fluent-button-primary shadow-sm',
+    secondary: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600',
+    danger: 'bg-error text-white hover:opacity-90 shadow-sm',
+    success: 'bg-success text-white hover:opacity-90 shadow-sm',
+    outline: 'border border-brand text-brand hover:bg-brand-dim',
+    ghost: 'text-brand hover:bg-brand-dim'
   }
   return variants[props.variant]
 })

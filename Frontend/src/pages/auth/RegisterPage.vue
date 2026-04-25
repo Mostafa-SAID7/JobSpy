@@ -1,56 +1,62 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+  <div class="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 bg-gray-50 dark:bg-gray-950">
     <div class="w-full max-w-md">
       <!-- Card -->
-      <div class="bg-white rounded-lg shadow-lg p-8">
-        <!-- Header -->
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Create a new account</h1>
-          <p class="text-gray-600">Join us and discover great job opportunities</p>
+      <div class="fluent-card bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-10">
+        <!-- Brand/Header -->
+        <div class="text-center mb-10">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-[#0078d4]/10 rounded-2xl mb-6">
+            <svg class="w-8 h-8 text-[#0078d4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+          </div>
+          <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Join JobSpy</h1>
+          <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mt-3">Start your career journey today</p>
         </div>
 
         <!-- Error Message -->
-        <div
-          v-if="authStore.error"
-          class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
-        >
-          <p class="text-red-700 text-sm">{{ authStore.error }}</p>
-        </div>
+        <transition name="fade">
+          <div
+            v-if="authStore.error"
+            class="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl flex items-center gap-3"
+          >
+            <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-red-700 dark:text-red-400 text-xs font-bold">{{ authStore.error }}</p>
+          </div>
+        </transition>
 
         <!-- Form -->
-        <form @submit.prevent="handleRegister" class="space-y-4">
-          <!-- Full Name Input -->
+        <form @submit.prevent="handleRegister" class="space-y-5">
           <FormInput
             v-model="formData.fullName"
             type="text"
-            label="Full Name"
-            placeholder="John Doe"
+            label="Full Professional Name"
+            placeholder="Johnathan Doe"
             :error="errors.fullName"
             required
           />
 
-          <!-- Email Input -->
           <FormInput
             v-model="formData.email"
             type="email"
-            label="Email"
-            placeholder="example@email.com"
+            label="Professional Email"
+            placeholder="name@company.com"
             :error="errors.email"
             required
           />
 
-          <!-- Password Input -->
           <FormInput
             v-model="formData.password"
             type="password"
-            label="Password"
+            label="Create Password"
             placeholder="••••••••"
             :error="errors.password"
-            hint="Must be at least 8 characters and contain letters and numbers"
+            hint="Min 8 characters, letters & numbers"
             required
           />
 
-          <!-- Confirm Password Input -->
           <FormInput
             v-model="formData.confirmPassword"
             type="password"
@@ -61,50 +67,54 @@
           />
 
           <!-- Terms & Conditions -->
-          <label class="flex items-start gap-3 cursor-pointer">
-            <input
-              v-model="formData.agreeToTerms"
-              type="checkbox"
-              class="w-4 h-4 mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span class="text-sm text-gray-700">
-              I agree to
-              <a href="#" class="text-blue-600 hover:text-blue-700">Terms of Service</a>
-              and
-              <a href="#" class="text-blue-600 hover:text-blue-700">Privacy Policy</a>
-            </span>
-          </label>
-          <p v-if="errors.agreeToTerms" class="text-sm text-red-500">
-            {{ errors.agreeToTerms }}
-          </p>
+          <div class="space-y-3">
+            <label class="flex items-start gap-3 cursor-pointer group">
+              <input
+                v-model="formData.agreeToTerms"
+                type="checkbox"
+                class="w-4 h-4 mt-1 rounded border-gray-300 text-[#0078d4] focus:ring-[#0078d4]/20 transition-all cursor-pointer"
+              />
+              <span class="text-xs font-bold text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors leading-relaxed uppercase tracking-tighter">
+                I agree to the 
+                <a href="#" class="text-[#0078d4] hover:underline">Terms of Service</a>
+                and
+                <a href="#" class="text-[#0078d4] hover:underline">Privacy Policy</a>
+              </span>
+            </label>
+            <p v-if="errors.agreeToTerms" class="text-[10px] font-bold text-red-500 uppercase tracking-widest">
+              {{ errors.agreeToTerms }}
+            </p>
+          </div>
 
-          <!-- Submit Button -->
           <FormButton
             label="Create Account"
             type="submit"
+            variant="primary"
+            class="w-full !py-4 shadow-lg shadow-blue-500/20"
             :loading="authStore.isLoading"
             :disabled="authStore.isLoading"
-            class="w-full"
           />
         </form>
 
-        <!-- Divider -->
-        <div class="my-6 flex items-center gap-4">
-          <div class="flex-1 h-px bg-gray-300"></div>
-          <span class="text-gray-500 text-sm">or</span>
-          <div class="flex-1 h-px bg-gray-300"></div>
+        <div class="mt-10 pt-8 border-t border-gray-50 dark:border-gray-800 text-center">
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">
+            Already have an account?
+            <RouterLink
+              to="/auth/login"
+              class="text-[#0078d4] hover:underline ml-1"
+            >
+              Sign In
+            </RouterLink>
+          </p>
         </div>
+      </div>
 
-        <!-- Login Link -->
-        <p class="text-center text-gray-600">
-          Already have an account?
-          <RouterLink
-            to="/auth/login"
-            class="text-blue-600 hover:text-blue-700 font-medium"
-          >
-            Log in
-          </RouterLink>
-        </p>
+      <div class="mt-8 text-center space-x-4">
+        <a href="#" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-[#0078d4] transition-colors">Privacy</a>
+        <span class="text-gray-300">•</span>
+        <a href="#" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-[#0078d4] transition-colors">Terms</a>
+        <span class="text-gray-300">•</span>
+        <a href="#" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-[#0078d4] transition-colors">Support</a>
       </div>
     </div>
   </div>

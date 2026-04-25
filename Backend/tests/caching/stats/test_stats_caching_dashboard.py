@@ -15,6 +15,21 @@ from app.services.stats_service import StatsService
 def stats_repo() -> StatsRepository:
     """Create mock stats repository"""
     repo = AsyncMock(spec=StatsRepository)
+    # Set default return values to avoid AsyncMock serialization errors
+    repo.get_total_jobs.return_value = 0
+    repo.get_jobs_by_source.return_value = {}
+    repo.get_jobs_by_type.return_value = {}
+    repo.get_remote_jobs_count.return_value = 0
+    repo.get_salary_statistics.return_value = {}
+    repo.get_jobs_posted_today.return_value = 0
+    repo.get_jobs_posted_this_week.return_value = 0
+    repo.get_jobs_by_company.return_value = []
+    repo.get_jobs_by_location.return_value = []
+    repo.get_total_users.return_value = 0
+    repo.get_active_users.return_value = 0
+    repo.get_search_statistics.return_value = {"total_searches": 0, "unique_queries": 0}
+    repo.get_trending_searches.return_value = []
+    repo.get_total_saved_jobs.return_value = 0
     return repo
 
 

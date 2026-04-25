@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Boolean, Integer, ForeignKey, Index
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import UUID, JSON
 from sqlalchemy.orm import relationship
 import uuid
 
@@ -14,7 +14,7 @@ class Alert(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     query = Column(String(500), nullable=False)
-    filters = Column(JSONB, nullable=True)  # Search filters
+    filters = Column(JSON, nullable=True)  # Search filters
     frequency = Column(String(50), nullable=False)  # "hourly", "daily", "weekly"
     is_active = Column(Boolean, default=True, nullable=False)
     last_triggered = Column(DateTime, nullable=True)
@@ -36,3 +36,4 @@ class Alert(Base):
 
     def __repr__(self):
         return f"<Alert(id={self.id}, user_id={self.user_id}, name={self.name})>"
+

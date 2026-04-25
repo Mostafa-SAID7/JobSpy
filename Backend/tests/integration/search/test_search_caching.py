@@ -6,7 +6,7 @@ Tests for search result caching functionality
 import pytest
 import time
 from fastapi.testclient import TestClient
-from Backend.app.main import app
+from app.main import app
 
 
 @pytest.fixture

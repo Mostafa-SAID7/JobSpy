@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, DateTime, ForeignKey, Index, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import UUID
 from sqlalchemy.orm import relationship
 import uuid
 
@@ -30,3 +30,4 @@ class SavedJob(Base):
 
     def __repr__(self):
         return f"<SavedJob(user_id={self.user_id}, job_id={self.job_id})>"
+
