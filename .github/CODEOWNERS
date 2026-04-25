@@ -1,0 +1,28 @@
+# This file defines code ownership and automatically requests reviews
+
+# Backend
+/Backend/ @Mostafa-SAID7
+/Backend/app/routers/ @Mostafa-SAID7
+/Backend/app/models/ @Mostafa-SAID7
+/Backend/app/repositories/ @Mostafa-SAID7
+/Backend/tests/ @Mostafa-SAID7
+
+# Frontend
+/Frontend/ @Mostafa-SAID7
+/Frontend/src/components/ @Mostafa-SAID7
+/Frontend/src/pages/ @Mostafa-SAID7
+/Frontend/src/stores/ @Mostafa-SAID7
+/Frontend/src/__tests__/ @Mostafa-SAID7
+
+# GitHub Actions and CI/CD
+/.github/ @Mostafa-SAID7
+/.github/workflows/ @Mostafa-SAID7
+
+# Documentation
+/README.md @Mostafa-SAID7
+/docs/ @Mostafa-SAID7
+
+# Configuration files
+/docker-compose.yml @Mostafa-SAID7
+/Dockerfile @Mostafa-SAID7
+/.env.example @Mostafa-SAID7

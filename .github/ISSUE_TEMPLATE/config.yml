@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/Mostafa-SAID7/JobSpy/wiki
+    about: Check our documentation for help
+  - name: Discussions
+    url: https://github.com/Mostafa-SAID7/JobSpy/discussions
+    about: Ask questions and share ideas
