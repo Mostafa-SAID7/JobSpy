@@ -1,0 +1,49 @@
+name: Node.js Frontend CI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'Frontend/**'
+      - '.github/workflows/node-package.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'Frontend/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: 'Frontend/package-lock.json'
+    
+    - name: Install dependencies
+      working-directory: ./Frontend
+      run: npm ci
+    
+    - name: Run ESLint
+      working-directory: ./Frontend
+      run: npm run lint
+    
+    - name: Type check with Vue TSC
+      working-directory: ./Frontend
+      run: npm run type-check
+    
+    - name: Run tests
+      working-directory: ./Frontend
+      run: npm run test
+    
+    - name: Build
+      working-directory: ./Frontend
+      run: npm run build

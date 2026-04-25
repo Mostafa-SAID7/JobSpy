@@ -1,0 +1,67 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  backend-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      working-directory: ./Backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run Black formatter check
+      working-directory: ./Backend
+      run: black --check app tests
+    
+    - name: Run isort import check
+      working-directory: ./Backend
+      run: isort --check-only app tests
+    
+    - name: Run MyPy type checking
+      working-directory: ./Backend
+      run: mypy app --ignore-missing-imports
+    
+    - name: Run Pylint
+      working-directory: ./Backend
+      continue-on-error: true
+      run: pylint app --disable=all --enable=E,F
+
+  frontend-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: 'Frontend/package-lock.json'
+    
+    - name: Install dependencies
+      working-directory: ./Frontend
+      run: npm ci
+    
+    - name: Run ESLint
+      working-directory: ./Frontend
+      run: npm run lint
+    
+    - name: Type check
+      working-directory: ./Frontend
+      run: npm run type-check
