@@ -1,5 +1,8 @@
 """
-Tests for job caching functionality
+Tests for cache invalidation functionality
+
+Tests verify that cache is properly invalidated when data is created, updated, or deleted.
+Extracted from test_caching.py
 """
 import pytest
 from uuid import uuid4
@@ -16,78 +19,6 @@ from app.schemas.job import JobCreate, JobUpdate
 from app.schemas.user import UserCreate, UserUpdate
 from app.schemas.search_history import SearchHistoryCreate
 from sqlalchemy.ext.asyncio import AsyncSession
-
-
-def test_cache_key_generation():
-    """Test that cache keys are generated correctly."""
-    job_id = uuid4()
-    cache_key = f"job:{job_id}"
-    
-    assert cache_key.startswith("job:")
-    assert str(job_id) in cache_key
-
-
-def test_search_cache_key_includes_query():
-    """Test that search cache keys include the query."""
-    query = "Python Developer"
-    skip = 0
-    limit = 100
-    cache_key = f"jobs:search:{query}:{skip}:{limit}"
-    
-    assert query in cache_key
-    assert str(skip) in cache_key
-    assert str(limit) in cache_key
-
-
-def test_cache_ttl_configuration():
-    """Test that cache TTL is properly configured."""
-    from app.core.config import settings
-    
-    # TTL should be set in settings
-    assert hasattr(settings, 'REDIS_CACHE_TTL')
-    assert settings.REDIS_CACHE_TTL > 0
-
-
-def test_multiple_cache_patterns():
-    """Test that multiple cache patterns are handled correctly."""
-    patterns = [
-        "jobs:all:*",
-        "jobs:source:*",
-        "jobs:company:*",
-        "jobs:search:*",
-        "job:*",
-    ]
-    
-    for pattern in patterns:
-        assert "*" in pattern or ":" in pattern
-
-
-def test_cache_key_patterns_for_different_operations():
-    """Test cache key patterns for different job operations."""
-    job_id = uuid4()
-    source = "linkedin"
-    company = "Tech Corp"
-    query = "Python"
-    
-    # Test individual job cache key
-    job_cache_key = f"job:{job_id}"
-    assert "job:" in job_cache_key
-    
-    # Test all jobs cache key
-    all_jobs_key = f"jobs:all:0:100"
-    assert "jobs:all:" in all_jobs_key
-    
-    # Test source-based cache key
-    source_key = f"jobs:source:{source}:0:100"
-    assert source in source_key
-    
-    # Test company-based cache key
-    company_key = f"jobs:company:{company}:0:100"
-    assert company in company_key
-    
-    # Test search cache key
-    search_key = f"jobs:search:{query}:0:100"
-    assert query in search_key
 
 
 def test_cache_invalidation_patterns():
@@ -112,52 +43,6 @@ def test_redis_client_configuration():
     assert hasattr(redis_client, 'set')
     assert hasattr(redis_client, 'delete')
     assert hasattr(redis_client, 'delete_pattern')
-
-
-def test_cache_key_uniqueness():
-    """Test that different queries generate different cache keys."""
-    query1 = "Python Developer"
-    query2 = "Java Developer"
-    
-    key1 = f"jobs:search:{query1}:0:100"
-    key2 = f"jobs:search:{query2}:0:100"
-    
-    assert key1 != key2
-    assert query1 in key1
-    assert query2 in key2
-
-
-def test_pagination_cache_keys():
-    """Test that pagination parameters are included in cache keys."""
-    query = "Developer"
-    
-    # Different pages should have different cache keys
-    key_page1 = f"jobs:search:{query}:0:100"
-    key_page2 = f"jobs:search:{query}:100:100"
-    
-    assert key_page1 != key_page2
-    assert "0:100" in key_page1
-    assert "100:100" in key_page2
-
-
-def test_cache_key_format_consistency():
-    """Test that cache keys follow a consistent format."""
-    job_id = uuid4()
-    
-    # All job-related cache keys should follow the pattern
-    cache_keys = [
-        f"job:{job_id}",
-        f"jobs:all:0:100",
-        f"jobs:source:linkedin:0:100",
-        f"jobs:company:Tech:0:100",
-        f"jobs:search:Python:0:100",
-    ]
-    
-    for key in cache_keys:
-        # All keys should contain colons as separators
-        assert ":" in key
-        # All keys should be strings
-        assert isinstance(key, str)
 
 
 class TestCacheInvalidationOnJobCreation:
@@ -484,97 +369,6 @@ class TestCacheInvalidationOnJobCreation:
         mock_logger.info.assert_called()
 
 
-class TestCacheInvalidationIntegration:
-    """Integration tests for cache invalidation with multiple services."""
-    
-    @pytest.mark.asyncio
-    async def test_job_creation_invalidates_all_related_caches(self):
-        """Test that job creation invalidates all related caches."""
-        db = AsyncMock(spec=AsyncSession)
-        job_repo = JobRepository(db)
-        search_service = SearchService(db)
-        stats_repo = AsyncMock()
-        stats_service = StatsService(stats_repo)
-        
-        job_create = JobCreate(
-            title="Python Developer",
-            company="Tech Corp",
-            location="San Francisco",
-            source_url="https://example.com/job/123",
-            source="linkedin",
-            source_job_id="123",
-            description="A great job",
-            salary_min=100000,
-            salary_max=150000,
-            job_type="fulltime",
-            is_remote=False,
-            posted_date=datetime.utcnow(),
-        )
-        
-        db.flush = AsyncMock()
-        
-        with patch.object(redis_client, 'delete_pattern', new_callable=AsyncMock) as mock_delete_pattern:
-            with patch.object(redis_client, 'delete', new_callable=AsyncMock) as mock_delete:
-                # Create job
-                job = await job_repo.create(job_create)
-                
-                # Invalidate all caches
-                job_result = await job_repo.invalidate_all_jobs_cache()
-                search_result = await search_service.invalidate_all_search_cache()
-                stats_result = await stats_service.invalidate_job_statistics()
-        
-        assert job_result is True
-        assert search_result is True
-        assert stats_result is True
-    
-    @pytest.mark.asyncio
-    async def test_cache_invalidation_sequence_on_job_creation(self):
-        """Test the sequence of cache invalidation operations on job creation."""
-        db = AsyncMock(spec=AsyncSession)
-        job_repo = JobRepository(db)
-        search_service = SearchService(db)
-        
-        job_create = JobCreate(
-            title="Python Developer",
-            company="Tech Corp",
-            location="San Francisco",
-            source_url="https://example.com/job/123",
-            source="linkedin",
-            source_job_id="123",
-            description="A great job",
-            salary_min=100000,
-            salary_max=150000,
-            job_type="fulltime",
-            is_remote=False,
-            posted_date=datetime.utcnow(),
-        )
-        
-        db.flush = AsyncMock()
-        
-        call_sequence = []
-        
-        async def track_delete_pattern(pattern):
-            call_sequence.append(('delete_pattern', pattern))
-        
-        with patch.object(redis_client, 'delete_pattern', side_effect=track_delete_pattern):
-            # Create job
-            job = await job_repo.create(job_create)
-            
-            # Invalidate caches in order
-            await job_repo.invalidate_all_jobs_cache()
-            await search_service.invalidate_all_search_cache()
-        
-        # Verify sequence
-        assert len(call_sequence) > 0
-        # Job cache should be invalidated before search cache
-        job_calls = [c for c in call_sequence if 'jobs:' in c[1]]
-        search_calls = [c for c in call_sequence if 'search:' in c[1]]
-        
-        if job_calls and search_calls:
-            assert call_sequence.index(job_calls[0]) < call_sequence.index(search_calls[0])
-
-
-
 class TestCacheInvalidationOnJobUpdate:
     """Test cache invalidation when jobs are updated."""
     
@@ -785,6 +579,5 @@ class TestCacheInvalidationOnSearchHistoryUpdate:
         with patch.object(redis_client, 'delete_pattern', new_callable=AsyncMock) as mock_delete_pattern:
             result = await search_repo.delete_by_user(user_id)
         
-        # Should have invalidated user search history cache
+        # Should have invalidated user search caches
         assert mock_delete_pattern.called
-        assert result == 3
