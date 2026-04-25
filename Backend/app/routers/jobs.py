@@ -33,10 +33,9 @@ async def create_job(job_create: JobCreate, db: AsyncSession = Depends(get_db)):
         await db.commit()
         await db.refresh(job)
         
-        # Invalidate all caches when new job is added
-        await job_repo.invalidate_all_jobs_cache()
-        await search_service.invalidate_all_search_cache()
-        logger.info(f"New job created: {job.id}, all caches invalidated")
+        # Selective cache invalidation: only invalidate searches that match this job
+        await search_service.invalidate_search_cache_for_job(job)
+        logger.info(f"New job created: {job.id}, selective caches invalidated")
         
         return job
     except ValueError as e:
@@ -123,15 +122,16 @@ async def advanced_search(
     salary_min: Optional[int] = Query(None, description="Minimum salary"),
     salary_max: Optional[int] = Query(None, description="Maximum salary"),
     is_remote: Optional[bool] = Query(None, description="Is remote job"),
+    source: Optional[str] = Query(None, description="Job source (LinkedIn, Indeed, etc.)"),
     skip: int = Query(0, ge=0, description="Number of results to skip"),
     limit: int = Query(20, ge=1, le=100, description="Maximum number of results"),
     db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
     """
-    Advanced search for jobs with multiple filter criteria.
+    Advanced search for jobs with multiple filter criteria (server-side filtering).
     
-    This endpoint supports caching of search results with all parameters.
+    This endpoint supports server-side filtering to avoid N+1 queries and client-side filtering.
     Cache is automatically invalidated when jobs are added or updated.
     
     Query Parameters:
@@ -142,6 +142,7 @@ async def advanced_search(
     - salary_min: Filter by minimum salary
     - salary_max: Filter by maximum salary
     - is_remote: Filter by remote work availability
+    - source: Filter by job source
     - skip: Pagination offset (default: 0)
     - limit: Results per page (default: 20, max: 100)
     
@@ -149,34 +150,33 @@ async def advanced_search(
     - results: List of matching jobs
     - total_count: Total number of matching jobs
     - has_more: Whether there are more results
-    - cache_key: Cache key used for this search (for debugging)
     """
     try:
+        job_repo = JobRepository(db)
         search_service = SearchService(db)
         
-        # Build search parameters
-        search_params = {
-            "query": query,
-            "location": location,
-            "job_type": job_type,
-            "experience_level": experience_level,
-            "salary_min": salary_min,
-            "salary_max": salary_max,
-            "is_remote": is_remote,
-            "skip": skip,
-            "limit": limit,
-        }
+        # Perform server-side filtered search
+        jobs, total = await job_repo.search_with_filters(
+            query=query,
+            source=source,
+            job_type=job_type,
+            location=location,
+            salary_min=salary_min,
+            salary_max=salary_max,
+            is_remote=is_remote,
+            skip=skip,
+            limit=limit
+        )
         
-        # Perform advanced search
-        result = await search_service.advanced_search(current_user.id, search_params)
-        
-        # Generate cache key for debugging
-        filters = {k: v for k, v in search_params.items() if v is not None and k not in ["query", "skip", "limit"]}
-        cache_key = search_service._generate_search_cache_key(query, filters, skip, limit)
+        # Log search for analytics
+        await search_service.log_search(current_user.id, query, len(jobs))
         
         return {
-            **result,
-            "cache_key": cache_key,
+            "results": jobs,
+            "total_count": total,
+            "has_more": skip + limit < total,
+            "page": skip // limit + 1,
+            "page_size": limit
         }
     except Exception as e:
         logger.error(f"Error in advanced search: {str(e)}")
@@ -206,11 +206,10 @@ async def update_job(
     
     await db.commit()
     
-    # Invalidate all caches when job is updated
+    # Selective cache invalidation: only invalidate searches that match this job
     await job_repo.invalidate_job_cache(job_id)
-    await job_repo.invalidate_all_jobs_cache()
-    await search_service.invalidate_all_search_cache()
-    logger.info(f"Job updated: {job_id}, all caches invalidated")
+    await search_service.invalidate_search_cache_for_job(job)
+    logger.info(f"Job updated: {job_id}, selective caches invalidated")
     
     return job
 
@@ -231,8 +230,8 @@ async def delete_job(job_id: UUID, db: AsyncSession = Depends(get_db)):
     
     await db.commit()
     
-    # Invalidate all caches when job is deleted
+    # Selective cache invalidation
     await job_repo.invalidate_job_cache(job_id)
-    await job_repo.invalidate_all_jobs_cache()
+    # For delete, we need to invalidate all search caches since we don't have job details
     await search_service.invalidate_all_search_cache()
-    logger.info(f"Job deleted: {job_id}, all caches invalidated")
+    logger.info(f"Job deleted: {job_id}, caches invalidated")

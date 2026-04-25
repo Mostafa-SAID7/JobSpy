@@ -19,17 +19,15 @@ export interface UserPreferences {
 export const useAuthStore = defineStore('auth', () => {
   // State
   const user = ref<User | null>(null)
-  const token = ref<string | null>(getLocalStorage<string>('token'))
+  const token = ref<string | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
-  const preferences = ref<UserPreferences>(
-    getLocalStorage<UserPreferences>('userPreferences') || {
-      theme: 'light',
-      language: 'en',
-      notificationsEnabled: true,
-      emailNotifications: true,
-    }
-  )
+  const preferences = ref<UserPreferences>({
+    theme: 'light',
+    language: 'en',
+    notificationsEnabled: true,
+    emailNotifications: true,
+  })
 
   // Computed
   const isAuthenticated = computed(() => !!token.value && !!user.value)

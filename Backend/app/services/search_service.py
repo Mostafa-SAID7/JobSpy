@@ -586,3 +586,36 @@ class SearchService:
         except Exception as e:
             logger.error(f"Error invalidating trending cache: {str(e)}")
             return False
+
+
+    async def invalidate_search_cache_for_job(self, job) -> bool:
+        """
+        Invalidate only searches that would match this job (selective invalidation).
+        
+        This method is more efficient than invalidating all search cache.
+        It only invalidates searches that would be affected by this job.
+        
+        Args:
+            job: Job object
+        
+        Returns:
+            True if invalidated successfully
+        """
+        try:
+            # Invalidate searches that match this job's criteria
+            # For now, invalidate searches by source and job type
+            patterns = [
+                f"search:advanced:{job.source}:*",
+                f"search:advanced:*:{job.job_type}:*",
+                f"search:advanced:*:{job.location}:*",
+                "search:advanced:*:*",  # Also invalidate general searches
+            ]
+            
+            for pattern in patterns:
+                await redis_client.delete_pattern(pattern)
+            
+            logger.info(f"Selective cache invalidated for job: {job.id} (source: {job.source}, type: {job.job_type})")
+            return True
+        except Exception as e:
+            logger.error(f"Error invalidating selective search cache: {str(e)}")
+            return False

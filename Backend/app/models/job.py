@@ -13,11 +13,11 @@ class Job(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(String(255), nullable=False, index=True)
     company = Column(String(255), nullable=False, index=True)
-    location = Column(String(255), nullable=False)
-    salary_min = Column(Float, nullable=True)
-    salary_max = Column(Float, nullable=True)
+    location = Column(String(255), nullable=False, index=True)
+    salary_min = Column(Float, nullable=True, index=True)
+    salary_max = Column(Float, nullable=True, index=True)
     salary_currency = Column(String(10), nullable=True)
-    job_type = Column(String(50), nullable=True)  # Full-time, Part-time, Contract, etc.
+    job_type = Column(String(50), nullable=True, index=True)  # Full-time, Part-time, Contract, etc.
     description = Column(Text, nullable=True)
     requirements = Column(JSONB, nullable=True)  # Array of requirements
     benefits = Column(JSONB, nullable=True)  # Array of benefits

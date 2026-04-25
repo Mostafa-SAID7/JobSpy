@@ -44,12 +44,12 @@
         <!-- User Menu & Mobile Toggle -->
         <div class="flex items-center space-x-4">
           <!-- User Dropdown -->
-          <div v-if="authStore.isLoggedIn" class="relative">
+          <div v-if="authStore.isAuthenticated" class="relative">
             <button
               @click="toggleUserMenu"
               class="flex items-center space-x-2 text-gray-700 hover:text-blue-600"
             >
-              <span class="text-sm font-medium">{{ authStore.currentUser?.full_name }}</span>
+              <span class="text-sm font-medium">{{ authStore.user?.full_name }}</span>
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
@@ -77,7 +77,7 @@
           </div>
 
           <!-- Auth Links -->
-          <div v-else class="hidden md:flex space-x-4">
+          <div v-if="!authStore.isAuthenticated" class="hidden md:flex space-x-4">
             <router-link
               to="/login"
               class="text-gray-700 hover:text-blue-600 font-medium"
@@ -134,7 +134,7 @@
         >
           الملف الشخصي
         </router-link>
-        <div v-if="!authStore.isLoggedIn" class="flex space-x-2 px-4 pt-2">
+        <div v-if="!authStore.isAuthenticated" class="flex space-x-2 px-4 pt-2">
           <router-link
             to="/login"
             class="flex-1 text-center px-4 py-2 text-gray-700 border border-gray-300 rounded hover:bg-gray-100"

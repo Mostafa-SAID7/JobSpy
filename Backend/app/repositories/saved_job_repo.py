@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload
 from uuid import UUID
 from app.models.saved_job import SavedJob
 from app.models.job import Job
@@ -86,6 +87,18 @@ class SavedJobRepository:
             .order_by(SavedJob.saved_at.desc())
         )
         return result.scalars().all()
+
+    async def get_by_user_with_jobs(self, user_id: UUID, skip: int = 0, limit: int = 100) -> list[tuple[SavedJob, Job]]:
+        """Get all saved jobs with job details in single query (JOIN to avoid N+1)."""
+        result = await self.session.execute(
+            select(SavedJob, Job)
+            .join(Job, SavedJob.job_id == Job.id)
+            .where(SavedJob.user_id == user_id)
+            .offset(skip)
+            .limit(limit)
+            .order_by(SavedJob.saved_at.desc())
+        )
+        return result.all()
 
     async def count_by_user(self, user_id: UUID) -> int:
         """Count saved jobs for a user."""

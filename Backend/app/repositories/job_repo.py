@@ -269,3 +269,59 @@ class JobRepository:
         except Exception as e:
             logger.error(f"Error invalidating all jobs cache: {str(e)}")
             return False
+
+
+    async def search_with_filters(
+        self, 
+        query: str = "", 
+        source: str = None,
+        job_type: str = None,
+        location: str = None,
+        salary_min: int = None,
+        salary_max: int = None,
+        is_remote: bool = None,
+        skip: int = 0, 
+        limit: int = 100
+    ) -> tuple[list[Job], int]:
+        """Search jobs with server-side filtering (no N+1 queries)."""
+        # Build query
+        q = select(Job)
+        
+        # Apply filters
+        if query:
+            q = q.where(
+                (Job.title.ilike(f"%{query}%")) |
+                (Job.description.ilike(f"%{query}%"))
+            )
+        
+        if source:
+            q = q.where(Job.source == source)
+        
+        if job_type:
+            q = q.where(Job.job_type == job_type)
+        
+        if location:
+            q = q.where(Job.location.ilike(f"%{location}%"))
+        
+        if salary_min is not None:
+            q = q.where(Job.salary_min >= salary_min)
+        
+        if salary_max is not None:
+            q = q.where(Job.salary_max <= salary_max)
+        
+        if is_remote is not None:
+            q = q.where(Job.is_remote == (2 if is_remote else 0))
+        
+        # Get total count
+        count_result = await self.session.execute(
+            select(Job).from_statement(q.statement)
+        )
+        total = len(count_result.scalars().all())
+        
+        # Apply pagination and ordering
+        q = q.offset(skip).limit(limit).order_by(Job.created_at.desc())
+        
+        result = await self.session.execute(q)
+        jobs = result.scalars().all()
+        
+        return jobs, total

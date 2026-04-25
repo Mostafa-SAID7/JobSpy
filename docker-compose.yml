@@ -21,6 +21,12 @@ services:
       retries: 5
     networks:
       - jobspy_network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ── Redis Cache ──────────────────────────────────────────────────
   redis:
@@ -37,6 +43,13 @@ services:
       retries: 5
     networks:
       - jobspy_network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ── FastAPI Backend ──────────────────────────────────────────────
   backend:
@@ -49,8 +62,12 @@ services:
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2
-      DEBUG: "True"
-      ENVIRONMENT: development
+      DEBUG: "False"
+      ENVIRONMENT: production
+      SECRET_KEY: ${SECRET_KEY:-jobspy-secret-key-2026-production}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
     ports:
       - "8000:8000"
     volumes:
@@ -62,7 +79,13 @@ services:
         condition: service_healthy
     networks:
       - jobspy_network
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    command: gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 120
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ── Celery Worker ────────────────────────────────────────────────
   celery_worker:
@@ -75,8 +98,8 @@ services:
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2
-      DEBUG: "True"
-      ENVIRONMENT: development
+      DEBUG: "False"
+      ENVIRONMENT: production
     volumes:
       - ./Backend:/app
     depends_on:
@@ -85,7 +108,13 @@ services:
       - backend
     networks:
       - jobspy_network
-    command: celery -A app.core.celery worker --loglevel=info
+    restart: unless-stopped
+    command: celery -A app.core.celery worker --loglevel=info --concurrency=4
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ── Celery Beat (Scheduler) ──────────────────────────────────────
   celery_beat:
@@ -98,8 +127,8 @@ services:
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2
-      DEBUG: "True"
-      ENVIRONMENT: development
+      DEBUG: "False"
+      ENVIRONMENT: production
     volumes:
       - ./Backend:/app
     depends_on:
@@ -108,28 +137,38 @@ services:
       - backend
     networks:
       - jobspy_network
-    command: celery -A app.core.celery beat --loglevel=info
+    restart: unless-stopped
+    command: celery -A app.core.celery beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-  # ── Vue.js Frontend ──────────────────────────────────────────────
+  # ── Vue.js Frontend (Nginx) ──────────────────────────────────────
   frontend:
     build:
       context: ./Frontend
       dockerfile: Dockerfile
     container_name: jobspy_frontend
     ports:
-      - "5173:5173"
-    volumes:
-      - ./Frontend:/app
-      - /app/node_modules
+      - "80:80"
     depends_on:
       - backend
     networks:
       - jobspy_network
-    command: npm run dev
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   postgres_data:
+    driver: local
   redis_data:
+    driver: local
 
 networks:
   jobspy_network:

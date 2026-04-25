@@ -19,26 +19,25 @@ RUN npm run build
 
 
 # ── Runtime Stage ────────────────────────────────────────────────────
-FROM node:20-alpine
+FROM nginx:alpine
 
 WORKDIR /app
 
-# Install serve to run the application
-RUN npm install -g serve
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy built application from builder
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Create non-root user
 RUN addgroup -g 1000 appuser && adduser -D -u 1000 -G appuser appuser
-USER appuser
 
 # Expose port
-EXPOSE 5173
+EXPOSE 80
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost:5173/ || exit 1
+    CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
 # Default command
-CMD ["serve", "-s", "dist", "-l", "5173"]
+CMD ["nginx", "-g", "daemon off;"]

@@ -275,10 +275,10 @@ const totalNewJobs = computed(() => {
  * Validates: Requirements 6.1
  */
 const isFormValid = computed(() => {
-  return formData.value.name.trim().length > 0 &&
-         formData.value.query.trim().length > 0 &&
-         formData.value.frequency &&
-         formData.value.notification_method
+  return !!(formData.value.name.trim().length > 0 &&
+           formData.value.query.trim().length > 0 &&
+           formData.value.frequency &&
+           formData.value.notification_method)
 })
 
 /**

@@ -224,6 +224,10 @@ describe('Create New Alert Modal', () => {
         notification_method: 'email',
       }
 
+      // Validate all fields
+      wrapper.vm.validateField('name')
+      wrapper.vm.validateField('query')
+      
       expect(wrapper.vm.isFormValid).toBe(true)
     })
 
