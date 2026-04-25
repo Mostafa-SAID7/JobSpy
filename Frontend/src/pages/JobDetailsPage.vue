@@ -4,25 +4,19 @@
     <button
       @click="goBack"
       class="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-      aria-label="العودة للصفحة السابقة"
+      aria-label="Return to previous page"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
-      العودة
+      Back
     </button>
 
     <!-- Loading State -->
-    <div v-if="loading" class="text-center py-12">
-      <div class="inline-block">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    </div>
+    <LoadingSpinner v-if="loading" />
 
     <!-- Error State -->
-    <div v-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-      <p class="text-red-800 dark:text-red-200">{{ error }}</p>
-    </div>
+    <ErrorState v-if="error" :message="error" />
 
     <!-- Success Toast -->
     <div v-if="successMessage" class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
@@ -42,42 +36,42 @@
             </div>
             <div class="text-right">
               <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ formatSalary() }}</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400">الراتب</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Salary</p>
             </div>
           </div>
 
           <!-- Job Meta -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">الموقع</p>
-              <p class="font-semibold text-gray-900 dark:text-white">{{ job.location || 'غير محدد' }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Location</p>
+              <p class="font-semibold text-gray-900 dark:text-white">{{ job.location || 'Not specified' }}</p>
             </div>
             <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">نوع الوظيفة</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Job Type</p>
               <p class="font-semibold text-gray-900 dark:text-white">{{ formatJobType(job.job_type) }}</p>
             </div>
             <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">مستوى الخبرة</p>
-              <p class="font-semibold text-gray-900 dark:text-white">{{ job.experience_level || 'غير محدد' }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Experience Level</p>
+              <p class="font-semibold text-gray-900 dark:text-white">{{ job.experience_level || 'Not specified' }}</p>
             </div>
             <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">العمل</p>
-              <p class="font-semibold text-gray-900 dark:text-white">{{ job.is_remote ? 'عن بعد' : 'في المقر' }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Work</p>
+              <p class="font-semibold text-gray-900 dark:text-white">{{ job.is_remote ? 'Remote' : 'On-site' }}</p>
             </div>
           </div>
         </div>
 
         <!-- Job Description -->
         <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">وصف الوظيفة</h2>
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Job Description</h2>
           <div class="prose dark:prose-invert max-w-none">
-            <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ job.description || 'لا يوجد وصف متاح' }}</p>
+            <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ job.description || 'No description available' }}</p>
           </div>
         </div>
 
         <!-- Skills -->
         <div v-if="job.skills && job.skills.length > 0" class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">المهارات المطلوبة</h2>
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Required Skills</h2>
           <div class="flex flex-wrap gap-2">
             <span
               v-for="(skill, idx) in job.skills"
@@ -100,8 +94,8 @@
             :loading="applyLoading"
             :disabled="applyLoading || saveLoading"
             @click="handleApply"
-            label="تقديم الطلب"
-            aria-label="تقديم طلب للوظيفة"
+            label="Apply"
+            aria-label="Apply for this job"
           />
 
           <FormButton
@@ -110,28 +104,28 @@
             :loading="saveLoading"
             :disabled="applyLoading || saveLoading"
             @click="toggleSave"
-            :label="isSaved ? 'تم الحفظ' : 'حفظ الوظيفة'"
-            aria-label="حفظ أو إزالة الوظيفة من القائمة"
+            :label="isSaved ? 'Saved' : 'Save Job'"
+            aria-label="Save or remove job from list"
           />
         </div>
 
         <!-- Company Info -->
         <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-          <h3 class="font-bold text-gray-900 dark:text-white mb-4">معلومات الشركة</h3>
+          <h3 class="font-bold text-gray-900 dark:text-white mb-4">Company Information</h3>
           <div class="space-y-3">
             <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">الشركة</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Company</p>
               <p class="font-semibold text-gray-900 dark:text-white">{{ job.company }}</p>
             </div>
             <div v-if="job.company_website">
-              <p class="text-sm text-gray-600 dark:text-gray-400">الموقع الإلكتروني</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Website</p>
               <a
                 :href="job.company_website"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
               >
-                زيارة الموقع
+                Visit Website
               </a>
             </div>
           </div>
@@ -139,13 +133,13 @@
 
         <!-- Posted Date -->
         <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-          <p class="text-sm text-gray-600 dark:text-gray-400">تاريخ النشر</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Posted Date</p>
           <p class="font-semibold text-gray-900 dark:text-white">{{ formatDate(job.posted_date) }}</p>
         </div>
 
         <!-- Source -->
         <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-          <p class="text-sm text-gray-600 dark:text-gray-400">المصدر</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Source</p>
           <p class="font-semibold text-gray-900 dark:text-white capitalize">{{ job.site_name }}</p>
         </div>
       </div>
@@ -160,6 +154,8 @@ import { useJobsStore } from '@/stores/jobs'
 import { apiClient } from '@/services/api'
 import type { Job } from '@/types'
 import FormButton from '@/components/forms/FormButton.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import ErrorState from '@/components/common/ErrorState.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -178,17 +174,17 @@ const saveLoading = ref(false)
  * Validates: Requirement 1.4 - Display all required job fields including salary
  */
 const formatSalary = (): string => {
-  if (!job.value) return 'غير محدد'
+  if (!job.value) return 'Not specified'
 
   const { salary_min, salary_max, salary_currency } = job.value
 
   if (!salary_min && !salary_max) {
-    return 'غير محدد'
+    return 'Not specified'
   }
 
-  const formatter = new Intl.NumberFormat('ar-EG', {
+  const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: salary_currency || 'EGP',
+    currency: salary_currency || 'USD',
     minimumFractionDigits: 0,
   })
 
@@ -200,30 +196,30 @@ const formatSalary = (): string => {
 }
 
 /**
- * Format job type to Arabic
+ * Format job type to English
  */
 const formatJobType = (jobType: string): string => {
   const typeMap: Record<string, string> = {
-    fulltime: 'دوام كامل',
-    parttime: 'دوام جزئي',
-    internship: 'تدريب',
-    contract: 'عقد',
+    fulltime: 'Full-time',
+    parttime: 'Part-time',
+    internship: 'Internship',
+    contract: 'Contract',
   }
   return typeMap[jobType] || jobType
 }
 
 /**
- * Format date to Arabic locale
+ * Format date to English locale
  */
 const formatDate = (date: string): string => {
   try {
-    return new Intl.DateTimeFormat('ar-EG', {
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     }).format(new Date(date))
   } catch {
-    return 'تاريخ غير صحيح'
+    return 'Invalid date'
   }
 }
 
@@ -241,7 +237,7 @@ const goBack = (): void => {
  */
 const handleApply = async (): Promise<void> => {
   if (!job.value?.source_url) {
-    error.value = 'رابط الوظيفة غير متاح'
+    error.value = 'Job link not available'
     return
   }
 
@@ -252,14 +248,14 @@ const handleApply = async (): Promise<void> => {
     // Open job URL in new tab
     window.open(job.value.source_url, '_blank', 'noopener,noreferrer')
 
-    successMessage.value = 'تم فتح صفحة الوظيفة. يرجى إكمال التقديم على الموقع الأصلي.'
+    successMessage.value = 'Job page opened. Please complete the application on the original site.'
 
     // Clear success message after 5 seconds
     setTimeout(() => {
       successMessage.value = ''
     }, 5000)
   } catch (err: any) {
-    error.value = 'فشل فتح صفحة الوظيفة'
+    error.value = 'Failed to open job page'
   } finally {
     applyLoading.value = false
   }
@@ -281,11 +277,11 @@ const toggleSave = async (): Promise<void> => {
     if (isSaved.value) {
       // Remove from saved jobs
       await jobsStore.removeSavedJob(job.value.id.toString())
-      successMessage.value = 'تم إزالة الوظيفة من القائمة'
+      successMessage.value = 'Job removed from list'
     } else {
       // Add to saved jobs
       await jobsStore.addSavedJob(job.value)
-      successMessage.value = 'تم حفظ الوظيفة بنجاح'
+      successMessage.value = 'Job saved successfully'
     }
 
     isSaved.value = !isSaved.value
@@ -295,7 +291,7 @@ const toggleSave = async (): Promise<void> => {
       successMessage.value = ''
     }, 3000)
   } catch (err: any) {
-    error.value = err.response?.data?.detail || 'فشل حفظ الوظيفة'
+    error.value = err.response?.data?.detail || 'Failed to save job'
   } finally {
     saveLoading.value = false
   }
@@ -319,7 +315,7 @@ const fetchJobDetails = async (): Promise<void> => {
     // Check if job is already saved
     isSaved.value = jobsStore.savedJobs.some(j => j.id === job.value?.id)
   } catch (err: any) {
-    error.value = err.response?.data?.detail || 'فشل تحميل تفاصيل الوظيفة'
+    error.value = err.response?.data?.detail || 'Failed to load job details'
     console.error('Error fetching job details:', err)
   } finally {
     loading.value = false

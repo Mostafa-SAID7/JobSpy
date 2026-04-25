@@ -139,7 +139,7 @@ describe('JobDetailsPage', () => {
 
     // Find and click save button
     const buttons = wrapper.findAll('button')
-    const saveButton = buttons.find((btn: any) => btn.text().includes('حفظ'))
+    const saveButton = buttons.find((btn: any) => btn.text().includes('Save'))
 
     if (saveButton) {
       await saveButton.trigger('click')
@@ -196,7 +196,7 @@ describe('JobDetailsPage', () => {
 
     // Find and click apply button
     const buttons = wrapper.findAll('button')
-    const applyButton = buttons.find((btn: any) => btn.text().includes('تقديم'))
+    const applyButton = buttons.find((btn: any) => btn.text().includes('Apply'))
 
     if (applyButton) {
       await applyButton.trigger('click')
@@ -304,14 +304,14 @@ describe('JobDetailsPage', () => {
 
     // Find and click apply button
     const buttons = wrapper.findAll('button')
-    const applyButton = buttons.find((btn: any) => btn.text().includes('تقديم'))
+    const applyButton = buttons.find((btn: any) => btn.text().includes('Apply'))
 
     if (applyButton) {
       await applyButton.trigger('click')
       await wrapper.vm.$nextTick()
 
       // Should show error message
-      expect(wrapper.text()).toContain('رابط الوظيفة غير متاح')
+      expect(wrapper.text()).toContain('Job link not available')
     }
   })
 })

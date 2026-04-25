@@ -1,5 +1,5 @@
 """
-خدمة التنبيهات - JobSpy
+Alert Service - JobSpy
 Alert service for JobSpy
 """
 from datetime import datetime, timedelta

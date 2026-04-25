@@ -1,5 +1,4 @@
 /**
- * جهاز التوجيه - Vue Router
  * Vue Router configuration for JobSpy
  */
 

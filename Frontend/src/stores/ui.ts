@@ -1,5 +1,5 @@
 /**
- * متجر واجهة المستخدم - Pinia Store
+ * UI Store - Pinia Store
  * UI store for global state
  */
 

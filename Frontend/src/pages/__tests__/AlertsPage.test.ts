@@ -60,7 +60,7 @@ describe('AlertsPage', () => {
       })
 
       // Check for loading indicator or text
-      const hasLoadingIndicator = wrapper.find('.animate-spin').exists() || wrapper.text().includes('Loading') || wrapper.text().includes('جاري')
+      const hasLoadingIndicator = wrapper.find('.animate-spin').exists() || wrapper.text().includes('Loading')
       expect(hasLoadingIndicator || wrapper.exists()).toBe(true)
     })
 

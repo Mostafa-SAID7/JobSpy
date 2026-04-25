@@ -5,8 +5,8 @@
       <div class="bg-white rounded-lg shadow-lg p-8">
         <!-- Header -->
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">إنشاء حساب جديد</h1>
-          <p class="text-gray-600">انضم إلينا واكتشف فرص عمل رائعة</p>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Create a new account</h1>
+          <p class="text-gray-600">Join us and discover great job opportunities</p>
         </div>
 
         <!-- Error Message -->
@@ -23,8 +23,8 @@
           <FormInput
             v-model="formData.fullName"
             type="text"
-            label="الاسم الكامل"
-            placeholder="أحمد محمد"
+            label="Full Name"
+            placeholder="John Doe"
             :error="errors.fullName"
             required
           />
@@ -33,7 +33,7 @@
           <FormInput
             v-model="formData.email"
             type="email"
-            label="البريد الإلكتروني"
+            label="Email"
             placeholder="example@email.com"
             :error="errors.email"
             required
@@ -43,10 +43,10 @@
           <FormInput
             v-model="formData.password"
             type="password"
-            label="كلمة المرور"
+            label="Password"
             placeholder="••••••••"
             :error="errors.password"
-            hint="يجب أن تكون 8 أحرف على الأقل وتحتوي على أحرف وأرقام"
+            hint="Must be at least 8 characters and contain letters and numbers"
             required
           />
 
@@ -54,7 +54,7 @@
           <FormInput
             v-model="formData.confirmPassword"
             type="password"
-            label="تأكيد كلمة المرور"
+            label="Confirm Password"
             placeholder="••••••••"
             :error="errors.confirmPassword"
             required
@@ -68,10 +68,10 @@
               class="w-4 h-4 mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             <span class="text-sm text-gray-700">
-              أوافق على
-              <a href="#" class="text-blue-600 hover:text-blue-700">شروط الخدمة</a>
-              و
-              <a href="#" class="text-blue-600 hover:text-blue-700">سياسة الخصوصية</a>
+              I agree to
+              <a href="#" class="text-blue-600 hover:text-blue-700">Terms of Service</a>
+              and
+              <a href="#" class="text-blue-600 hover:text-blue-700">Privacy Policy</a>
             </span>
           </label>
           <p v-if="errors.agreeToTerms" class="text-sm text-red-500">
@@ -80,7 +80,7 @@
 
           <!-- Submit Button -->
           <FormButton
-            label="إنشاء الحساب"
+            label="Create Account"
             type="submit"
             :loading="authStore.isLoading"
             :disabled="authStore.isLoading"
@@ -91,18 +91,18 @@
         <!-- Divider -->
         <div class="my-6 flex items-center gap-4">
           <div class="flex-1 h-px bg-gray-300"></div>
-          <span class="text-gray-500 text-sm">أو</span>
+          <span class="text-gray-500 text-sm">or</span>
           <div class="flex-1 h-px bg-gray-300"></div>
         </div>
 
         <!-- Login Link -->
         <p class="text-center text-gray-600">
-          هل لديك حساب بالفعل؟
+          Already have an account?
           <RouterLink
             to="/auth/login"
             class="text-blue-600 hover:text-blue-700 font-medium"
           >
-            تسجيل الدخول
+            Log in
           </RouterLink>
         </p>
       </div>
@@ -144,33 +144,33 @@ const validateForm = (): boolean => {
   errors.agreeToTerms = ''
 
   if (!formData.fullName) {
-    errors.fullName = 'الاسم الكامل مطلوب'
+    errors.fullName = 'Full name is required'
   } else if (formData.fullName.length < 3) {
-    errors.fullName = 'الاسم يجب أن يكون 3 أحرف على الأقل'
+    errors.fullName = 'Name must be at least 3 characters'
   }
 
   if (!formData.email) {
-    errors.email = 'البريد الإلكتروني مطلوب'
+    errors.email = 'Email is required'
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-    errors.email = 'البريد الإلكتروني غير صحيح'
+    errors.email = 'Invalid email address'
   }
 
   if (!formData.password) {
-    errors.password = 'كلمة المرور مطلوبة'
+    errors.password = 'Password is required'
   } else if (formData.password.length < 8) {
-    errors.password = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'
+    errors.password = 'Password must be at least 8 characters'
   } else if (!/[a-zA-Z]/.test(formData.password) || !/[0-9]/.test(formData.password)) {
-    errors.password = 'كلمة المرور يجب أن تحتوي على أحرف وأرقام'
+    errors.password = 'Password must contain letters and numbers'
   }
 
   if (!formData.confirmPassword) {
-    errors.confirmPassword = 'تأكيد كلمة المرور مطلوب'
+    errors.confirmPassword = 'Confirm password is required'
   } else if (formData.password !== formData.confirmPassword) {
-    errors.confirmPassword = 'كلمات المرور غير متطابقة'
+    errors.confirmPassword = 'Passwords do not match'
   }
 
   if (!formData.agreeToTerms) {
-    errors.agreeToTerms = 'يجب أن توافق على شروط الخدمة'
+    errors.agreeToTerms = 'You must agree to the Terms of Service'
   }
 
   return (

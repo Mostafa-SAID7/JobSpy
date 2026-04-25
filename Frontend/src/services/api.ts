@@ -1,5 +1,4 @@
 /**
- * خدمة API - Axios Client
  * API client for JobSpy
  */
 

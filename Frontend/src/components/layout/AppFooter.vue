@@ -4,29 +4,29 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
         <!-- About -->
         <div>
-          <h3 class="text-white dark:text-white font-bold mb-4">عن JobSpy</h3>
+          <h3 class="text-white dark:text-white font-bold mb-4">About JobSpy</h3>
           <p class="text-sm text-gray-400 dark:text-gray-500">
-            منصة شاملة للبحث عن الوظائف تجمع الفرص من أكبر مواقع التوظيف العالمية والعربية.
+            A comprehensive job search platform gathering opportunities from top global job boards.
           </p>
         </div>
 
         <!-- Quick Links -->
         <div>
-          <h3 class="text-white dark:text-white font-bold mb-4">روابط سريعة</h3>
+          <h3 class="text-white dark:text-white font-bold mb-4">Quick Links</h3>
           <ul class="space-y-2 text-sm">
             <li>
               <RouterLink to="/jobs" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">
-                البحث عن الوظائف
+                Search Jobs
               </RouterLink>
             </li>
             <li>
               <RouterLink to="/about" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">
-                عن الموقع
+                About Us
               </RouterLink>
             </li>
             <li>
               <RouterLink to="/contact" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">
-                اتصل بنا
+                Contact Us
               </RouterLink>
             </li>
           </ul>
@@ -34,21 +34,21 @@
 
         <!-- Support -->
         <div>
-          <h3 class="text-white dark:text-white font-bold mb-4">الدعم</h3>
+          <h3 class="text-white dark:text-white font-bold mb-4">Support</h3>
           <ul class="space-y-2 text-sm">
             <li>
               <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">
-                مركز المساعدة
+                Help Center
               </a>
             </li>
             <li>
               <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">
-                الأسئلة الشائعة
+                FAQ
               </a>
             </li>
             <li>
               <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">
-                سياسة الخصوصية
+                Privacy Policy
               </a>
             </li>
           </ul>
@@ -56,7 +56,7 @@
 
         <!-- Social -->
         <div>
-          <h3 class="text-white dark:text-white font-bold mb-4">تابعنا</h3>
+          <h3 class="text-white dark:text-white font-bold mb-4">Follow Us</h3>
           <div class="flex gap-4">
             <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">
               <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -80,11 +80,11 @@
       <!-- Divider -->
       <div class="border-t border-gray-700 dark:border-gray-800 pt-8">
         <div class="flex flex-col md:flex-row justify-between items-center">
-          <p class="text-sm text-gray-400 dark:text-gray-500">© 2024 JobSpy. جميع الحقوق محفوظة.</p>
+          <p class="text-sm text-gray-400 dark:text-gray-500">© 2024 JobSpy. All rights reserved.</p>
           <div class="flex gap-6 mt-4 md:mt-0 text-sm">
-            <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">سياسة الخصوصية</a>
-            <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">شروط الاستخدام</a>
-            <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">اتصل بنا</a>
+            <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">Terms of Use</a>
+            <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors">Contact Us</a>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 """
-خدمات الخلفية - مهام Celery
+Background Services - Celery Tasks
 Celery Background Tasks for JobSpy
 """
 

@@ -1,7 +1,7 @@
 {
   "name": "jobspy-frontend",
   "version": "1.0.0",
-  "description": "JobSpy - منصة بحث عن الوظائف الشاملة",
+  "description": "JobSpy - Comprehensive job search platform",
   "type": "module",
   "scripts": {
     "dev": "vite",

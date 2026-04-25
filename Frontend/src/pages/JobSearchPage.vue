@@ -2,8 +2,8 @@
   <div class="space-y-6">
     <!-- Page Header -->
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">البحث عن الوظائف</h1>
-      <p class="text-gray-600 dark:text-gray-400 mt-2">ابحث عن الوظائف المناسبة لك من آلاف الفرص المتاحة</p>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Search for Jobs</h1>
+      <p class="text-gray-600 dark:text-gray-400 mt-2">Find the right job for you from thousands of available opportunities</p>
     </div>
 
     <!-- Search Bar Component -->
@@ -30,53 +30,32 @@
         <!-- Results Header with Sort -->
         <div v-if="jobs.length > 0" class="flex justify-between items-center mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <div class="text-sm text-gray-600 dark:text-gray-400">
-            عدد النتائج: <span class="font-semibold">{{ totalJobs }}</span>
+            Number of results: <span class="font-semibold">{{ totalJobs }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <label for="sort-select" class="text-sm text-gray-700 dark:text-gray-300">ترتيب:</label>
+            <label for="sort-select" class="text-sm text-gray-700 dark:text-gray-300">Sort by:</label>
             <select
               id="sort-select"
               v-model="sortBy"
               class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm"
               @change="handleSortChange"
             >
-              <option value="recent">الأحدث أولاً</option>
-              <option value="salary-high">الراتب (الأعلى أولاً)</option>
-              <option value="salary-low">الراتب (الأقل أولاً)</option>
-              <option value="relevance">الأكثر ملاءمة</option>
+              <option value="recent">Newest First</option>
+              <option value="salary-high">Salary (Highest First)</option>
+              <option value="salary-low">Salary (Lowest First)</option>
+              <option value="relevance">Most Relevant</option>
             </select>
           </div>
         </div>
 
         <!-- Loading State -->
-        <div v-if="loading" class="text-center py-12">
-          <div class="inline-block">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-          <p class="text-gray-600 dark:text-gray-400 mt-4">جاري البحث عن الوظائف...</p>
-        </div>
+        <LoadingSpinner v-if="loading" text="Searching for jobs..." />
 
         <!-- Error State -->
-        <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <div class="flex items-start">
-            <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-            </svg>
-            <div>
-              <p class="text-red-800 dark:text-red-200 font-medium">خطأ</p>
-              <p class="text-red-700 dark:text-red-300 text-sm mt-1">{{ error }}</p>
-            </div>
-          </div>
-        </div>
+        <ErrorState v-else-if="error" :message="error" />
 
         <!-- Empty State -->
-        <div v-else-if="jobs.length === 0" class="bg-gray-50 dark:bg-gray-800 rounded-lg p-12 text-center">
-          <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">لم يتم العثور على وظائف</h3>
-          <p class="text-gray-600 dark:text-gray-400">حاول تغيير معايير البحث والتصفية</p>
-        </div>
+        <EmptyState v-else-if="jobs.length === 0" title="No jobs found" message="Try changing your search and filter criteria" />
 
         <!-- Jobs List -->
         <div v-else class="space-y-4">
@@ -115,6 +94,10 @@ import SearchBar from '@/components/search/SearchBar.vue'
 import FilterPanel from '@/components/search/FilterPanel.vue'
 import Pagination from '@/components/search/Pagination.vue'
 import JobCard from '@/components/cards/JobCard.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import ErrorState from '@/components/common/ErrorState.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
+import type { Job } from '@/types'
 
 const router = useRouter()
 const route = useRoute()
@@ -122,7 +105,7 @@ const jobsStore = useJobsStore()
 
 const loading = ref(false)
 const error = ref('')
-const jobs = ref<any[]>([])
+const jobs = ref<Job[]>([])
 const currentPage = ref(1)
 const pageSize = ref(25)
 const totalJobs = ref(0)
@@ -290,7 +273,7 @@ const searchJobs = async () => {
     totalJobs.value = response.data.total || response.data.count || 0
   } catch (err: any) {
     console.error('Search error:', err)
-    error.value = err.response?.data?.detail || 'فشل البحث عن الوظائف. يرجى المحاولة مرة أخرى.'
+    error.value = err.response?.data?.detail || 'Failed to search for jobs. Please try again.'
     jobs.value = []
     totalJobs.value = 0
   } finally {
@@ -314,7 +297,7 @@ const toggleSaveJob = async (jobId: string | number) => {
       }
     }
   } catch (err) {
-    error.value = 'فشل حفظ الوظيفة'
+    error.value = 'Failed to save job'
   }
 }
 

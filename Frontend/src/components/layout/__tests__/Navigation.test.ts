@@ -65,8 +65,8 @@ describe('Navigation Component', () => {
         },
       })
 
-      expect(wrapper.text()).toContain('دخول')
-      expect(wrapper.text()).toContain('تسجيل')
+      expect(wrapper.text()).toContain('Login')
+      expect(wrapper.text()).toContain('Register')
     })
 
     it('should show user menu when authenticated', async () => {
@@ -102,7 +102,7 @@ describe('Navigation Component', () => {
         await wrapper.find('button').trigger('click')
         await wrapper.vm.$nextTick()
       }
-      expect(wrapper.text()).toContain('تسجيل الخروج')
+      expect(wrapper.text()).toContain('Logout')
     })
   })
 
@@ -114,9 +114,9 @@ describe('Navigation Component', () => {
         },
       })
 
-      expect(wrapper.text()).toContain('البحث')
-      expect(wrapper.text()).toContain('الوظائف المحفوظة')
-      expect(wrapper.text()).toContain('التنبيهات')
+      expect(wrapper.text()).toContain('Search')
+      expect(wrapper.text()).toContain('Saved Jobs')
+      expect(wrapper.text()).toContain('Alerts')
     })
 
     it('should have correct router links', () => {
@@ -177,7 +177,7 @@ describe('Navigation Component', () => {
       await wrapper.vm.$nextTick()
       // Find logout button by looking for button containing the logout text
       const buttons = wrapper.findAll('button')
-      const logoutButton = buttons.find(btn => btn.text().includes('تسجيل الخروج'))
+      const logoutButton = buttons.find(btn => btn.text().includes('Logout'))
       
       if (logoutButton) {
         await logoutButton.trigger('click')

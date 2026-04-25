@@ -4,7 +4,7 @@
       <!-- Logo -->
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-blue-600 dark:text-blue-400">JobSpy</h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-2">منصة بحث عن الوظائف الشاملة</p>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Comprehensive job search platform</p>
       </div>
 
       <!-- Auth Content -->
@@ -14,7 +14,7 @@
 
       <!-- Footer -->
       <div class="text-center mt-8 text-gray-600 dark:text-gray-400 text-sm transition-colors">
-        <p>© 2024 JobSpy. جميع الحقوق محفوظة.</p>
+        <p>© 2024 JobSpy. All rights reserved.</p>
       </div>
     </div>
 

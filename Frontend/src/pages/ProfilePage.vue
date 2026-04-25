@@ -2,40 +2,34 @@
   <div class="max-w-6xl mx-auto px-4 py-8">
     <!-- Page Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">الملف الشخصي</h1>
-      <p class="text-gray-600 dark:text-gray-400 mt-2">إدارة معلومات حسابك والإعدادات</p>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Profile</h1>
+      <p class="text-gray-600 dark:text-gray-400 mt-2">Manage your account information and settings</p>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="text-center py-12">
-      <div class="inline-block">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    </div>
+    <LoadingSpinner v-if="loading" />
 
     <!-- Error State -->
-    <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
-      <p class="text-red-800 dark:text-red-200">{{ error }}</p>
-    </div>
+    <ErrorState v-else-if="error" :message="error" class="mb-6" />
 
     <!-- Profile Content -->
     <div v-else class="space-y-6">
       <!-- Stats Section -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatsCard
-          label="الوظائف المحفوظة"
+          label="Saved Jobs"
           :value="stats.savedJobsCount"
           variant="primary"
           :icon="BookmarkIcon"
         />
         <StatsCard
-          label="التنبيهات النشطة"
+          label="Active Alerts"
           :value="stats.activeAlertsCount"
           variant="success"
           :icon="BellIcon"
         />
         <StatsCard
-          label="عضو منذ"
+          label="Member Since"
           :value="memberSinceText"
           variant="info"
           :icon="CalendarIcon"
@@ -44,7 +38,7 @@
 
       <!-- User Info Card -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">معلومات الحساب</h2>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Account Information</h2>
         
         <!-- Success Message -->
         <div v-if="profileSuccess" class="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
@@ -71,7 +65,7 @@
             <FormInput
               v-model="formData.full_name"
               type="text"
-              label="الاسم الكامل"
+              label="Full Name"
               :disabled="!isEditing"
               :error="isEditing ? fieldErrors.full_name : ''"
               @blur="validateField('full_name')"
@@ -79,26 +73,26 @@
             <FormInput
               v-model="formData.email"
               type="email"
-              label="البريد الإلكتروني"
+              label="Email"
               disabled
-              hint="لا يمكن تغيير البريد الإلكتروني"
+              hint="Email cannot be changed"
             />
           </div>
           <FormInput
             v-if="isEditing"
             v-model="formData.phone"
             type="tel"
-            label="رقم الهاتف"
-            placeholder="مثال: +966501234567"
+            label="Phone Number"
+            placeholder="Example: +1234567890"
             :disabled="!isEditing"
             :error="fieldErrors.phone"
             @blur="validateField('phone')"
           />
           <div v-if="isEditing">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">السيرة الذاتية</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bio</label>
             <textarea
               v-model="formData.bio"
-              placeholder="أخبرنا عن نفسك..."
+              placeholder="Tell us about yourself..."
               :disabled="!isEditing"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
               rows="4"
@@ -112,7 +106,7 @@
           <FormButton
             v-if="!isEditing"
             variant="primary"
-            label="تعديل"
+            label="Edit"
             @click="startEdit"
           />
           <template v-else>
@@ -120,12 +114,12 @@
               variant="success"
               :disabled="savingProfile || !isFormValid"
               :loading="savingProfile"
-              label="حفظ التغييرات"
+              label="Save Changes"
               @click="saveProfile"
             />
             <FormButton
               variant="outline"
-              label="إلغاء"
+              label="Cancel"
               @click="cancelEdit"
               :disabled="savingProfile"
             />
@@ -135,25 +129,25 @@
 
       <!-- Password Change Card -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">تغيير كلمة المرور</h2>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Change Password</h2>
         
         <div class="space-y-4">
           <FormInput
             v-model="passwordData.currentPassword"
             type="password"
-            label="كلمة المرور الحالية"
+            label="Current Password"
           />
 
           <FormInput
             v-model="passwordData.newPassword"
             type="password"
-            label="كلمة المرور الجديدة"
+            label="New Password"
           />
 
           <FormInput
             v-model="passwordData.confirmPassword"
             type="password"
-            label="تأكيد كلمة المرور الجديدة"
+            label="Confirm New Password"
           />
         </div>
 
@@ -161,7 +155,7 @@
           variant="primary"
           :disabled="changingPassword"
           :loading="changingPassword"
-          label="تحديث كلمة المرور"
+          label="Update Password"
           @click="changePassword"
           class="mt-6"
         />
@@ -169,7 +163,7 @@
 
       <!-- Preferences Card -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">التفضيلات</h2>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Preferences</h2>
         
         <!-- Success Message -->
         <div v-if="preferencesSuccess" class="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
@@ -194,26 +188,26 @@
         <div class="space-y-4">
           <FormCheckbox
             v-model="preferences.emailNotifications"
-            label="تلقي إشعارات البريد الإلكتروني"
-            hint="احصل على إشعارات عند توفر وظائف جديدة تطابق معاييرك"
+            label="Receive Email Notifications"
+            hint="Get notified when new jobs matching your criteria are available"
           />
 
           <FormCheckbox
             v-model="preferences.pushNotifications"
-            label="تلقي إشعارات الويب"
-            hint="احصل على إشعارات فورية في المتصفح"
+            label="Receive Web Notifications"
+            hint="Get instant notifications in the browser"
           />
 
           <FormCheckbox
             v-model="preferences.weeklyDigest"
-            label="تلقي ملخص أسبوعي"
-            hint="احصل على ملخص أسبوعي للوظائف الجديدة"
+            label="Receive Weekly Digest"
+            hint="Get a weekly digest of new jobs"
           />
 
           <FormCheckbox
             v-model="preferences.darkMode"
-            label="الوضع الليلي"
-            hint="استخدم الوضع الليلي لتقليل إجهاد العين"
+            label="Dark Mode"
+            hint="Use dark mode to reduce eye strain"
           />
         </div>
 
@@ -221,7 +215,7 @@
           variant="primary"
           :disabled="savingPreferences"
           :loading="savingPreferences"
-          label="حفظ التفضيلات"
+          label="Save Preferences"
           @click="savePreferences"
           class="mt-6"
         />
@@ -229,15 +223,15 @@
 
       <!-- Danger Zone -->
       <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-        <h2 class="text-xl font-semibold text-red-900 dark:text-red-200 mb-4">منطقة الخطر</h2>
+        <h2 class="text-xl font-semibold text-red-900 dark:text-red-200 mb-4">Danger Zone</h2>
         
         <p class="text-red-800 dark:text-red-300 mb-4">
-          حذف حسابك سيؤدي إلى حذف جميع بيانات الملف الشخصي والوظائف المحفوظة والتنبيهات. لا يمكن التراجع عن هذا الإجراء.
+          Deleting your account will delete all profile data, saved jobs, and alerts. This action cannot be undone.
         </p>
 
         <FormButton
           variant="danger"
-          label="حذف الحساب"
+          label="Delete Account"
           @click="deleteAccount"
         />
       </div>
@@ -254,6 +248,8 @@ import FormInput from '@/components/forms/FormInput.vue'
 import FormCheckbox from '@/components/forms/FormCheckbox.vue'
 import FormButton from '@/components/forms/FormButton.vue'
 import StatsCard from '@/components/cards/StatsCard.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import ErrorState from '@/components/common/ErrorState.vue'
 
 // Icons (using simple SVG components)
 const BookmarkIcon = {
@@ -325,7 +321,7 @@ const originalFormData = ref({
 const memberSinceText = computed(() => {
   if (!authStore.user?.created_at) return 'N/A'
   const date = new Date(authStore.user.created_at)
-  return date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' })
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
 })
 
 /**
@@ -359,7 +355,7 @@ onMounted(async () => {
     // Fetch stats
     await fetchStats()
   } catch (err) {
-    error.value = 'فشل تحميل الملف الشخصي'
+    error.value = 'Failed to load profile'
     console.error(err)
   } finally {
     loading.value = false
@@ -387,21 +383,21 @@ const fetchStats = async () => {
 const validateField = (field: string) => {
   if (field === 'full_name') {
     if (formData.value.full_name.trim().length === 0) {
-      fieldErrors.value.full_name = 'الاسم الكامل مطلوب'
+      fieldErrors.value.full_name = 'Full name is required'
     } else if (formData.value.full_name.length > 255) {
-      fieldErrors.value.full_name = 'الاسم الكامل يجب أن يكون أقل من 255 حرف'
+      fieldErrors.value.full_name = 'Full name must be less than 255 characters'
     } else {
       fieldErrors.value.full_name = ''
     }
   } else if (field === 'phone') {
     if (formData.value.phone && !/^[\d\s\-\+\(\)]+$/.test(formData.value.phone)) {
-      fieldErrors.value.phone = 'رقم الهاتف غير صحيح'
+      fieldErrors.value.phone = 'Invalid phone number'
     } else {
       fieldErrors.value.phone = ''
     }
   } else if (field === 'bio') {
     if (formData.value.bio && formData.value.bio.length > 1000) {
-      fieldErrors.value.bio = 'السيرة الذاتية يجب أن تكون أقل من 1000 حرف'
+      fieldErrors.value.bio = 'Bio must be less than 1000 characters'
     } else {
       fieldErrors.value.bio = ''
     }
@@ -432,7 +428,7 @@ const saveProfile = async () => {
   validateField('bio')
   
   if (!isFormValid.value) {
-    profileError.value = 'يرجى تصحيح الأخطاء في النموذج'
+    profileError.value = 'Please correct the errors in the form'
     return
   }
 
@@ -462,14 +458,14 @@ const saveProfile = async () => {
     
     originalFormData.value = { ...formData.value }
     isEditing.value = false
-    profileSuccess.value = 'تم حفظ التغييرات بنجاح'
+    profileSuccess.value = 'Changes saved successfully'
     
     // Clear success message after 3 seconds
     setTimeout(() => {
       profileSuccess.value = ''
     }, 3000)
   } catch (err: any) {
-    profileError.value = err.response?.data?.detail || 'فشل حفظ التغييرات'
+    profileError.value = err.response?.data?.detail || 'Failed to save changes'
     console.error('Profile update error:', err)
   } finally {
     savingProfile.value = false
@@ -495,12 +491,12 @@ const cancelEdit = () => {
 
 const changePassword = async () => {
   if (passwordData.value.newPassword !== passwordData.value.confirmPassword) {
-    error.value = 'كلمات المرور غير متطابقة'
+    error.value = 'Passwords do not match'
     return
   }
 
   if (passwordData.value.newPassword.length < 8) {
-    error.value = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'
+    error.value = 'Password must be at least 8 characters'
     return
   }
 
@@ -508,7 +504,7 @@ const changePassword = async () => {
   try {
     // Note: This endpoint would need to be implemented in the backend
     // For now, we'll show a placeholder
-    error.value = 'خاصية تغيير كلمة المرور قيد التطوير'
+    error.value = 'Change password feature is in development'
     
     passwordData.value = {
       currentPassword: '',
@@ -516,7 +512,7 @@ const changePassword = async () => {
       confirmPassword: '',
     }
   } catch (err: any) {
-    error.value = err.response?.data?.detail || 'فشل تغيير كلمة المرور'
+    error.value = err.response?.data?.detail || 'Failed to change password'
   } finally {
     changingPassword.value = false
   }
@@ -549,14 +545,14 @@ const savePreferences = async () => {
       }
     }
 
-    preferencesSuccess.value = 'تم حفظ التفضيلات بنجاح'
+    preferencesSuccess.value = 'Preferences saved successfully'
     
     // Clear success message after 3 seconds
     setTimeout(() => {
       preferencesSuccess.value = ''
     }, 3000)
   } catch (err: any) {
-    preferencesError.value = err.response?.data?.detail || 'فشل حفظ التفضيلات'
+    preferencesError.value = err.response?.data?.detail || 'Failed to save preferences'
     console.error('Preferences save error:', err)
   } finally {
     savingPreferences.value = false
@@ -578,13 +574,13 @@ const loadPreferences = () => {
 }
 
 const deleteAccount = async () => {
-  if (confirm('هل أنت متأكد من رغبتك في حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.')) {
+  if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
     try {
       await apiClient.delete('/users/me')
       await authStore.logout()
       router.push({ name: 'Home' })
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'فشل حذف الحساب'
+      error.value = err.response?.data?.detail || 'Failed to delete account'
     }
   }
 }

@@ -5,8 +5,8 @@
       <div class="bg-white rounded-lg shadow-lg p-8">
         <!-- Header -->
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">تسجيل الدخول</h1>
-          <p class="text-gray-600">أدخل بيانات حسابك للمتابعة</p>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Log In</h1>
+          <p class="text-gray-600">Enter your account details to continue</p>
         </div>
 
         <!-- Error Message -->
@@ -23,7 +23,7 @@
           <FormInput
             v-model="formData.email"
             type="email"
-            label="البريد الإلكتروني"
+            label="Email"
             placeholder="example@email.com"
             :error="errors.email"
             required
@@ -33,7 +33,7 @@
           <FormInput
             v-model="formData.password"
             type="password"
-            label="كلمة المرور"
+            label="Password"
             placeholder="••••••••"
             :error="errors.password"
             required
@@ -47,19 +47,19 @@
                 type="checkbox"
                 class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <span class="text-gray-700">تذكرني</span>
+              <span class="text-gray-700">Remember me</span>
             </label>
             <RouterLink
               to="/auth/forgot-password"
               class="text-blue-600 hover:text-blue-700 font-medium"
             >
-              هل نسيت كلمة المرور؟
+              Forgot your password?
             </RouterLink>
           </div>
 
           <!-- Submit Button -->
           <FormButton
-            label="تسجيل الدخول"
+            label="Log In"
             type="submit"
             :loading="authStore.isLoading"
             :disabled="authStore.isLoading"
@@ -70,28 +70,28 @@
         <!-- Divider -->
         <div class="my-6 flex items-center gap-4">
           <div class="flex-1 h-px bg-gray-300"></div>
-          <span class="text-gray-500 text-sm">أو</span>
+          <span class="text-gray-500 text-sm">or</span>
           <div class="flex-1 h-px bg-gray-300"></div>
         </div>
 
         <!-- Sign Up Link -->
         <p class="text-center text-gray-600">
-          ليس لديك حساب؟
+          Don't have an account?
           <RouterLink
             to="/auth/register"
             class="text-blue-600 hover:text-blue-700 font-medium"
           >
-            إنشاء حساب جديد
+            Create a new account
           </RouterLink>
         </p>
       </div>
 
       <!-- Footer -->
       <p class="text-center text-gray-600 text-sm mt-6">
-        بالمتابعة، أنت توافق على
-        <a href="#" class="text-blue-600 hover:text-blue-700">شروط الخدمة</a>
-        و
-        <a href="#" class="text-blue-600 hover:text-blue-700">سياسة الخصوصية</a>
+        By continuing, you agree to
+        <a href="#" class="text-blue-600 hover:text-blue-700">Terms of Service</a>
+        and
+        <a href="#" class="text-blue-600 hover:text-blue-700">Privacy Policy</a>
       </p>
     </div>
   </div>
@@ -123,15 +123,15 @@ const validateForm = (): boolean => {
   errors.password = ''
 
   if (!formData.email) {
-    errors.email = 'البريد الإلكتروني مطلوب'
+    errors.email = 'Email is required'
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-    errors.email = 'البريد الإلكتروني غير صحيح'
+    errors.email = 'Invalid email address'
   }
 
   if (!formData.password) {
-    errors.password = 'كلمة المرور مطلوبة'
+    errors.password = 'Password is required'
   } else if (formData.password.length < 6) {
-    errors.password = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'
+    errors.password = 'Password must be at least 6 characters'
   }
 
   return !errors.email && !errors.password

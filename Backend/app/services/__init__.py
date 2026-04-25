@@ -1,5 +1,5 @@
 """
-خدمات تطبيق JobSpy
+JobSpy Services
 Business Logic Services Package
 """
 

@@ -3,12 +3,12 @@
     :type="type"
     :disabled="disabled || loading"
     :class="[
-      'px-6 py-2 rounded-lg font-medium transition-all duration-200',
-      'focus:outline-none focus:ring-2 focus:ring-offset-2',
+      'px-6 py-2 rounded font-semibold transition-all duration-150',
+      'focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900',
       'flex items-center justify-center gap-2',
       variantClasses,
       sizeClasses,
-      disabled || loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+      disabled || loading ? 'opacity-60 cursor-not-allowed shadow-none' : 'cursor-pointer active:scale-[0.98]'
     ]"
     @click="$emit('click')"
   >
@@ -19,14 +19,10 @@
       stroke="currentColor"
       viewBox="0 0 24 24"
     >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-      />
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
     </svg>
-    <slot>
+    <slot v-else>
       <span>{{ label }}</span>
     </slot>
   </button>
@@ -35,7 +31,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'outline'
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'outline' | 'ghost'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 interface Props {
@@ -57,24 +53,25 @@ const props = withDefaults(defineProps<Props>(), {
 
 defineEmits<{
   click: []
-}>()
+>()
 
 const variantClasses = computed(() => {
   const variants: Record<ButtonVariant, string> = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-    success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',
-    outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-50 focus:ring-blue-500'
+    primary: 'bg-[#0078d4] text-white hover:bg-[#106ebe] shadow-sm focus:ring-[#0078d4]',
+    secondary: 'bg-[#f3f2f1] dark:bg-gray-800 text-[#323130] dark:text-gray-200 hover:bg-[#edebe9] dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-gray-400',
+    danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm focus:ring-red-500',
+    success: 'bg-[#107c10] text-white hover:bg-[#0b5a0b] shadow-sm focus:ring-[#107c10]',
+    outline: 'border border-[#0078d4] text-[#0078d4] hover:bg-blue-50 dark:hover:bg-gray-800 focus:ring-[#0078d4]',
+    ghost: 'text-[#0078d4] hover:bg-blue-50 dark:hover:bg-gray-800 focus:ring-[#0078d4]'
   }
   return variants[props.variant]
 })
 
 const sizeClasses = computed(() => {
   const sizes: Record<ButtonSize, string> = {
-    sm: 'px-3 py-1 text-sm',
-    md: 'px-6 py-2 text-base',
-    lg: 'px-8 py-3 text-lg'
+    sm: 'px-3 py-1 text-xs',
+    md: 'px-5 py-2 text-sm',
+    lg: 'px-8 py-3 text-base'
   }
   return sizes[props.size]
 })

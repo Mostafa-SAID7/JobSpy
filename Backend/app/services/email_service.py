@@ -1,5 +1,5 @@
 """
-خدمة البريد الإلكتروني - JobSpy
+Email Service - JobSpy
 Email service for JobSpy
 """
 import logging
@@ -43,7 +43,7 @@ class EmailService:
             True if email sent successfully
         """
         try:
-            subject = f"🔔 تنبيه وظائف جديدة - {alert_query}"
+            subject = f"🔔 New Job Alert - {alert_query}"
             
             # Build email body
             body = self._build_alert_email_body(alert_query, new_jobs, alert_frequency)
@@ -69,7 +69,7 @@ class EmailService:
             True if email sent successfully
         """
         try:
-            subject = "مرحباً بك في JobSpy"
+            subject = "Welcome to JobSpy"
             body = self._build_welcome_email_body(user_name)
             
             await self._send_email(recipient_email, subject, body)
@@ -98,7 +98,7 @@ class EmailService:
             True if email sent successfully
         """
         try:
-            subject = "إعادة تعيين كلمة المرور - JobSpy"
+            subject = "Reset Password - JobSpy"
             body = self._build_password_reset_email_body(reset_url)
             
             await self._send_email(recipient_email, subject, body)
@@ -127,7 +127,7 @@ class EmailService:
             True if email sent successfully
         """
         try:
-            subject = "تأكيد بريدك الإلكتروني - JobSpy"
+            subject = "Confirm your email - JobSpy"
             body = self._build_verification_email_body(verification_url)
             
             await self._send_email(recipient_email, subject, body)
@@ -189,24 +189,24 @@ class EmailService:
                     </a>
                 </h3>
                 <p style="margin: 5px 0; color: #666;">
-                    <strong>الشركة:</strong> {job.get('company', 'N/A')}
+                    <strong>Company:</strong> {job.get('company', 'N/A')}
                 </p>
                 <p style="margin: 5px 0; color: #666;">
-                    <strong>الموقع:</strong> {job.get('location', 'N/A')}
+                    <strong>Location:</strong> {job.get('location', 'N/A')}
                 </p>
                 <p style="margin: 5px 0; color: #666;">
-                    <strong>نوع الوظيفة:</strong> {job.get('job_type', 'N/A')}
+                    <strong>Job Type:</strong> {job.get('job_type', 'N/A')}
                 </p>
-                {f'<p style="margin: 5px 0; color: #666;"><strong>الراتب:</strong> {job.get("salary_min", "N/A")} - {job.get("salary_max", "N/A")} {job.get("salary_currency", "USD")}</p>' if job.get('salary_min') or job.get('salary_max') else ''}
+                {f'<p style="margin: 5px 0; color: #666;"><strong>Salary:</strong> {job.get("salary_min", "N/A")} - {job.get("salary_max", "N/A")} {job.get("salary_currency", "USD")}</p>' if job.get('salary_min') or job.get('salary_max') else ''}
             </div>
             """
         
         return f"""
-        <html dir="rtl">
+        <html dir="ltr">
         <head>
             <meta charset="UTF-8">
             <style>
-                body {{ font-family: Arial, sans-serif; direction: rtl; }}
+                body {{ font-family: Arial, sans-serif; direction: ltr; }}
                 .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
                 .header {{ background-color: #0066cc; color: white; padding: 20px; border-radius: 5px; text-align: center; }}
                 .content {{ padding: 20px; }}
@@ -216,24 +216,24 @@ class EmailService:
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>🔔 تنبيه وظائف جديدة</h1>
+                    <h1>🔔 New Job Alert</h1>
                 </div>
                 <div class="content">
-                    <p>مرحباً،</p>
-                    <p>وجدنا <strong>{len(new_jobs)}</strong> وظائف جديدة تطابق معايير البحث الخاصة بك:</p>
-                    <p><strong>البحث:</strong> {alert_query}</p>
-                    <p><strong>التكرار:</strong> {alert_frequency}</p>
+                    <p>Hello,</p>
+                    <p>We found <strong>{len(new_jobs)}</strong> new jobs matching your search criteria:</p>
+                    <p><strong>Search:</strong> {alert_query}</p>
+                    <p><strong>Frequency:</strong> {alert_frequency}</p>
                     <hr>
                     {jobs_html}
                     <hr>
                     <p>
                         <a href="{settings.FRONTEND_URL}/jobs" style="background-color: #0066cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                            عرض جميع الوظائف
+                            View all jobs
                         </a>
                     </p>
                 </div>
                 <div class="footer">
-                    <p>© 2024 JobSpy. جميع الحقوق محفوظة.</p>
+                    <p>© 2024 JobSpy. All rights reserved.</p>
                 </div>
             </div>
         </body>
@@ -244,11 +244,11 @@ class EmailService:
     def _build_welcome_email_body(user_name: str) -> str:
         """Build welcome email HTML body."""
         return f"""
-        <html dir="rtl">
+        <html dir="ltr">
         <head>
             <meta charset="UTF-8">
             <style>
-                body {{ font-family: Arial, sans-serif; direction: rtl; }}
+                body {{ font-family: Arial, sans-serif; direction: ltr; }}
                 .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
                 .header {{ background-color: #0066cc; color: white; padding: 20px; border-radius: 5px; text-align: center; }}
                 .content {{ padding: 20px; }}
@@ -258,26 +258,26 @@ class EmailService:
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>مرحباً بك في JobSpy</h1>
+                    <h1>Welcome to JobSpy</h1>
                 </div>
                 <div class="content">
-                    <p>مرحباً {user_name}،</p>
-                    <p>شكراً لتسجيلك في JobSpy! نحن سعداء بانضمامك إلينا.</p>
-                    <p>يمكنك الآن:</p>
+                    <p>Hello {user_name},</p>
+                    <p>Thank you for registering at JobSpy! We're glad to have you.</p>
+                    <p>You can now:</p>
                     <ul>
-                        <li>البحث عن الوظائف المناسبة لك</li>
-                        <li>حفظ الوظائف المفضلة</li>
-                        <li>إنشاء تنبيهات للوظائف الجديدة</li>
-                        <li>إدارة ملفك الشخصي</li>
+                        <li>Search for suitable jobs</li>
+                        <li>Save favorite jobs</li>
+                        <li>Create alerts for new jobs</li>
+                        <li>Manage your profile</li>
                     </ul>
                     <p>
                         <a href="{settings.FRONTEND_URL}/jobs" style="background-color: #0066cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                            ابدأ البحث الآن
+                            Start searching now
                         </a>
                     </p>
                 </div>
                 <div class="footer">
-                    <p>© 2024 JobSpy. جميع الحقوق محفوظة.</p>
+                    <p>© 2024 JobSpy. All rights reserved.</p>
                 </div>
             </div>
         </body>
@@ -288,11 +288,11 @@ class EmailService:
     def _build_password_reset_email_body(reset_url: str) -> str:
         """Build password reset email HTML body."""
         return f"""
-        <html dir="rtl">
+        <html dir="ltr">
         <head>
             <meta charset="UTF-8">
             <style>
-                body {{ font-family: Arial, sans-serif; direction: rtl; }}
+                body {{ font-family: Arial, sans-serif; direction: ltr; }}
                 .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
                 .header {{ background-color: #0066cc; color: white; padding: 20px; border-radius: 5px; text-align: center; }}
                 .content {{ padding: 20px; }}
@@ -302,21 +302,21 @@ class EmailService:
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>إعادة تعيين كلمة المرور</h1>
+                    <h1>Reset Password</h1>
                 </div>
                 <div class="content">
-                    <p>مرحباً،</p>
-                    <p>لقد طلبت إعادة تعيين كلمة المرور الخاصة بك. انقر على الزر أدناه لإعادة تعيين كلمة المرور:</p>
+                    <p>Hello,</p>
+                    <p>You have requested to reset your password. Click the button below to reset it:</p>
                     <p>
                         <a href="{reset_url}" style="background-color: #0066cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                            إعادة تعيين كلمة المرور
+                            Reset Password
                         </a>
                     </p>
-                    <p>إذا لم تطلب هذا، يرجى تجاهل هذا البريد الإلكتروني.</p>
-                    <p>ملاحظة: هذا الرابط صالح لمدة 24 ساعة فقط.</p>
+                    <p>If you didn't request this, please ignore this email.</p>
+                    <p>Note: This link is valid for 24 hours only.</p>
                 </div>
                 <div class="footer">
-                    <p>© 2024 JobSpy. جميع الحقوق محفوظة.</p>
+                    <p>© 2024 JobSpy. All rights reserved.</p>
                 </div>
             </div>
         </body>
@@ -327,11 +327,11 @@ class EmailService:
     def _build_verification_email_body(verification_url: str) -> str:
         """Build email verification HTML body."""
         return f"""
-        <html dir="rtl">
+        <html dir="ltr">
         <head>
             <meta charset="UTF-8">
             <style>
-                body {{ font-family: Arial, sans-serif; direction: rtl; }}
+                body {{ font-family: Arial, sans-serif; direction: ltr; }}
                 .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
                 .header {{ background-color: #0066cc; color: white; padding: 20px; border-radius: 5px; text-align: center; }}
                 .content {{ padding: 20px; }}
@@ -341,20 +341,20 @@ class EmailService:
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>تأكيد بريدك الإلكتروني</h1>
+                    <h1>Confirm your email</h1>
                 </div>
                 <div class="content">
-                    <p>مرحباً،</p>
-                    <p>شكراً لتسجيلك في JobSpy! يرجى تأكيد بريدك الإلكتروني بالنقر على الزر أدناه:</p>
+                    <p>Hello,</p>
+                    <p>Thank you for registering at JobSpy! Please confirm your email by clicking the button below:</p>
                     <p>
                         <a href="{verification_url}" style="background-color: #0066cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                            تأكيد البريد الإلكتروني
+                            Confirm Email
                         </a>
                     </p>
-                    <p>إذا لم تقم بالتسجيل، يرجى تجاهل هذا البريد الإلكتروني.</p>
+                    <p>If you didn't register, please ignore this email.</p>
                 </div>
                 <div class="footer">
-                    <p>© 2024 JobSpy. جميع الحقوق محفوظة.</p>
+                    <p>© 2024 JobSpy. All rights reserved.</p>
                 </div>
             </div>
         </body>

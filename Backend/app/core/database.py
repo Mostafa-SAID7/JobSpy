@@ -1,5 +1,5 @@
 """
-قاعدة البيانات والاتصال
+Database and Connection
 Database Connection and Session Management
 """
 

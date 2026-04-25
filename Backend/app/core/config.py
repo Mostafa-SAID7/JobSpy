@@ -1,5 +1,5 @@
 """
-تكوين التطبيق
+Application Configuration
 Application Configuration Module
 """
 

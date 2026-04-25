@@ -5,13 +5,13 @@
   >
     <div class="p-6">
       <!-- Sidebar Header -->
-      <h2 class="text-lg font-semibold text-gray-900 mb-6">الفلاتر</h2>
+      <h2 class="text-lg font-semibold text-gray-900 mb-6">Filters</h2>
 
       <!-- Search Filters -->
       <div class="space-y-6">
         <!-- Job Type Filter -->
         <div>
-          <h3 class="text-sm font-medium text-gray-700 mb-3">نوع الوظيفة</h3>
+          <h3 class="text-sm font-medium text-gray-700 mb-3">Job Type</h3>
           <div class="space-y-2">
             <label class="flex items-center">
               <input
@@ -20,7 +20,7 @@
                 value="fulltime"
                 class="w-4 h-4 text-blue-600 rounded"
               />
-              <span class="ml-3 text-sm text-gray-700">دوام كامل</span>
+              <span class="ml-3 text-sm text-gray-700">Full-time</span>
             </label>
             <label class="flex items-center">
               <input
@@ -29,7 +29,7 @@
                 value="parttime"
                 class="w-4 h-4 text-blue-600 rounded"
               />
-              <span class="ml-3 text-sm text-gray-700">دوام جزئي</span>
+              <span class="ml-3 text-sm text-gray-700">Part-time</span>
             </label>
             <label class="flex items-center">
               <input
@@ -38,7 +38,7 @@
                 value="internship"
                 class="w-4 h-4 text-blue-600 rounded"
               />
-              <span class="ml-3 text-sm text-gray-700">تدريب</span>
+              <span class="ml-3 text-sm text-gray-700">Internship</span>
             </label>
             <label class="flex items-center">
               <input
@@ -47,30 +47,30 @@
                 value="contract"
                 class="w-4 h-4 text-blue-600 rounded"
               />
-              <span class="ml-3 text-sm text-gray-700">عقد</span>
+              <span class="ml-3 text-sm text-gray-700">Contract</span>
             </label>
           </div>
         </div>
 
         <!-- Remote Filter -->
         <div>
-          <h3 class="text-sm font-medium text-gray-700 mb-3">نوع العمل</h3>
+          <h3 class="text-sm font-medium text-gray-700 mb-3">Work Type</h3>
           <label class="flex items-center">
             <input
               type="checkbox"
               v-model="filters.isRemote"
               class="w-4 h-4 text-blue-600 rounded"
             />
-            <span class="ml-3 text-sm text-gray-700">عمل عن بعد</span>
+            <span class="ml-3 text-sm text-gray-700">Remote</span>
           </label>
         </div>
 
         <!-- Salary Range Filter -->
         <div>
-          <h3 class="text-sm font-medium text-gray-700 mb-3">نطاق الراتب</h3>
+          <h3 class="text-sm font-medium text-gray-700 mb-3">Salary Range</h3>
           <div class="space-y-3">
             <div>
-              <label class="text-xs text-gray-600">الحد الأدنى</label>
+              <label class="text-xs text-gray-600">Minimum</label>
               <input
                 type="number"
                 v-model.number="filters.salaryMin"
@@ -79,7 +79,7 @@
               />
             </div>
             <div>
-              <label class="text-xs text-gray-600">الحد الأقصى</label>
+              <label class="text-xs text-gray-600">Maximum</label>
               <input
                 type="number"
                 v-model.number="filters.salaryMax"
@@ -92,23 +92,23 @@
 
         <!-- Location Filter -->
         <div>
-          <h3 class="text-sm font-medium text-gray-700 mb-3">الموقع</h3>
+          <h3 class="text-sm font-medium text-gray-700 mb-3">Location</h3>
           <input
             type="text"
             v-model="filters.location"
-            placeholder="أدخل الموقع"
+            placeholder="Enter location"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
           />
         </div>
 
         <!-- Posted Date Filter -->
         <div>
-          <h3 class="text-sm font-medium text-gray-700 mb-3">تاريخ النشر</h3>
+          <h3 class="text-sm font-medium text-gray-700 mb-3">Posted Date</h3>
           <select v-model="filters.postedDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-            <option value="">الكل</option>
-            <option value="24">آخر 24 ساعة</option>
-            <option value="7">آخر 7 أيام</option>
-            <option value="30">آخر 30 يوم</option>
+            <option value="">All</option>
+            <option value="24">Last 24 hours</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
           </select>
         </div>
 
@@ -118,13 +118,13 @@
             @click="applyFilters"
             class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
           >
-            تطبيق
+            Apply
           </button>
           <button
             @click="clearFilters"
             class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
           >
-            مسح
+            Clear
           </button>
         </div>
       </div>

@@ -5,8 +5,8 @@
       <div class="bg-white rounded-lg shadow-lg p-8">
         <!-- Header -->
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">استعادة كلمة المرور</h1>
-          <p class="text-gray-600">أدخل بريدك الإلكتروني لاستعادة كلمة المرور</p>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Reset Password</h1>
+          <p class="text-gray-600">Enter your email to reset your password</p>
         </div>
 
         <!-- Success Message -->
@@ -32,7 +32,7 @@
             <FormInput
               v-model="formData.email"
               type="email"
-              label="البريد الإلكتروني"
+              label="Email"
               placeholder="example@email.com"
               :error="errors.email"
               required
@@ -40,7 +40,7 @@
 
             <!-- Submit Button -->
             <FormButton
-              label="إرسال رابط الاستعادة"
+              label="Send Reset Link"
               type="submit"
               :loading="isLoading"
               :disabled="isLoading"
@@ -52,7 +52,7 @@
         <!-- Step 2: Reset Code Input -->
         <div v-if="currentStep === 'code'" class="space-y-4">
           <p class="text-sm text-gray-600 mb-4">
-            تم إرسال رمز التحقق إلى بريدك الإلكتروني. أدخله أدناه.
+            Verification code sent to your email. Enter it below.
           </p>
 
           <form @submit.prevent="handleVerifyCode" class="space-y-4">
@@ -60,16 +60,16 @@
             <FormInput
               v-model="formData.code"
               type="text"
-              label="رمز التحقق"
+              label="Verification Code"
               placeholder="000000"
               :error="errors.code"
-              hint="أدخل الرمز المكون من 6 أرقام"
+              hint="Enter the 6-digit code"
               required
             />
 
             <!-- Submit Button -->
             <FormButton
-              label="التحقق من الرمز"
+              label="Verify Code"
               type="submit"
               :loading="isLoading"
               :disabled="isLoading"
@@ -79,13 +79,13 @@
 
           <!-- Resend Code -->
           <p class="text-center text-sm text-gray-600">
-            لم تستقبل الرمز؟
+            Didn't receive the code?
             <button
               @click="handleResendCode"
               :disabled="isLoading || resendCountdown > 0"
               class="text-blue-600 hover:text-blue-700 font-medium disabled:text-gray-400"
             >
-              {{ resendCountdown > 0 ? `إعادة الإرسال بعد ${resendCountdown}s` : 'إعادة الإرسال' }}
+              {{ resendCountdown > 0 ? `Resend after ${resendCountdown}s` : 'Resend' }}
             </button>
           </p>
         </div>
@@ -93,7 +93,7 @@
         <!-- Step 3: New Password Input -->
         <div v-if="currentStep === 'password'" class="space-y-4">
           <p class="text-sm text-gray-600 mb-4">
-            أدخل كلمة المرور الجديدة الخاصة بك.
+            Enter your new password.
           </p>
 
           <form @submit.prevent="handleResetPassword" class="space-y-4">
@@ -101,10 +101,10 @@
             <FormInput
               v-model="formData.newPassword"
               type="password"
-              label="كلمة المرور الجديدة"
+              label="New Password"
               placeholder="••••••••"
               :error="errors.newPassword"
-              hint="يجب أن تكون 8 أحرف على الأقل وتحتوي على أحرف وأرقام"
+              hint="Must be at least 8 characters and contain letters and numbers"
               required
             />
 
@@ -112,7 +112,7 @@
             <FormInput
               v-model="formData.confirmPassword"
               type="password"
-              label="تأكيد كلمة المرور"
+              label="Confirm Password"
               placeholder="••••••••"
               :error="errors.confirmPassword"
               required
@@ -120,7 +120,7 @@
 
             <!-- Submit Button -->
             <FormButton
-              label="تحديث كلمة المرور"
+              label="Update Password"
               type="submit"
               :loading="isLoading"
               :disabled="isLoading"
@@ -132,18 +132,18 @@
         <!-- Divider -->
         <div class="my-6 flex items-center gap-4">
           <div class="flex-1 h-px bg-gray-300"></div>
-          <span class="text-gray-500 text-sm">أو</span>
+          <span class="text-gray-500 text-sm">or</span>
           <div class="flex-1 h-px bg-gray-300"></div>
         </div>
 
         <!-- Back to Login -->
         <p class="text-center text-gray-600">
-          تذكرت كلمة المرور؟
+          Remembered your password?
           <RouterLink
             to="/auth/login"
             class="text-blue-600 hover:text-blue-700 font-medium"
           >
-            العودة إلى تسجيل الدخول
+            Back to Login
           </RouterLink>
         </p>
       </div>
@@ -187,9 +187,9 @@ const validateEmail = (): boolean => {
   errors.email = ''
 
   if (!formData.email) {
-    errors.email = 'البريد الإلكتروني مطلوب'
+    errors.email = 'Email is required'
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-    errors.email = 'البريد الإلكتروني غير صحيح'
+    errors.email = 'Invalid email address'
   }
 
   return !errors.email
@@ -199,9 +199,9 @@ const validateCode = (): boolean => {
   errors.code = ''
 
   if (!formData.code) {
-    errors.code = 'رمز التحقق مطلوب'
+    errors.code = 'Verification code is required'
   } else if (!/^\d{6}$/.test(formData.code)) {
-    errors.code = 'الرمز يجب أن يكون 6 أرقام'
+    errors.code = 'Code must be 6 digits'
   }
 
   return !errors.code
@@ -212,17 +212,17 @@ const validatePassword = (): boolean => {
   errors.confirmPassword = ''
 
   if (!formData.newPassword) {
-    errors.newPassword = 'كلمة المرور الجديدة مطلوبة'
+    errors.newPassword = 'New password is required'
   } else if (formData.newPassword.length < 8) {
-    errors.newPassword = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'
+    errors.newPassword = 'Password must be at least 8 characters'
   } else if (!/[a-zA-Z]/.test(formData.newPassword) || !/[0-9]/.test(formData.newPassword)) {
-    errors.newPassword = 'كلمة المرور يجب أن تحتوي على أحرف وأرقام'
+    errors.newPassword = 'Password must contain letters and numbers'
   }
 
   if (!formData.confirmPassword) {
-    errors.confirmPassword = 'تأكيد كلمة المرور مطلوب'
+    errors.confirmPassword = 'Confirm password is required'
   } else if (formData.newPassword !== formData.confirmPassword) {
-    errors.confirmPassword = 'كلمات المرور غير متطابقة'
+    errors.confirmPassword = 'Passwords do not match'
   }
 
   return !errors.newPassword && !errors.confirmPassword
@@ -240,11 +240,11 @@ const handleSendReset = async () => {
       email: formData.email
     })
 
-    successMessage.value = 'تم إرسال رمز التحقق إلى بريدك الإلكتروني'
+    successMessage.value = 'Verification code sent to your email'
     currentStep.value = 'code'
     startResendCountdown()
   } catch (err: any) {
-    errorMessage.value = err.response?.data?.detail || 'حدث خطأ في إرسال الرمز'
+    errorMessage.value = err.response?.data?.detail || 'Failed to send code'
   } finally {
     isLoading.value = false
   }
@@ -263,10 +263,10 @@ const handleVerifyCode = async () => {
       code: formData.code
     })
 
-    successMessage.value = 'تم التحقق من الرمز بنجاح'
+    successMessage.value = 'Code verified successfully'
     currentStep.value = 'password'
   } catch (err: any) {
-    errorMessage.value = err.response?.data?.detail || 'الرمز غير صحيح'
+    errorMessage.value = err.response?.data?.detail || 'Invalid code'
   } finally {
     isLoading.value = false
   }
@@ -286,12 +286,12 @@ const handleResetPassword = async () => {
       new_password: formData.newPassword
     })
 
-    successMessage.value = 'تم تحديث كلمة المرور بنجاح'
+    successMessage.value = 'Password updated successfully'
     setTimeout(() => {
       router.push('/auth/login')
     }, 2000)
   } catch (err: any) {
-    errorMessage.value = err.response?.data?.detail || 'حدث خطأ في تحديث كلمة المرور'
+    errorMessage.value = err.response?.data?.detail || 'Failed to update password'
   } finally {
     isLoading.value = false
   }
@@ -307,10 +307,10 @@ const handleResendCode = async () => {
       email: formData.email
     })
 
-    successMessage.value = 'تم إعادة إرسال الرمز'
+    successMessage.value = 'Code resent'
     startResendCountdown()
   } catch (err: any) {
-    errorMessage.value = err.response?.data?.detail || 'حدث خطأ في إعادة الإرسال'
+    errorMessage.value = err.response?.data?.detail || 'Failed to resend'
   } finally {
     isLoading.value = false
   }

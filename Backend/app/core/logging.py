@@ -1,5 +1,5 @@
 """
-تكوين نظام السجلات
+Logging Configuration
 Logging Configuration Module
 """
 

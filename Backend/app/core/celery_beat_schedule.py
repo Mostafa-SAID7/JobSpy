@@ -1,5 +1,5 @@
 """
-خطة جدولة Celery Beat
+Celery Beat Schedule
 Celery Beat Schedule Configuration for JobSpy
 """
 

@@ -1,5 +1,5 @@
 /**
- * متجر المصادقة - Pinia Store
+ * Authentication Store - Pinia Store
  * Authentication store for JobSpy
  */
 
@@ -49,7 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'خطأ في تسجيل الدخول'
+      error.value = err.response?.data?.detail || 'Login error'
       return false
     } finally {
       isLoading.value = false
@@ -80,7 +80,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'خطأ في التسجيل'
+      error.value = err.response?.data?.detail || 'Registration error'
       return false
     } finally {
       isLoading.value = false

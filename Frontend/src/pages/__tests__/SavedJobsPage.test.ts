@@ -51,7 +51,7 @@ describe('SavedJobsPage', () => {
     })
 
     expect(wrapper.text()).toContain('Saved Jobs')
-    expect(wrapper.text()).toContain('Manage the jobs you saved for later review')
+    expect(wrapper.text()).toContain('Manage jobs you saved for later review')
   })
 
   it('shows empty state when no saved jobs', () => {
@@ -68,7 +68,7 @@ describe('SavedJobsPage', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('No saved jobs yet')
+    expect(wrapper.text()).toContain("You haven't saved any jobs yet")
   })
 
   it('displays saved jobs when available', async () => {
@@ -109,7 +109,7 @@ describe('SavedJobsPage', () => {
     await wrapper.vm.$nextTick()
 
     // Check that the page renders and has the header
-    expect(wrapper.text()).toContain('الوظائف المحفوظة')
+    expect(wrapper.text()).toContain('Saved Jobs')
   })
 
   it('filters jobs by search query', async () => {
@@ -354,10 +354,10 @@ describe('SavedJobsPage', () => {
     const formatted = (wrapper.vm as any).formatSalary(job1)
     // Salary is formatted with Arabic numerals, so check for the pattern with any digits
     expect(formatted).toBeTruthy()
-    expect(formatted).not.toBe('غير محدد')
+    expect(formatted).not.toBe('Not specified')
 
     const job2 = { salary_min: 0, salary_max: 0 }
-    expect((wrapper.vm as any).formatSalary(job2)).toBe('غير محدد')
+    expect((wrapper.vm as any).formatSalary(job2)).toBe('Not specified')
   })
 
   it('formats job type label correctly', () => {
@@ -374,9 +374,9 @@ describe('SavedJobsPage', () => {
       },
     })
 
-    expect((wrapper.vm as any).getJobTypeLabel('fulltime')).toBe('دوام كامل')
-    expect((wrapper.vm as any).getJobTypeLabel('parttime')).toBe('دوام جزئي')
-    expect((wrapper.vm as any).getJobTypeLabel('internship')).toBe('تدريب')
-    expect((wrapper.vm as any).getJobTypeLabel('contract')).toBe('عقد')
+    expect((wrapper.vm as any).getJobTypeLabel('fulltime')).toBe('Full-time')
+    expect((wrapper.vm as any).getJobTypeLabel('parttime')).toBe('Part-time')
+    expect((wrapper.vm as any).getJobTypeLabel('internship')).toBe('Internship')
+    expect((wrapper.vm as any).getJobTypeLabel('contract')).toBe('Contract')
   })
 })

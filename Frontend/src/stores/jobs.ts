@@ -1,5 +1,5 @@
 /**
- * متجر الوظائف - Pinia Store
+ * Jobs Store - Pinia Store
  * Jobs store for JobSpy
  */
 
@@ -41,7 +41,7 @@ export const useJobsStore = defineStore('jobs', () => {
       jobs.value = response.data.results
       totalCount.value = response.data.total
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'خطأ في البحث عن الوظائف'
+      error.value = err.response?.data?.detail || 'Error searching for jobs'
     } finally {
       isLoading.value = false
     }
@@ -56,7 +56,7 @@ export const useJobsStore = defineStore('jobs', () => {
       currentJob.value = response.data
       return response.data
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'خطأ في تحميل تفاصيل الوظيفة'
+      error.value = err.response?.data?.detail || 'Error loading job details'
       return null
     } finally {
       isLoading.value = false
@@ -97,7 +97,7 @@ export const useJobsStore = defineStore('jobs', () => {
       
       return response.data
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'فشل حفظ الوظيفة'
+      error.value = err.response?.data?.detail || 'Failed to save job'
       throw err
     } finally {
       isLoading.value = false
@@ -114,7 +114,7 @@ export const useJobsStore = defineStore('jobs', () => {
       // Remove from local state
       savedJobs.value = savedJobs.value.filter(j => j.id !== savedJobId)
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'فشل إزالة الوظيفة المحفوظة'
+      error.value = err.response?.data?.detail || 'Failed to remove saved job'
       throw err
     } finally {
       isLoading.value = false
@@ -139,7 +139,7 @@ export const useJobsStore = defineStore('jobs', () => {
       
       return response.data
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'فشل تحميل الوظائف المحفوظة'
+      error.value = err.response?.data?.detail || 'Failed to load saved jobs'
       throw err
     } finally {
       isLoading.value = false
@@ -167,7 +167,7 @@ export const useJobsStore = defineStore('jobs', () => {
       alerts.value.push(response.data)
       return response.data
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'فشل إنشاء التنبيه'
+      error.value = err.response?.data?.detail || 'Failed to create alert'
       throw err
     } finally {
       isLoading.value = false
@@ -188,7 +188,7 @@ export const useJobsStore = defineStore('jobs', () => {
       
       return response.data
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'فشل تحديث التنبيه'
+      error.value = err.response?.data?.detail || 'Failed to update alert'
       throw err
     } finally {
       isLoading.value = false
@@ -203,7 +203,7 @@ export const useJobsStore = defineStore('jobs', () => {
       await apiClient.delete(`/alerts/${alertId}`)
       alerts.value = alerts.value.filter(a => a.id !== alertId)
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'فشل حذف التنبيه'
+      error.value = err.response?.data?.detail || 'Failed to delete alert'
       throw err
     } finally {
       isLoading.value = false
@@ -219,7 +219,7 @@ export const useJobsStore = defineStore('jobs', () => {
       alerts.value = response.data.items || []
       return response.data
     } catch (err: any) {
-      error.value = err.response?.data?.detail || 'فشل تحميل التنبيهات'
+      error.value = err.response?.data?.detail || 'Failed to load alerts'
       throw err
     } finally {
       isLoading.value = false

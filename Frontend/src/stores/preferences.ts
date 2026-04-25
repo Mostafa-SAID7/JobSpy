@@ -1,5 +1,5 @@
 /**
- * متجر التفضيلات - Pinia Store
+ * Preferences Store - Pinia Store
  * Preferences store for search and UI preferences
  */
 

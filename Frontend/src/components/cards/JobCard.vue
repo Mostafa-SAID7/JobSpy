@@ -14,7 +14,7 @@
             ? 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800'
             : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
         ]"
-        :title="isSaved ? 'إزالة من المحفوظات' : 'حفظ الوظيفة'"
+        :title="isSaved ? 'Remove from saved' : 'Save job'"
       >
         <svg class="w-5 h-5" :fill="isSaved ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h6a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" />
@@ -31,7 +31,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
         <span>{{ job.location }}</span>
-        <span v-if="job.is_remote" class="ml-2 px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400 text-xs rounded">عن بعد</span>
+        <span v-if="job.is_remote" class="ml-2 px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400 text-xs rounded">Remote</span>
       </div>
 
       <!-- Job Type -->
@@ -77,13 +77,13 @@
         rel="noopener noreferrer"
         class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-center text-sm font-medium"
       >
-        عرض الوظيفة
+        View Job
       </a>
       <button
         @click="$emit('view-details')"
         class="flex-1 border border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium"
       >
-        التفاصيل
+        Details
       </button>
     </div>
   </div>
@@ -127,19 +127,19 @@ const toggleSave = () => {
 
 const getJobTypeLabel = (type: string): string => {
   const labels: Record<string, string> = {
-    fulltime: 'دوام كامل',
-    parttime: 'دوام جزئي',
-    internship: 'تدريب',
-    contract: 'عقد'
+    fulltime: 'Full-time',
+    parttime: 'Part-time',
+    internship: 'Internship',
+    contract: 'Contract'
   }
   return labels[type] || type
 }
 
 const formatSalary = (salary?: number): string => {
-  if (!salary) return 'غير محدد'
-  return new Intl.NumberFormat('ar-SA', {
+  if (!salary) return 'Not specified'
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'SAR',
+    currency: 'USD',
     maximumFractionDigits: 0
   }).format(salary)
 }
@@ -150,10 +150,10 @@ const formatDate = (date: string): string => {
   const diffTime = Math.abs(now.getTime() - d.getTime())
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
-  if (diffDays === 0) return 'اليوم'
-  if (diffDays === 1) return 'أمس'
-  if (diffDays < 7) return `منذ ${diffDays} أيام`
-  if (diffDays < 30) return `منذ ${Math.floor(diffDays / 7)} أسابيع`
-  return d.toLocaleDateString('ar-SA')
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
+  return d.toLocaleDateString('en-US')
 }
 </script>

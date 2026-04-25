@@ -1,5 +1,5 @@
 """
-خدمة الكشط - JobSpy
+Scraping Service - JobSpy
 Scraping service for JobSpy
 """
 from typing import List, Dict, Any, Optional

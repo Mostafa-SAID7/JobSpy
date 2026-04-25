@@ -18,6 +18,6 @@ onMounted(() => {
 
 <style scoped>
 #app {
-  direction: rtl;
+  width: 100%;
 }
 </style>

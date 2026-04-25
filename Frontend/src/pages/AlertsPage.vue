@@ -18,40 +18,25 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoading && alerts.length === 0" class="text-center py-12">
-      <div class="inline-block">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-      <p class="text-gray-600 dark:text-gray-400 mt-4">Loading alerts...</p>
-    </div>
+    <LoadingSpinner v-if="isLoading && alerts.length === 0" text="Loading alerts..." />
 
     <!-- Error State -->
-    <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-      <div class="flex items-start">
-        <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-        </svg>
-        <div>
-          <p class="text-red-800 dark:text-red-200 font-medium">خطأ</p>
-          <p class="text-red-700 dark:text-red-300 text-sm mt-1">{{ error }}</p>
-        </div>
-      </div>
-    </div>
+    <ErrorState v-else-if="error" :message="error" />
 
     <!-- Empty State -->
-    <div v-else-if="alerts.length === 0" class="bg-gray-50 dark:bg-gray-800 rounded-lg p-12 text-center">
-      <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-      </svg>
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No alerts created yet</h3>
-      <p class="text-gray-600 dark:text-gray-400 mb-6">Create alerts to receive notifications when new jobs matching your criteria are available</p>
-      <button
-        @click="openCreateModal"
-        class="px-6 py-2 rounded-lg font-medium transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-      >
-        Create Alert Now
-      </button>
-    </div>
+    <EmptyState
+      v-else-if="alerts.length === 0"
+      title="No alerts created yet"
+      message="Create alerts to receive notifications when new jobs matching your criteria are available"
+      action-text="Create Alert Now"
+      @action-click="openCreateModal"
+    >
+      <template #icon>
+        <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+      </template>
+    </EmptyState>
 
     <!-- Statistics Cards -->
     <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -208,6 +193,9 @@ import FormInput from '@/components/forms/FormInput.vue'
 import FormSelect from '@/components/forms/FormSelect.vue'
 import AlertCard from '@/components/cards/AlertCard.vue'
 import StatsCard from '@/components/cards/StatsCard.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import ErrorState from '@/components/common/ErrorState.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 
 // Icons
 const BellIcon = 'svg'

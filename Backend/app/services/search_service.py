@@ -1,5 +1,5 @@
 """
-خدمة البحث - JobSpy
+Search Service - JobSpy
 Search service for JobSpy
 """
 import logging

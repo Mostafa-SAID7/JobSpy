@@ -16,28 +16,28 @@
             class="text-gray-700 hover:text-blue-600 transition-colors"
             :class="{ 'text-blue-600 font-semibold': isActive('/search') }"
           >
-            البحث
+            Search
           </router-link>
           <router-link
             to="/saved-jobs"
             class="text-gray-700 hover:text-blue-600 transition-colors"
             :class="{ 'text-blue-600 font-semibold': isActive('/saved-jobs') }"
           >
-            الوظائف المحفوظة
+            Saved Jobs
           </router-link>
           <router-link
             to="/alerts"
             class="text-gray-700 hover:text-blue-600 transition-colors"
             :class="{ 'text-blue-600 font-semibold': isActive('/alerts') }"
           >
-            التنبيهات
+            Alerts
           </router-link>
           <router-link
             to="/profile"
             class="text-gray-700 hover:text-blue-600 transition-colors"
             :class="{ 'text-blue-600 font-semibold': isActive('/profile') }"
           >
-            الملف الشخصي
+            Profile
           </router-link>
         </div>
 
@@ -65,13 +65,13 @@
                 class="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                 @click="showUserMenu = false"
               >
-                الملف الشخصي
+                Profile
               </router-link>
               <button
                 @click="logout"
                 class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               >
-                تسجيل الخروج
+                Logout
               </button>
             </div>
           </div>
@@ -82,13 +82,13 @@
               to="/login"
               class="text-gray-700 hover:text-blue-600 font-medium"
             >
-              دخول
+              Login
             </router-link>
             <router-link
               to="/register"
               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
-              تسجيل
+              Register
             </router-link>
           </div>
 
@@ -111,28 +111,28 @@
           class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
           @click="showMobileMenu = false"
         >
-          البحث
+          Search
         </router-link>
         <router-link
           to="/saved-jobs"
           class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
           @click="showMobileMenu = false"
         >
-          الوظائف المحفوظة
+          Saved Jobs
         </router-link>
         <router-link
           to="/alerts"
           class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
           @click="showMobileMenu = false"
         >
-          التنبيهات
+          Alerts
         </router-link>
         <router-link
           to="/profile"
           class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
           @click="showMobileMenu = false"
         >
-          الملف الشخصي
+          Profile
         </router-link>
         <div v-if="!authStore.isAuthenticated" class="flex space-x-2 px-4 pt-2">
           <router-link
@@ -140,14 +140,14 @@
             class="flex-1 text-center px-4 py-2 text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
             @click="showMobileMenu = false"
           >
-            دخول
+            Login
           </router-link>
           <router-link
             to="/register"
             class="flex-1 text-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             @click="showMobileMenu = false"
           >
-            تسجيل
+            Register
           </router-link>
         </div>
       </div>

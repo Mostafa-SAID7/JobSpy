@@ -1,5 +1,5 @@
 """
-تطبيق JobSpy الويب - الملف الرئيسي
+JobSpy Web Application - Main Entry Point
 Main FastAPI Application Entry Point
 """
 
@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 # Create FastAPI application
 app = FastAPI(
     title=settings.APP_NAME,
-    description="تطبيق JobSpy الويب - منصة بحث عن الوظائف الشاملة",
+    description="JobSpy Web Application - A Comprehensive Job Search Platform",
     version=settings.APP_VERSION,
     docs_url="/api/docs",
     redoc_url="/api/redoc",
@@ -87,7 +87,7 @@ async def root():
     Root endpoint
     """
     return {
-        "message": f"مرحباً بك في {settings.APP_NAME}",
+        "message": f"Welcome to {settings.APP_NAME}",
         "version": settings.APP_VERSION,
         "docs": "/api/docs",
         "redoc": "/api/redoc",

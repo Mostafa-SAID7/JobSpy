@@ -1,15 +1,12 @@
-# تطبيق JobSpy الويب
 # JobSpy Web Application
 
-منصة بحث عن الوظائف الشاملة - A Comprehensive Job Search Platform
+A Comprehensive Job Search Platform
 
-## 📋 نظرة عامة | Overview
-
-تطبيق JobSpy الويب هو منصة متكاملة للبحث عن الوظائف تجمع بيانات الوظائف من عدة مصادر (LinkedIn, Indeed, Wuzzuf, Bayt) وتوفر واجهة موحدة للبحث والتصفية والحفظ والتنبيهات.
+## Overview
 
 JobSpy Web Application is a comprehensive job search platform that aggregates job data from multiple sources (LinkedIn, Indeed, Wuzzuf, Bayt) and provides a unified interface for searching, filtering, saving, and alerts.
 
-## 🏗️ البنية المعمارية | Architecture
+## 🏗️ Architecture
 
 ```
 JobSpy/
@@ -41,17 +38,17 @@ JobSpy/
 └── README.md              # This File
 ```
 
-## 🚀 البدء السريع | Quick Start
+## 🚀 Quick Start
 
-### المتطلبات | Requirements
+### Requirements
 
 - Docker & Docker Compose
-- Python 3.11+ (للتطوير المحلي)
-- Node.js 20+ (للتطوير المحلي)
+- Python 3.11+ (Local Development)
+- Node.js 20+ (Local Development)
 
-### التثبيت والتشغيل | Installation & Running
+### Installation & Running
 
-#### باستخدام Docker Compose | Using Docker Compose
+#### Using Docker Compose
 
 ```bash
 # Clone the repository
@@ -73,7 +70,7 @@ docker-compose exec backend alembic upgrade head
 # API Docs: http://localhost:8000/api/docs
 ```
 
-#### التطوير المحلي | Local Development
+#### Local Development
 
 **Backend:**
 ```bash
@@ -107,24 +104,24 @@ npm install
 npm run dev
 ```
 
-## 📚 التوثيق | Documentation
+## 📚 Documentation
 
 ### API Documentation
 - Swagger UI: http://localhost:8000/api/docs
 - ReDoc: http://localhost:8000/api/redoc
 
 ### Project Documentation
-- [Requirements](./docs/requirements.md) - المتطلبات الوظيفية
-- [Design](./docs/design.md) - التصميم المعماري
-- [Tasks](./docs/tasks.md) - قائمة المهام
+- [Requirements](./docs/requirements.md) - Functional Requirements
+- [Design](./docs/design.md) - Architectural Design
+- [Tasks](./docs/tasks.md) - Task List
 
-## 🔧 التكوين | Configuration
+## 🔧 Configuration
 
-### متغيرات البيئة | Environment Variables
+### Environment Variables
 
-انظر إلى `Backend/.env.example` للحصول على قائمة كاملة بمتغيرات البيئة المتاحة.
+Check `Backend/.env.example` for a complete list of available environment variables.
 
-### قاعدة البيانات | Database
+### Database
 
 - **Type**: PostgreSQL 16
 - **Host**: localhost (Docker: postgres)
@@ -139,7 +136,7 @@ npm run dev
 - **Port**: 6379
 - **Database**: 0 (Cache), 1 (Celery Broker), 2 (Celery Results)
 
-## 🧪 الاختبار | Testing
+## 🧪 Testing
 
 ```bash
 # Run tests
@@ -152,7 +149,7 @@ pytest --cov=app
 pytest tests/test_auth.py
 ```
 
-## 📦 المكتبات الرئيسية | Main Libraries
+## 📦 Main Libraries
 
 ### Backend
 - **FastAPI**: Modern web framework
@@ -169,7 +166,7 @@ pytest tests/test_auth.py
 - **Vite**: Build Tool
 - **Axios**: HTTP Client
 
-## 🔐 الأمان | Security
+## 🔐 Security
 
 - JWT Authentication
 - Password Hashing (bcrypt)
@@ -178,7 +175,7 @@ pytest tests/test_auth.py
 - SQL Injection Prevention
 - XSS Protection
 
-## 📊 الأداء | Performance
+## 📊 Performance
 
 - Redis Caching
 - Database Query Optimization
@@ -186,7 +183,7 @@ pytest tests/test_auth.py
 - Lazy Loading
 - Code Splitting
 
-## 🤝 المساهمة | Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -194,23 +191,23 @@ pytest tests/test_auth.py
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 الترخيص | License
+## 📝 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 👥 الفريق | Team
+## 👥 Team
 
 - **Project Lead**: JobSpy Team
 - **Backend**: FastAPI Development Team
 - **Frontend**: Vue.js Development Team
 
-## 📞 التواصل | Contact
+## 📞 Contact
 
 - Email: support@jobspy.com
 - GitHub: https://github.com/speedyapply/JobSpy
 - Issues: https://github.com/speedyapply/JobSpy/issues
 
-## 🙏 شكر وتقدير | Acknowledgments
+## 🙏 Acknowledgments
 
 - FastAPI Documentation
 - Vue.js Documentation
@@ -219,5 +216,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**آخر تحديث**: 23 أبريل 2026
 **Last Updated**: April 23, 2026

@@ -1,5 +1,4 @@
 """
-تطبيق JobSpy الويب
 JobSpy Web Application Package
 """
 

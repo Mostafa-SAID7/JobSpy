@@ -1,5 +1,5 @@
 /**
- * تطبيق JobSpy الرئيسي
+ * Main JobSpy Application
  * Main entry point for JobSpy Vue application
  */
 
