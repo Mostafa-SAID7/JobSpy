@@ -30,6 +30,9 @@ aiohttp==3.9.1
 marshmallow==3.20.1
 python-dateutil==2.8.2
 
+# Dependency Injection
+dependency-injector==4.41.0
+
 # Logging & Monitoring
 python-json-logger==2.0.7
 structlog==23.2.0
