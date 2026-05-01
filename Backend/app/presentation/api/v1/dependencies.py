@@ -112,7 +112,6 @@ class Container(containers.DeclarativeContainer):
     # Application Mappers (Singleton - stateless)
     job_mapper = providers.Singleton(
         JobMapper,
-        skill_service=skill_extraction_service,
     )
     
     # Use Cases - Jobs (Factory - new instance per request)

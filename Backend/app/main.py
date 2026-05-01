@@ -5,6 +5,7 @@ Main FastAPI Application Entry Point
 
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
+import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,8 +16,12 @@ from app.core.logging import setup_logging
 from app.core.database import init_db, close_db
 from app.routers import auth, jobs, saved_jobs, alerts, users, stats
 
+# Import DI container
+from app.presentation.api.v1.dependencies import wire_container, reset_container
+
 # Setup logging
 setup_logging()
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -25,22 +30,45 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     Lifespan context manager for startup and shutdown events
     """
     # Startup
-    print(f"🚀 Starting {settings.APP_NAME} v{settings.APP_VERSION}")
-    print(f"📍 Environment: {settings.ENVIRONMENT}")
-    print(f"🔧 Debug Mode: {settings.DEBUG}")
-    print(f"🗄️  Database: {settings.DATABASE_URL}")
+    logger.info(f"🚀 Starting {settings.APP_NAME} v{settings.APP_VERSION}")
+    logger.info(f"📍 Environment: {settings.ENVIRONMENT}")
+    logger.info(f"🔧 Debug Mode: {settings.DEBUG}")
+    logger.info(f"🗄️  Database: {settings.DATABASE_URL}")
     
     # Initialize database
     try:
         await init_db()
-        print("✅ Database initialized successfully")
+        logger.info("✅ Database initialized successfully")
     except Exception as e:
-        print(f"⚠️  Database initialization warning: {e}")
+        logger.warning(f"⚠️  Database initialization warning: {e}")
+    
+    # Wire DI container to routers
+    try:
+        wire_container([
+            "app.routers.jobs",
+            "app.routers.auth",
+            "app.routers.alerts",
+            "app.routers.saved_jobs",
+            "app.routers.stats",
+            "app.routers.users",
+        ])
+        logger.info("✅ Dependency Injection container wired successfully")
+    except Exception as e:
+        logger.error(f"❌ Failed to wire DI container: {e}")
+        # Continue anyway - old code will still work
     
     yield
     
     # Shutdown
-    print(f"🛑 Shutting down {settings.APP_NAME}")
+    logger.info(f"🛑 Shutting down {settings.APP_NAME}")
+    
+    # Reset DI container
+    try:
+        reset_container()
+        logger.info("✅ DI container reset successfully")
+    except Exception as e:
+        logger.warning(f"⚠️  DI container reset warning: {e}")
+    
     await close_db()
 
 
