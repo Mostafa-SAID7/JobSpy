@@ -12,6 +12,33 @@ import { useAuthStore } from './stores/auth'
 import { useUIStore } from './stores/ui'
 import { usePreferencesStore } from './stores/preferences'
 
+// Global error handler for browser extension conflicts
+window.addEventListener('error', (event) => {
+  // Suppress service worker and cache-related errors from extensions
+  if (
+    event.error?.message?.includes('chrome-extension') ||
+    event.error?.message?.includes('Cache') ||
+    event.filename?.includes('sw.js') ||
+    event.filename?.includes('content_script')
+  ) {
+    console.warn('Browser extension error suppressed:', event.error?.message)
+    event.preventDefault()
+    return false
+  }
+})
+
+// Handle unhandled promise rejections from extensions
+window.addEventListener('unhandledrejection', (event) => {
+  if (
+    event.reason?.message?.includes('chrome-extension') ||
+    event.reason?.message?.includes('Cache') ||
+    event.reason?.toString?.()?.includes('sw.js')
+  ) {
+    console.warn('Browser extension promise rejection suppressed:', event.reason)
+    event.preventDefault()
+  }
+})
+
 const app = createApp(App)
 const pinia = createPinia()
 

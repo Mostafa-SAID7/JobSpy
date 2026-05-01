@@ -1,32 +1,24 @@
 <template>
   <div class="flex flex-col md:flex-row items-center justify-between gap-4 py-4">
     <!-- Page Size Selector -->
-    <div class="flex items-center gap-2">
-      <label for="page-size" class="text-sm text-gray-700 dark:text-gray-300">
-        {{ $t('pagination.itemsPerPage') || 'Items per page:' }}
-      </label>
-      <select
-        id="page-size"
-        :value="pageSize"
-        class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-        @change="handlePageSizeChange"
-      >
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-      </select>
+    <div class="flex items-center gap-3">
+      <span class="text-sm text-gray-700 dark:text-gray-300">Items per page:</span>
+      <FormSelect
+        :model-value="pageSize"
+        :options="pageSizeOptions"
+        @update:model-value="handlePageSizeChange"
+      />
     </div>
 
     <!-- Page Info -->
     <div class="text-sm text-gray-600 dark:text-gray-400">
-      {{ $t('pagination.showing') || 'Showing' }}
+      Showing
       <span class="font-semibold">{{ startItem }}</span>
-      {{ $t('pagination.to') || 'to' }}
+      to
       <span class="font-semibold">{{ endItem }}</span>
-      {{ $t('pagination.of') || 'of' }}
+      of
       <span class="font-semibold">{{ totalItems }}</span>
-      {{ $t('pagination.results') || 'results' }}
+      results
     </div>
 
     <!-- Pagination Controls -->
@@ -38,7 +30,7 @@
         class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
         @click="goToPreviousPage"
       >
-        {{ $t('pagination.previous') || 'Previous' }}
+        Previous
       </button>
 
       <!-- Page Numbers -->
@@ -93,7 +85,7 @@
         class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
         @click="goToNextPage"
       >
-        {{ $t('pagination.next') || 'Next' }}
+        Next
       </button>
     </div>
   </div>
@@ -101,6 +93,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import FormSelect from '@/components/forms/FormSelect.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -123,6 +116,13 @@ const emit = defineEmits<{
   'page-change': [page: number]
   'page-size-change': [size: number]
 }>()
+
+const pageSizeOptions = [
+  { label: '10', value: 10 },
+  { label: '25', value: 25 },
+  { label: '50', value: 50 },
+  { label: '100', value: 100 }
+]
 
 const totalPages = computed(() => Math.ceil(props.totalItems / props.pageSize))
 
@@ -191,11 +191,10 @@ const goToNextPage = () => {
   }
 }
 
-const handlePageSizeChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement
-  const newSize = parseInt(target.value)
-  emit('update:pageSize', newSize)
-  emit('page-size-change', newSize)
+const handlePageSizeChange = (newSize: string | number) => {
+  const size = typeof newSize === 'string' ? parseInt(newSize) : newSize
+  emit('update:pageSize', size)
+  emit('page-size-change', size)
   // Reset to first page when page size changes
   emit('update:currentPage', 1)
   emit('page-change', 1)

@@ -124,24 +124,12 @@
       <!-- Posted Date -->
       <div class="space-y-3">
         <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">Date Posted</label>
-        <div class="relative">
-          <select
-            v-model="postedDate"
-            class="w-full appearance-none px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-transparent focus:border-[#0078d4] rounded text-sm focus:ring-4 focus:ring-[#0078d4]/10 dark:text-white transition-all shadow-inner font-medium cursor-pointer"
-            @change="updatePostedDate"
-          >
-            <option value="">Anytime</option>
-            <option value="1">Last 24 hours</option>
-            <option value="7">Last 7 days</option>
-            <option value="30">Last 30 days</option>
-            <option value="90">Last 90 days</option>
-          </select>
-          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </div>
+        <FormSelect
+          v-model="postedDate"
+          :options="dateOptions"
+          placeholder="Anytime"
+          @update:model-value="updatePostedDate"
+        />
       </div>
     </div>
   </div>
@@ -149,6 +137,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import FormSelect from '@/components/forms/FormSelect.vue'
 
 interface FilterState {
   minSalary: number
@@ -192,6 +181,14 @@ const remoteOptions = ref(props.filters.remote)
 const experienceLevel = ref(props.filters.experienceLevel)
 const postedDate = ref(props.filters.postedDate)
 const companySizes = ref(props.filters.companySizes)
+
+const dateOptions = [
+  { value: '', label: 'Anytime' },
+  { value: '1', label: 'Last 24 hours' },
+  { value: '7', label: 'Last 7 days' },
+  { value: '30', label: 'Last 30 days' },
+  { value: '90', label: 'Last 90 days' }
+]
 
 const hasActiveFilters = computed(() => {
   return (

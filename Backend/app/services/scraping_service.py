@@ -8,6 +8,7 @@ import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.job_repo import JobRepository
 from app.schemas.job import JobCreate
+from app.services.job_processing_service import JobProcessingService
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +19,13 @@ class ScrapingService:
     def __init__(self, db: AsyncSession):
         self.db = db
         self.job_repo = JobRepository(db)
+        self.job_processor = JobProcessingService(db)
     
     async def save_jobs(self, jobs_data: List[Dict[str, Any]], source: str) -> Dict[str, Any]:
         """
         Save scraped jobs to database.
+        
+        CONSOLIDATED: Uses unified processing pipeline from JobProcessingService.
         
         Args:
             jobs_data: List of job dictionaries from scraper
@@ -30,66 +34,14 @@ class ScrapingService:
         Returns:
             Dictionary with statistics about saved jobs
         """
-        saved_count = 0
-        duplicate_count = 0
-        error_count = 0
-        
-        for job_data in jobs_data:
-            try:
-                # Normalize job data
-                normalized_job = self._normalize_job(job_data)
-                
-                # Check if job already exists
-                existing_job = await self.job_repo.get_by_source_url(
-                    normalized_job.get("source_url")
-                )
-                if existing_job:
-                    duplicate_count += 1
-                    continue
-                
-                # Create job
-                job_create = JobCreate(
-                    title=normalized_job.get("title"),
-                    company=normalized_job.get("company"),
-                    location=normalized_job.get("location"),
-                    salary_min=normalized_job.get("salary_min"),
-                    salary_max=normalized_job.get("salary_max"),
-                    salary_currency=normalized_job.get("salary_currency"),
-                    job_type=normalized_job.get("job_type"),
-                    description=normalized_job.get("description"),
-                    requirements=normalized_job.get("requirements"),
-                    benefits=normalized_job.get("benefits"),
-                    source=source,
-                    source_url=normalized_job.get("source_url"),
-                    source_job_id=normalized_job.get("source_job_id"),
-                    posted_date=normalized_job.get("posted_date"),
-                    deadline=normalized_job.get("deadline"),
-                    company_logo_url=normalized_job.get("company_logo_url"),
-                    company_website=normalized_job.get("company_website"),
-                    experience_level=normalized_job.get("experience_level"),
-                    skills=normalized_job.get("skills"),
-                    is_remote=normalized_job.get("is_remote", 0),
-                )
-                
-                await self.job_repo.create(job_create)
-                saved_count += 1
-            except Exception as e:
-                logger.error(f"Error saving job from {source}: {str(e)}")
-                error_count += 1
-                continue
-        
-        await self.db.commit()
-        
-        return {
-            "saved": saved_count,
-            "duplicates": duplicate_count,
-            "errors": error_count,
-            "total_processed": len(jobs_data),
-        }
+        return await self.job_processor.process_scraped_jobs(jobs_data, source)
     
     def _normalize_job(self, job_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Normalize job data from different sources.
+        
+        DEPRECATED: Use JobProcessingService.normalize_job() instead.
+        Kept for backward compatibility.
         
         Args:
             job_data: Raw job data from scraper
@@ -97,31 +49,14 @@ class ScrapingService:
         Returns:
             Normalized job data
         """
-        return {
-            "title": (job_data.get("title") or "").strip(),
-            "company": (job_data.get("company") or "").strip(),
-            "location": (job_data.get("location") or "").strip(),
-            "salary_min": self._parse_salary(job_data.get("salary_min")),
-            "salary_max": self._parse_salary(job_data.get("salary_max")),
-            "salary_currency": (job_data.get("salary_currency") or "USD").strip(),
-            "job_type": (job_data.get("job_type") or "").strip(),
-            "description": (job_data.get("description") or "").strip(),
-            "requirements": job_data.get("requirements") or [],
-            "benefits": job_data.get("benefits") or [],
-            "source_url": (job_data.get("source_url") or "").strip(),
-            "source_job_id": (job_data.get("source_job_id") or "").strip(),
-            "posted_date": job_data.get("posted_date"),
-            "deadline": job_data.get("deadline"),
-            "company_logo_url": (job_data.get("company_logo_url") or "").strip(),
-            "company_website": (job_data.get("company_website") or "").strip(),
-            "experience_level": (job_data.get("experience_level") or "").strip(),
-            "skills": job_data.get("skills") or [],
-            "is_remote": self._parse_remote(job_data.get("is_remote")),
-        }
+        logger.warning("_normalize_job is deprecated. Use JobProcessingService.normalize_job() instead.")
+        return self.job_processor.normalize_job(job_data, "unknown")
     
     async def normalize_jobs(self, jobs_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
         Normalize job data from different sources.
+        
+        CONSOLIDATED: Uses unified normalization from JobProcessingService.
         
         Args:
             jobs_data: Raw job data from scraper
@@ -132,7 +67,7 @@ class ScrapingService:
         normalized = []
         
         for job in jobs_data:
-            normalized_job = self._normalize_job(job)
+            normalized_job = self.job_processor.normalize_job(job, "unknown")
             
             # Only add if required fields are present
             if normalized_job["title"] and normalized_job["company"] and normalized_job["source_url"]:
@@ -142,36 +77,25 @@ class ScrapingService:
     
     @staticmethod
     def _parse_salary(salary: Any) -> float | None:
-        """Parse salary value."""
-        if not salary:
-            return None
+        """
+        Parse salary value.
         
-        try:
-            if isinstance(salary, (int, float)):
-                return float(salary)
-            if isinstance(salary, str):
-                # Remove common currency symbols and commas
-                cleaned = salary.replace("$", "").replace("€", "").replace("£", "").replace(",", "")
-                return float(cleaned)
-        except (ValueError, TypeError):
-            pass
-        
-        return None
+        DEPRECATED: Use JobProcessingService._parse_salary() instead.
+        Kept for backward compatibility.
+        """
+        logger.warning("_parse_salary is deprecated. Use JobProcessingService._parse_salary() instead.")
+        return JobProcessingService._parse_salary(salary)
     
     @staticmethod
     def _parse_remote(remote: Any) -> int:
-        """Parse remote work type (0: On-site, 1: Remote, 2: Hybrid)."""
-        if isinstance(remote, int):
-            return remote
+        """
+        Parse remote work type (0: On-site, 1: Remote, 2: Hybrid).
         
-        if isinstance(remote, str):
-            remote_lower = remote.lower()
-            if "remote" in remote_lower:
-                return 1
-            elif "hybrid" in remote_lower:
-                return 2
-        
-        return 0
+        DEPRECATED: Use JobProcessingService._parse_remote_type() instead.
+        Kept for backward compatibility.
+        """
+        logger.warning("_parse_remote is deprecated. Use JobProcessingService._parse_remote_type() instead.")
+        return JobProcessingService._parse_remote_type(remote)
     
     async def remove_duplicates(self) -> int:
         """

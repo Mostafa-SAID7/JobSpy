@@ -13,6 +13,7 @@ from app.repositories.job_repo import JobRepository
 from app.repositories.search_history_repo import SearchHistoryRepository
 from app.core.redis import redis_client
 from app.core.config import settings
+from app.services.job_processing_service import JobProcessingService
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ class AlertService:
         self.alert_repo = AlertRepository(db)
         self.job_repo = JobRepository(db)
         self.search_repo = SearchHistoryRepository(db)
+        self.job_processor = JobProcessingService(db)
     
     async def get_alerts_to_trigger(self) -> List[Alert]:
         """Get alerts that need to be triggered."""
@@ -33,6 +35,8 @@ class AlertService:
     async def trigger_alert(self, alert: Alert) -> Dict[str, Any]:
         """
         Trigger an alert and search for new jobs.
+        
+        CONSOLIDATED: Uses unified filtering logic from JobProcessingService.
         
         Args:
             alert: Alert to trigger
@@ -44,9 +48,9 @@ class AlertService:
             # Search for jobs matching alert criteria
             jobs = await self.job_repo.search(alert.query)
             
-            # Filter by additional criteria if provided
+            # Filter by additional criteria if provided using unified logic
             if alert.filters:
-                jobs = self._filter_jobs(jobs, alert.filters)
+                jobs = self.job_processor.filter_jobs(jobs, alert.filters)
             
             # Count new jobs (posted after last trigger)
             new_jobs_count = 0
@@ -85,33 +89,6 @@ class AlertService:
                 "success": False,
                 "error": str(e),
             }
-    
-    @staticmethod
-    def _filter_jobs(jobs: List[Any], filters: Dict[str, Any]) -> List[Any]:
-        """Filter jobs based on criteria."""
-        filtered = jobs
-        
-        if "location" in filters and filters["location"]:
-            location = filters["location"].lower()
-            filtered = [j for j in filtered if location in (j.location or "").lower()]
-        
-        if "job_type" in filters and filters["job_type"]:
-            job_type = filters["job_type"].lower()
-            filtered = [j for j in filtered if j.job_type and job_type in j.job_type.lower()]
-        
-        if "experience_level" in filters and filters["experience_level"]:
-            exp_level = filters["experience_level"].lower()
-            filtered = [j for j in filtered if j.experience_level and exp_level in j.experience_level.lower()]
-        
-        if "salary_min" in filters and filters["salary_min"]:
-            min_salary = filters["salary_min"]
-            filtered = [j for j in filtered if j.salary_max and j.salary_max >= min_salary]
-        
-        if "is_remote" in filters and filters["is_remote"] is not None:
-            is_remote = filters["is_remote"]
-            filtered = [j for j in filtered if j.is_remote == is_remote]
-        
-        return filtered
     
     @staticmethod
     def _calculate_next_trigger(frequency: str) -> datetime:

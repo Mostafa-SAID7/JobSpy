@@ -30,6 +30,41 @@ body {
   color: #f3f2f1;
 }
 
+/* Select and Option Styling - CRITICAL for proper display */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Light mode options */
+select option {
+  background-color: #ffffff !important;
+  color: #323130 !important;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+  background-color: #0078d4 !important;
+  color: #ffffff !important;
+}
+
+/* Dark mode options */
+.dark select option {
+  background-color: #1b1a19 !important;
+  color: #f3f2f1 !important;
+}
+
+.dark select option:hover,
+.dark select option:focus,
+.dark select option:checked {
+  background-color: #0078d4 !important;
+  color: #ffffff !important;
+}
+
 /* Custom Scrollbar (Microsoft Edge Style) */
 ::-webkit-scrollbar {
   width: 10px;

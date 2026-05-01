@@ -14,6 +14,7 @@ from app.repositories.search_history_repo import SearchHistoryRepository
 from app.schemas.search_history import SearchHistoryCreate
 from app.core.redis import redis_client
 from app.core.config import settings
+from app.services.job_processing_service import JobProcessingService
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ class SearchService:
         self.db = db
         self.job_repo = JobRepository(db)
         self.search_history_repo = SearchHistoryRepository(db)
+        self.job_processor = JobProcessingService(db)
     
     def _generate_search_cache_key(
         self,
@@ -416,6 +418,8 @@ class SearchService:
         """
         Filter jobs based on criteria.
         
+        CONSOLIDATED: Uses unified filtering logic from JobProcessingService.
+        
         Args:
             jobs: List of jobs to filter
             filters: Filter criteria
@@ -423,33 +427,7 @@ class SearchService:
         Returns:
             Filtered list of jobs
         """
-        filtered = jobs
-        
-        if "location" in filters and filters["location"]:
-            location = filters["location"].lower()
-            filtered = [j for j in filtered if location in (j.get("location") or "").lower()]
-        
-        if "job_type" in filters and filters["job_type"]:
-            job_type = filters["job_type"].lower()
-            filtered = [j for j in filtered if j.get("job_type") and job_type in j.get("job_type", "").lower()]
-        
-        if "experience_level" in filters and filters["experience_level"]:
-            exp_level = filters["experience_level"].lower()
-            filtered = [j for j in filtered if j.get("experience_level") and exp_level in j.get("experience_level", "").lower()]
-        
-        if "salary_min" in filters and filters["salary_min"]:
-            min_salary = filters["salary_min"]
-            filtered = [j for j in filtered if j.get("salary_max") and j.get("salary_max") >= min_salary]
-        
-        if "salary_max" in filters and filters["salary_max"]:
-            max_salary = filters["salary_max"]
-            filtered = [j for j in filtered if j.get("salary_min") and j.get("salary_min") <= max_salary]
-        
-        if "is_remote" in filters and filters["is_remote"] is not None:
-            is_remote = filters["is_remote"]
-            filtered = [j for j in filtered if j.get("is_remote") == is_remote]
-        
-        return filtered
+        return self.job_processor.filter_jobs(jobs, filters)
     
     async def sort_jobs(
         self,

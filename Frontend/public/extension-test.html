@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobSpy - Extension Conflict Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9fafb;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .error {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+        .success {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+        }
+        .warning {
+            background-color: #fffbeb;
+            border: 1px solid #fed7aa;
+            color: #d97706;
+        }
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        #log {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>JobSpy - Browser Extension Conflict Test</h1>
+    
+    <div class="card warning">
+        <h3>⚠️ Extension Conflict Detection</h3>
+        <p>This page helps diagnose browser extension conflicts that may cause cache-related errors.</p>
+        <p><strong>Error:</strong> <code>Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported</code></p>
+    </div>
+
+    <div class="card">
+        <h3>🔧 Troubleshooting Steps</h3>
+        <ol>
+            <li><strong>Try Incognito Mode:</strong> Open this page in incognito/private browsing mode</li>
+            <li><strong>Disable Extensions:</strong> Go to <code>chrome://extensions/</code> and disable all extensions</li>
+            <li><strong>Clear Cache:</strong> Clear browser cache and cookies</li>
+            <li><strong>Test API:</strong> Use the buttons below to test API connectivity</li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <h3>🧪 API Connectivity Test</h3>
+        <button onclick="testAPI()">Test JobSpy API</button>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <button onclick="clearLog()">Clear Log</button>
+        
+        <div id="status" class="card" style="margin-top: 15px; display: none;">
+            <h4>Test Results:</h4>
+            <div id="results"></div>
+        </div>
+        
+        <h4>Console Log:</h4>
+        <div id="log"></div>
+    </div>
+
+    <div class="card">
+        <h3>🚀 Access JobSpy Application</h3>
+        <p>If the tests above work, you can safely access the main application:</p>
+        <a href="http://localhost:5173" target="_blank" style="color: #3b82f6; text-decoration: none;">
+            → Open JobSpy Application
+        </a>
+    </div>
+
+    <script>
+        const log = document.getElementById('log');
+        const status = document.getElementById('status');
+        const results = document.getElementById('results');
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            log.textContent += logEntry;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function showResult(message, isSuccess) {
+            status.style.display = 'block';
+            results.innerHTML = `<div class="card ${isSuccess ? 'success' : 'error'}">${message}</div>`;
+        }
+
+        function clearLog() {
+            log.textContent = '';
+            status.style.display = 'none';
+        }
+
+        async function testHealth() {
+            addLog('Testing health endpoint...');
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addLog(`Health check successful: ${JSON.stringify(data)}`, 'success');
+                    showResult('✅ Backend is running and healthy!', true);
+                } else {
+                    addLog(`Health check failed: ${response.status} ${response.statusText}`, 'error');
+                    showResult('❌ Backend health check failed', false);
+                }
+            } catch (error) {
+                addLog(`Health check error: ${error.message}`, 'error');
+                showResult('❌ Cannot connect to backend', false);
+            }
+        }
+
+        async function testAPI() {
+            addLog('Testing JobSpy API...');
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/jobs?skip=0&limit=5');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addLog(`API test successful: Found ${data.total} jobs`, 'success');
+                    addLog(`Jobs: ${data.items.map(job => job.title).join(', ')}`, 'info');
+                    showResult(`✅ API is working! Found ${data.total} jobs in database`, true);
+                } else {
+                    addLog(`API test failed: ${response.status} ${response.statusText}`, 'error');
+                    showResult('❌ API test failed', false);
+                }
+            } catch (error) {
+                addLog(`API test error: ${error.message}`, 'error');
+                showResult('❌ Cannot connect to API', false);
+            }
+        }
+
+        // Global error handlers
+        window.addEventListener('error', (event) => {
+            if (event.error?.message?.includes('chrome-extension') || 
+                event.error?.message?.includes('Cache') ||
+                event.filename?.includes('sw.js')) {
+                addLog(`Extension error detected: ${event.error.message}`, 'warning');
+                showResult('⚠️ Browser extension conflict detected! Try incognito mode or disable extensions.', false);
+                event.preventDefault();
+            } else {
+                addLog(`JavaScript error: ${event.error?.message || event.message}`, 'error');
+            }
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            if (event.reason?.message?.includes('chrome-extension') || 
+                event.reason?.message?.includes('Cache')) {
+                addLog(`Extension promise rejection: ${event.reason}`, 'warning');
+                event.preventDefault();
+            } else {
+                addLog(`Unhandled promise rejection: ${event.reason}`, 'error');
+            }
+        });
+
+        // Initial log
+        addLog('Extension conflict test page loaded');
+        addLog('Monitoring for extension-related errors...');
+    </script>
+</body>
+</html>

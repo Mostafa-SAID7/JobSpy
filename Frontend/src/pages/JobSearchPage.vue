@@ -49,25 +49,12 @@
           </div>
           
           <div class="flex items-center gap-3">
-            <label for="sort-select" class="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Sort By</label>
-            <div class="relative min-w-[160px]">
-              <select
-                id="sort-select"
-                v-model="sortBy"
-                class="w-full appearance-none px-4 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-sm font-medium focus:ring-2 focus:ring-[#0078d4]/20 focus:border-[#0078d4] dark:text-white transition-all cursor-pointer"
-                @change="handleSortChange"
-              >
-                <option value="recent">Newest First</option>
-                <option value="salary-high">High Salary</option>
-                <option value="salary-low">Low Salary</option>
-                <option value="relevance">Relevance</option>
-              </select>
-              <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
+            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Sort By</label>
+            <FormSelect
+              v-model="sortBy"
+              :options="sortOptions"
+              @update:model-value="handleSortChange"
+            />
           </div>
         </div>
 
@@ -134,6 +121,7 @@ import JobCard from '@/components/cards/JobCard.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorState from '@/components/common/ErrorState.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import FormSelect from '@/components/forms/FormSelect.vue'
 import type { Job } from '@/types'
 
 const router = useRouter()
@@ -168,6 +156,13 @@ const filterState = ref({
   postedDate: '',
   companySizes: [] as string[]
 })
+
+const sortOptions = [
+  { label: 'Newest First', value: 'recent' },
+  { label: 'High Salary', value: 'salary-high' },
+  { label: 'Low Salary', value: 'salary-low' },
+  { label: 'Relevance', value: 'relevance' }
+]
 
 /**
  * Check if a job is saved
@@ -248,68 +243,62 @@ const searchJobs = async () => {
   error.value = ''
 
   try {
-    // Build query parameters
-    const params: any = {
-      page: currentPage.value,
-      limit: pageSize.value,
-      sort: getSortParam()
+    let response
+
+    console.log('🔍 Starting job search...', { 
+      searchQuery: searchQuery.value, 
+      currentPage: currentPage.value, 
+      pageSize: pageSize.value 
+    })
+
+    // If there's a search query, use the search endpoint
+    if (searchQuery.value.trim()) {
+      const params: any = {
+        query: searchQuery.value.trim(),
+        skip: (currentPage.value - 1) * pageSize.value,
+        limit: pageSize.value
+      }
+
+      console.log('📡 Making search API call with params:', params)
+      response = await apiClient.post('/jobs/search', null, { params })
+    } else {
+      // Otherwise, use the list endpoint
+      const params: any = {
+        skip: (currentPage.value - 1) * pageSize.value,
+        limit: pageSize.value
+      }
+
+      // Add source filter if site is selected
+      if (selectedSite.value) {
+        params.source = selectedSite.value
+      }
+
+      console.log('📡 Making list API call with params:', params)
+      response = await apiClient.get('/jobs', { params })
     }
 
-    // Add search query
-    if (searchQuery.value) {
-      params.q = searchQuery.value
-    }
+    console.log('✅ API response received:', {
+      status: response.status,
+      dataKeys: Object.keys(response.data),
+      total: response.data.total,
+      itemsLength: response.data.items?.length
+    })
 
-    // Add site filter
-    if (selectedSite.value) {
-      params.site_name = selectedSite.value
-    }
+    jobs.value = response.data.items || []
+    totalJobs.value = response.data.total || 0
 
-    // Add location filter
-    if (filterState.value.location) {
-      params.location = filterState.value.location
-    }
-
-    // Add job type filters
-    if (filterState.value.jobTypes.length > 0) {
-      params.job_types = filterState.value.jobTypes.join(',')
-    }
-
-    // Add remote filter
-    if (filterState.value.remote.length > 0) {
-      params.remote = filterState.value.remote.includes('remote')
-    }
-
-    // Add salary range filters
-    if (filterState.value.minSalary > 0) {
-      params.salary_min = filterState.value.minSalary
-    }
-    if (filterState.value.maxSalary < 500000) {
-      params.salary_max = filterState.value.maxSalary
-    }
-
-    // Add experience level filter
-    if (filterState.value.experienceLevel) {
-      params.experience_level = filterState.value.experienceLevel
-    }
-
-    // Add posted date filter
-    if (filterState.value.postedDate) {
-      params.hours_old = parseInt(filterState.value.postedDate) * 24
-    }
-
-    // Add company size filters
-    if (filterState.value.companySizes.length > 0) {
-      params.company_sizes = filterState.value.companySizes.join(',')
-    }
-
-    // Call API
-    const response = await apiClient.get('/jobs', { params })
-
-    jobs.value = response.data.results || response.data.jobs || []
-    totalJobs.value = response.data.total || response.data.count || 0
+    console.log('📊 Updated state:', {
+      jobsCount: jobs.value.length,
+      totalJobs: totalJobs.value,
+      firstJobTitle: jobs.value[0]?.title
+    })
   } catch (err: any) {
-    console.error('Search error:', err)
+    console.error('❌ Search error:', err)
+    console.error('Error details:', {
+      status: err.response?.status,
+      statusText: err.response?.statusText,
+      data: err.response?.data
+    })
     error.value = err.response?.data?.detail || 'Failed to search for jobs. Please try again.'
     jobs.value = []
     totalJobs.value = 0
@@ -362,8 +351,7 @@ watch(
  * Initialize on mount
  */
 onMounted(() => {
-  if (searchQuery.value) {
-    searchJobs()
-  }
+  // Always load jobs on mount, either with search query or all jobs
+  searchJobs()
 })
 </script>

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from typing import Optional, Dict, Any
+from datetime import datetime
 from app.core.database import get_db
 from app.schemas.job import JobCreate, JobUpdate, JobResponse, JobListResponse
 from app.repositories.job_repo import JobRepository
@@ -46,6 +47,44 @@ async def create_job(job_create: JobCreate, db: AsyncSession = Depends(get_db)):
         )
 
 
+@router.get("/debug", tags=["Debug"])
+async def debug_jobs(db: AsyncSession = Depends(get_db)):
+    """Debug endpoint to check jobs data."""
+    job_repo = JobRepository(db)
+    
+    # Get first few jobs
+    jobs = await job_repo.get_all(0, 3)
+    count = await job_repo.count()
+    
+    return {
+        "total_jobs": count,
+        "sample_jobs": [
+            {
+                "id": str(job.id),
+                "title": job.title,
+                "company": job.company,
+                "location": job.location
+            } for job in jobs
+        ],
+        "api_working": True,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+
+@router.get("/api-test", tags=["Test"])
+async def test_jobs_endpoint(db: AsyncSession = Depends(get_db)):
+    """Test endpoint to verify jobs API is working."""
+    job_repo = JobRepository(db)
+    count = await job_repo.count()
+    
+    return {
+        "status": "success",
+        "message": "Jobs API is working",
+        "total_jobs": count,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+
 @router.get("/{job_id}", response_model=JobResponse)
 async def get_job(job_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get job by ID."""
@@ -63,6 +102,7 @@ async def get_job(job_id: UUID, db: AsyncSession = Depends(get_db)):
     await db.commit()
     
     return job
+
 
 
 @router.get("", response_model=JobListResponse)

@@ -108,6 +108,48 @@ export default {
             },
           },
         },
+        '.fluent-select': {
+          width: '100%',
+          padding: '0.625rem 2.5rem 0.625rem 1rem',
+          backgroundColor: theme('colors.white'),
+          border: `1px solid ${theme('colors.gray.300')}`,
+          borderRadius: theme('borderRadius.fluent'),
+          fontSize: '0.875rem',
+          lineHeight: '1.25rem',
+          transition: 'all 0.15s ease-in-out',
+          outline: 'none',
+          appearance: 'none',
+          cursor: 'pointer',
+          '&:hover:not(:disabled)': {
+            borderColor: theme('colors.gray.400'),
+          },
+          '&:focus': {
+            borderColor: theme('colors.brand.DEFAULT'),
+            boxShadow: `0 0 0 1px ${theme('colors.brand.DEFAULT')}`,
+          },
+          '&:disabled': {
+            backgroundColor: theme('colors.gray.100'),
+            color: theme('colors.gray.500'),
+            cursor: 'not-allowed',
+            opacity: '0.6',
+          },
+          '.dark &': {
+            backgroundColor: theme('colors.gray.800'),
+            borderColor: theme('colors.gray.700'),
+            color: theme('colors.white'),
+            '&:hover:not(:disabled)': {
+              borderColor: theme('colors.gray.600'),
+            },
+            '&:focus': {
+              borderColor: theme('colors.brand.DEFAULT'),
+              boxShadow: `0 0 0 1px ${theme('colors.brand.DEFAULT')}`,
+            },
+            '&:disabled': {
+              backgroundColor: theme('colors.gray.900'),
+              color: theme('colors.gray.600'),
+            },
+          },
+        },
         '.fluent-button': {
           display: 'inline-flex',
           alignItems: 'center',

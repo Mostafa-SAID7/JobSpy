@@ -38,24 +38,12 @@
         <label for="site-select" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 px-1">
           Source
         </label>
-        <div class="relative">
-          <select
-            id="site-select"
-            v-model="localSite"
-            class="w-full appearance-none pl-4 pr-10 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded focus:outline-none focus:ring-2 focus:ring-[#0078d4]/20 focus:border-[#0078d4] dark:text-white transition-all shadow-sm font-medium"
-          >
-            <option value="">All Sources</option>
-            <option value="linkedin">LinkedIn</option>
-            <option value="indeed">Indeed</option>
-            <option value="wuzzuf">Wuzzuf</option>
-            <option value="bayt">Bayt</option>
-          </select>
-          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </div>
+        <FormSelect
+          id="site-select"
+          v-model="localSite"
+          :options="siteOptions"
+          placeholder="All Sources"
+        />
       </div>
 
       <!-- Advanced Search Toggle -->
@@ -127,43 +115,21 @@
           <!-- Experience Level -->
           <div class="space-y-3">
             <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Experience</label>
-            <div class="relative">
-              <select
-                v-model="filters.experienceLevel"
-                class="w-full appearance-none px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-sm focus:ring-2 focus:ring-[#0078d4]/20 focus:border-[#0078d4] dark:text-white transition-all"
-              >
-                <option value="">Any Level</option>
-                <option value="entry">Entry Level</option>
-                <option value="mid">Mid Level</option>
-                <option value="senior">Senior Level</option>
-              </select>
-              <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
+            <FormSelect
+              v-model="filters.experienceLevel"
+              :options="experienceOptions"
+              placeholder="Any Level"
+            />
           </div>
 
           <!-- Posted Date -->
           <div class="space-y-3">
             <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Date Posted</label>
-            <div class="relative">
-              <select
-                v-model="filters.postedDate"
-                class="w-full appearance-none px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-sm focus:ring-2 focus:ring-[#0078d4]/20 focus:border-[#0078d4] dark:text-white transition-all"
-              >
-                <option value="">Anytime</option>
-                <option value="1">Last 24 hours</option>
-                <option value="7">Last 7 days</option>
-                <option value="30">Last 30 days</option>
-              </select>
-              <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
+            <FormSelect
+              v-model="filters.postedDate"
+              :options="dateOptions"
+              placeholder="Anytime"
+            />
           </div>
         </div>
 
@@ -186,6 +152,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import FormButton from '@/components/forms/FormButton.vue'
+import FormSelect from '@/components/forms/FormSelect.vue'
 
 interface SearchFilters {
   jobTypes: string[]
@@ -223,6 +190,28 @@ const localQuery = ref(props.modelValue)
 const localSite = ref(props.site)
 const showAdvanced = ref(false)
 const filters = ref<SearchFilters>(props.filters)
+
+const siteOptions = [
+  { value: '', label: 'All Sources' },
+  { value: 'linkedin', label: 'LinkedIn' },
+  { value: 'indeed', label: 'Indeed' },
+  { value: 'wuzzuf', label: 'Wuzzuf' },
+  { value: 'bayt', label: 'Bayt' }
+]
+
+const experienceOptions = [
+  { value: '', label: 'Any Level' },
+  { value: 'entry', label: 'Entry Level' },
+  { value: 'mid', label: 'Mid Level' },
+  { value: 'senior', label: 'Senior Level' }
+]
+
+const dateOptions = [
+  { value: '', label: 'Anytime' },
+  { value: '1', label: 'Last 24 hours' },
+  { value: '7', label: 'Last 7 days' },
+  { value: '30', label: 'Last 30 days' }
+]
 
 const handleSearch = () => {
   emit('update:modelValue', localQuery.value)
