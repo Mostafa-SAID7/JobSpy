@@ -1,7 +1,18 @@
 """
 Scraping Service - JobSpy
 Scraping service for JobSpy
+
+⚠️ DEPRECATED: This service is deprecated and will be removed in Phase 5.
+
+Migration Path:
+- Use ProcessScrapedJobsUseCase instead
+- Location: app.application.use_cases.scraping.process_scraped_jobs_use_case
+- See: Backend/app/services/DEPRECATION_NOTICE.md
+
+This service is kept temporarily for backward compatibility.
+Will be removed after Phase 5 (router refactoring) is complete.
 """
+import warnings
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
@@ -12,9 +23,22 @@ from app.services.job_processing_service import JobProcessingService
 
 logger = logging.getLogger(__name__)
 
+# Issue deprecation warning
+warnings.warn(
+    "ScrapingService is deprecated. Use ProcessScrapedJobsUseCase from "
+    "app.application.use_cases.scraping instead. "
+    "See Backend/app/services/DEPRECATION_NOTICE.md for migration guide.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 
 class ScrapingService:
-    """Service for handling job scraping operations."""
+    """
+    Service for handling job scraping operations.
+    
+    ⚠️ DEPRECATED: Use ProcessScrapedJobsUseCase instead.
+    """
     
     def __init__(self, db: AsyncSession):
         self.db = db

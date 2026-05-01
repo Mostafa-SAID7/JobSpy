@@ -1,7 +1,21 @@
 """
 Search Service - JobSpy
 Search service for JobSpy
+
+⚠️ DEPRECATED: This service is deprecated and will be removed in Phase 5.
+
+Migration Path:
+- Use SearchJobsUseCase for basic search
+- Use AdvancedSearchUseCase for advanced search
+- Location: app.application.use_cases.search
+- See: Backend/app/services/DEPRECATION_NOTICE.md
+
+This service is kept temporarily for backward compatibility with:
+- routers/jobs.py
+
+Will be removed after Phase 5 (router refactoring) is complete.
 """
+import warnings
 import logging
 import json
 import hashlib
@@ -18,9 +32,22 @@ from app.services.job_processing_service import JobProcessingService
 
 logger = logging.getLogger(__name__)
 
+# Issue deprecation warning
+warnings.warn(
+    "SearchService is deprecated. Use SearchJobsUseCase or AdvancedSearchUseCase from "
+    "app.application.use_cases.search instead. "
+    "See Backend/app/services/DEPRECATION_NOTICE.md for migration guide.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 
 class SearchService:
-    """Service for handling search operations."""
+    """
+    Service for handling search operations.
+    
+    ⚠️ DEPRECATED: Use SearchJobsUseCase or AdvancedSearchUseCase instead.
+    """
     
     def __init__(self, db: AsyncSession):
         self.db = db

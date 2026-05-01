@@ -1,7 +1,22 @@
 """
 Job Processing Service - JobSpy
 Unified job processing pipeline for parsing, filtering, scoring, and output
+
+⚠️ DEPRECATED: This service is deprecated and will be removed in Phase 5.
+
+Migration Path:
+- Use ProcessScrapedJobsUseCase instead
+- Location: app.application.use_cases.scraping.process_scraped_jobs_use_case
+- See: Backend/app/services/DEPRECATION_NOTICE.md
+
+This service is kept temporarily for backward compatibility with:
+- services/alert_service.py
+- services/search_service.py (also deprecated)
+- scripts/seed_sample_jobs.py
+
+Will be removed after Phase 5 (router refactoring) is complete.
 """
+import warnings
 import logging
 import re
 from typing import List, Dict, Any, Optional, Tuple
@@ -13,10 +28,21 @@ from app.schemas.job import JobCreate
 
 logger = logging.getLogger(__name__)
 
+# Issue deprecation warning
+warnings.warn(
+    "JobProcessingService is deprecated. Use ProcessScrapedJobsUseCase from "
+    "app.application.use_cases.scraping instead. "
+    "See Backend/app/services/DEPRECATION_NOTICE.md for migration guide.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 
 class JobProcessingService:
     """
     Unified service for all job processing operations.
+    
+    ⚠️ DEPRECATED: Use ProcessScrapedJobsUseCase instead.
     
     This service consolidates:
     - Job parsing and normalization
