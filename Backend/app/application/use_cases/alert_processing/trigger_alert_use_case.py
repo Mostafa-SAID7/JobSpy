@@ -9,9 +9,8 @@ from typing import Dict, Any, List
 import logging
 from uuid import UUID
 
-from app.models.alert import Alert
-from app.repositories.alert_repo import AlertRepository
-from app.repositories.job_repo import JobRepository
+from app.domain.entities.alert import Alert
+from app.domain.interfaces.repositories import IAlertRepository, IJobRepository
 from app.domain.services.job_filtering_service import JobFilteringService
 
 logger = logging.getLogger(__name__)
@@ -22,8 +21,8 @@ class TriggerAlertUseCase:
 
     def __init__(
         self,
-        alert_repository: AlertRepository,
-        job_repository: JobRepository,
+        alert_repository: IAlertRepository,
+        job_repository: IJobRepository,
         filtering_service: JobFilteringService,
     ):
         """
@@ -70,9 +69,11 @@ class TriggerAlertUseCase:
                 new_jobs = jobs
                 new_jobs_count = len(jobs)
             
-            # Update alert trigger info
+            # Update alert trigger info via domain entity
+            alert.trigger(new_jobs_count)
             next_trigger = self._calculate_next_trigger(alert.frequency)
-            await self._alert_repository.update_trigger_info(alert.id, next_trigger)
+            alert.next_trigger = next_trigger
+            await self._alert_repository.update(alert)
             
             logger.info(f"Alert {alert.id} triggered: {new_jobs_count} new jobs found")
             

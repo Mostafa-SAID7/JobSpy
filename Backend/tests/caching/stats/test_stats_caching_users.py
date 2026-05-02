@@ -7,8 +7,8 @@ import pytest
 from uuid import uuid4
 from unittest.mock import AsyncMock
 
-from app.repositories.stats_repo import StatsRepository
-from app.services.stats_service import StatsService
+from app.domain.interfaces.repositories import IStatsRepository as StatsRepository
+from app.application.services.stats_service import StatsService
 
 
 @pytest.fixture

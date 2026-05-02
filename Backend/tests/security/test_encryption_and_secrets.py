@@ -22,7 +22,7 @@ async def test_passwords_are_hashed_not_stored_plaintext():
     
     **Validates: Requirements 4.3**
     """
-    from app.utils.security import hash_password, verify_password
+    from app.shared.security.security import hash_password, verify_password
     
     password = "TestPassword123!"
     
@@ -52,7 +52,7 @@ async def test_password_hashing_is_consistent(password):
     
     **Validates: Requirements 4.3**
     """
-    from app.utils.security import hash_password, verify_password
+    from app.shared.security.security import hash_password, verify_password
     
     # Hash the password
     hashed = hash_password(password)
@@ -71,7 +71,7 @@ async def test_jwt_tokens_are_signed():
     
     **Validates: Requirements 10.5**
     """
-    from app.utils.security import create_access_token
+    from app.shared.security.security import create_access_token
     from uuid import uuid4
     
     user_id = str(uuid4())
@@ -101,7 +101,7 @@ async def test_environment_variables_not_hardcoded():
     # These should be set in .env or environment
     
     # Verify that the app uses environment variables
-    from app.core.config import settings
+    from app.config.settings import settings
     
     # Verify settings object exists and has required attributes
     assert hasattr(settings, 'database_url')
@@ -149,7 +149,7 @@ async def test_api_keys_not_exposed_in_responses():
     
     **Validates: Requirements 10.5**
     """
-    from app.schemas.user import UserResponse
+    from app.presentation.api.v1.schemas.user import UserResponse
     from uuid import uuid4
     
     # Create a user response

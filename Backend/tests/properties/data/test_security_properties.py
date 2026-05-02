@@ -33,7 +33,7 @@ async def test_unauthorized_users_cannot_access_protected_data(user_id, other_us
     
     **Validates: Requirements 10.1**
     """
-    from app.repositories.saved_job_repo import SavedJobRepository
+    from app.domain.interfaces.repositories import ISavedJobRepository as SavedJobRepository
     
     db = AsyncMock(spec=AsyncSession)
     saved_job_repo = SavedJobRepository(db)

@@ -5,7 +5,7 @@ Handles deleting an alert with authorization.
 """
 
 from uuid import UUID
-from app.repositories.alert_repo import AlertRepository
+from app.domain.interfaces.repositories import IAlertRepository as AlertRepository
 from app.shared.exceptions.application_exceptions import NotFoundException, AuthorizationException
 
 

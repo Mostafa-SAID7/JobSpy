@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from app.services.search_service import SearchService
-from app.core.redis import redis_client
+from app.infrastructure.cache.redis import redis_client
 
 
 class TestSearchCacheInvalidation:

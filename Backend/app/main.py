@@ -11,10 +11,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.core.config import settings
-from app.core.logging import setup_logging
-from app.core.database import init_db, close_db
-from app.routers import auth, jobs, saved_jobs, alerts, users, stats
+from app.config.settings import settings
+from app.shared.logging.logger import setup_logging
+from app.infrastructure.persistence.sqlalchemy.database import init_db, close_db
+from app.presentation.api.v1.routers import auth, jobs, saved_jobs, alerts, users, stats
 
 # Import DI container
 from app.presentation.api.v1.dependencies import wire_container, reset_container
@@ -30,44 +30,44 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     Lifespan context manager for startup and shutdown events
     """
     # Startup
-    logger.info(f"🚀 Starting {settings.APP_NAME} v{settings.APP_VERSION}")
-    logger.info(f"📍 Environment: {settings.ENVIRONMENT}")
-    logger.info(f"🔧 Debug Mode: {settings.DEBUG}")
-    logger.info(f"🗄️  Database: {settings.DATABASE_URL}")
+    logger.info(f"Ã°Å¸Å¡â‚¬ Starting {settings.APP_NAME} v{settings.APP_VERSION}")
+    logger.info(f"Ã°Å¸â€œÂ Environment: {settings.ENVIRONMENT}")
+    logger.info(f"Ã°Å¸â€Â§ Debug Mode: {settings.DEBUG}")
+    logger.info(f"Ã°Å¸â€”â€žÃ¯Â¸Â  Database: {settings.DATABASE_URL}")
     
     # Initialize database
     try:
         await init_db()
-        logger.info("✅ Database initialized successfully")
+        logger.info("Ã¢Å“â€¦ Database initialized successfully")
     except Exception as e:
-        logger.warning(f"⚠️  Database initialization warning: {e}")
+        logger.warning(f"Ã¢Å¡Â Ã¯Â¸Â  Database initialization warning: {e}")
     
     # Wire DI container to routers
     try:
         wire_container([
-            "app.routers.jobs",
-            "app.routers.auth",
-            "app.routers.alerts",
-            "app.routers.saved_jobs",
-            "app.routers.stats",
-            "app.routers.users",
+            "app.presentation.api.v1.routers.jobs",
+            "app.presentation.api.v1.routers.auth",
+            "app.presentation.api.v1.routers.alerts",
+            "app.presentation.api.v1.routers.saved_jobs",
+            "app.presentation.api.v1.routers.stats",
+            "app.presentation.api.v1.routers.users",
         ])
-        logger.info("✅ Dependency Injection container wired successfully")
+        logger.info("Ã¢Å“â€¦ Dependency Injection container wired successfully")
     except Exception as e:
-        logger.error(f"❌ Failed to wire DI container: {e}")
+        logger.error(f"Ã¢ÂÅ’ Failed to wire DI container: {e}")
         # Continue anyway - old code will still work
     
     yield
     
     # Shutdown
-    logger.info(f"🛑 Shutting down {settings.APP_NAME}")
+    logger.info(f"Ã°Å¸â€ºâ€˜ Shutting down {settings.APP_NAME}")
     
     # Reset DI container
     try:
         reset_container()
-        logger.info("✅ DI container reset successfully")
+        logger.info("Ã¢Å“â€¦ DI container reset successfully")
     except Exception as e:
-        logger.warning(f"⚠️  DI container reset warning: {e}")
+        logger.warning(f"Ã¢Å¡Â Ã¯Â¸Â  DI container reset warning: {e}")
     
     await close_db()
 
@@ -84,7 +84,7 @@ app = FastAPI(
 )
 
 
-# ── Middleware Configuration ─────────────────────────────────────────
+# Ã¢â€â‚¬Ã¢â€â‚¬ Middleware Configuration Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
@@ -95,7 +95,7 @@ app.add_middleware(
 )
 
 
-# ── Health Check Endpoint ────────────────────────────────────────────
+# Ã¢â€â‚¬Ã¢â€â‚¬ Health Check Endpoint Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 @app.get("/health", tags=["Health"])
 async def health_check():
     """
@@ -122,7 +122,7 @@ async def root():
     }
 
 
-# ── Error Handlers ───────────────────────────────────────────────────
+# Ã¢â€â‚¬Ã¢â€â‚¬ Error Handlers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """
@@ -137,7 +137,7 @@ async def global_exception_handler(request, exc):
     )
 
 
-# ── Router Registration ──────────────────────────────────────────────
+# Ã¢â€â‚¬Ã¢â€â‚¬ Router Registration Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 app.include_router(auth.router)
 app.include_router(jobs.router)
 app.include_router(saved_jobs.router)

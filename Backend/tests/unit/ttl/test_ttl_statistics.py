@@ -5,7 +5,7 @@ Tests cache statistics tracking and performance
 
 import pytest
 import time
-from app.core.redis import redis_client
+from app.infrastructure.cache.redis import redis_client
 
 
 class TestCacheStatistics:

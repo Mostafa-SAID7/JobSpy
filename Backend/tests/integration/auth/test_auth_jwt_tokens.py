@@ -8,7 +8,7 @@ Tests for JWT token creation, validation, and expiration.
 
 import pytest
 from datetime import timedelta
-from app.utils.security import (
+from app.shared.security.security import (
     create_access_token,
     create_refresh_token,
     decode_token,

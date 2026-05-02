@@ -5,9 +5,9 @@ Handles retrieving user statistics (saved jobs, alerts, searches).
 """
 
 from uuid import UUID
-from app.repositories.saved_job_repo import SavedJobRepository
-from app.repositories.alert_repo import AlertRepository
-from app.repositories.search_history_repo import SearchHistoryRepository
+from app.domain.interfaces.repositories import ISavedJobRepository as SavedJobRepository
+from app.domain.interfaces.repositories import IAlertRepository as AlertRepository
+from app.domain.interfaces.repositories import ISearchHistoryRepository as SearchHistoryRepository
 
 
 class GetUserStatsUseCase:

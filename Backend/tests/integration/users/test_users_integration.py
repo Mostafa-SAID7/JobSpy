@@ -9,12 +9,12 @@ from datetime import datetime, timedelta
 import secrets
 
 from app.main import app
-from app.models.user import User
-from app.models.job import Job
-from app.models.saved_job import SavedJob
-from app.models.alert import Alert
-from app.utils.security import hash_password
-from app.repositories.user_repo import UserRepository
+from app.domain.entities.user import User
+from app.domain.entities.job import Job
+from app.domain.entities.saved_job import SavedJob
+from app.domain.entities.alert import Alert
+from app.shared.security.security import hash_password
+from app.domain.interfaces.repositories import IUserRepository as UserRepository
 
 
 @pytest.fixture

@@ -5,8 +5,8 @@ Handles password reset confirmation with token.
 """
 
 from datetime import datetime
-from app.repositories.user_repo import UserRepository
-from app.utils.security import hash_password
+from app.domain.interfaces.repositories import IUserRepository as UserRepository
+from app.shared.security.security import hash_password
 from app.shared.exceptions.application_exceptions import NotFoundException, AuthorizationException
 
 

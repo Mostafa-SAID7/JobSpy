@@ -27,6 +27,11 @@ from app.domain.services.job_filtering_service import JobFilteringService
 
 # Infrastructure - Repositories
 from app.infrastructure.persistence.sqlalchemy.repositories.job_repository_impl import JobRepositoryImpl
+from app.infrastructure.persistence.sqlalchemy.repositories.user_repository_impl import UserRepositoryImpl
+from app.infrastructure.persistence.sqlalchemy.repositories.saved_job_repository_impl import SavedJobRepositoryImpl
+from app.infrastructure.persistence.sqlalchemy.repositories.alert_repository_impl import AlertRepositoryImpl
+from app.infrastructure.persistence.sqlalchemy.repositories.stats_repository_impl import StatsRepositoryImpl
+from app.infrastructure.persistence.sqlalchemy.repositories.search_history_repository_impl import SearchHistoryRepositoryImpl
 from app.infrastructure.persistence.redis.cache_repository_impl import CacheRepositoryImpl
 
 # Infrastructure - Mappers
@@ -82,16 +87,8 @@ from app.application.use_cases.users.confirm_password_reset_use_case import Conf
 from app.application.use_cases.users.update_user_preferences_use_case import UpdateUserPreferencesUseCase
 from app.application.use_cases.users.get_user_stats_use_case import GetUserStatsUseCase
 
-# Repositories
-from app.repositories.user_repo import UserRepository
-from app.repositories.saved_job_repo import SavedJobRepository
-from app.repositories.alert_repo import AlertRepository
-from app.repositories.stats_repo import StatsRepository
-from app.repositories.search_history_repo import SearchHistoryRepository
-
 # Services
-from app.services.stats_service import StatsService
-
+from app.application.services.stats_service import StatsService
 
 class Container(containers.DeclarativeContainer):
     """
@@ -123,27 +120,27 @@ class Container(containers.DeclarativeContainer):
     )
     
     user_repository = providers.Factory(
-        UserRepository,
+        UserRepositoryImpl,
         session=db_session,
     )
     
     saved_job_repository = providers.Factory(
-        SavedJobRepository,
+        SavedJobRepositoryImpl,
         session=db_session,
     )
     
     alert_repository = providers.Factory(
-        AlertRepository,
+        AlertRepositoryImpl,
         session=db_session,
     )
     
     stats_repository = providers.Factory(
-        StatsRepository,
+        StatsRepositoryImpl,
         session=db_session,
     )
     
     search_history_repository = providers.Factory(
-        SearchHistoryRepository,
+        SearchHistoryRepositoryImpl,
         session=db_session,
     )
     
@@ -401,7 +398,7 @@ def wire_container(modules: list[str]) -> None:
     This enables @inject decorator to work in the specified modules.
     
     Args:
-        modules: List of module paths to wire (e.g., ["app.routers.jobs"])
+        modules: List of module paths to wire (e.g., ["app.presentation.api.v1.routers.jobs"])
     """
     container.wire(modules=modules)
 

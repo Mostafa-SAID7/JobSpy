@@ -5,7 +5,7 @@ Handles email verification with token.
 """
 
 from datetime import datetime
-from app.repositories.user_repo import UserRepository
+from app.domain.interfaces.repositories import IUserRepository as UserRepository
 from app.shared.exceptions.application_exceptions import NotFoundException, AuthorizationException
 
 

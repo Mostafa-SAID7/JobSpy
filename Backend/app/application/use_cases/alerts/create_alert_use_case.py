@@ -5,8 +5,8 @@ Handles the creation of new job alerts for users.
 """
 
 from uuid import UUID
-from app.schemas.alert import AlertCreate, AlertResponse
-from app.repositories.alert_repo import AlertRepository
+from app.presentation.api.v1.schemas.alert import AlertCreate, AlertResponse
+from app.domain.interfaces.repositories import IAlertRepository as AlertRepository
 
 
 class CreateAlertUseCase:

@@ -5,8 +5,8 @@ Handles changing user password with current password verification.
 """
 
 from uuid import UUID
-from app.repositories.user_repo import UserRepository
-from app.utils.security import verify_password, hash_password
+from app.domain.interfaces.repositories import IUserRepository as UserRepository
+from app.shared.security.security import verify_password, hash_password
 from app.shared.exceptions.application_exceptions import NotFoundException, AuthorizationException
 
 

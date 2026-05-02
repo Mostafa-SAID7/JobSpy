@@ -32,7 +32,7 @@ async def test_saved_job_appears_in_user_list(job_id, user_id):
     
     **Validates: Requirements 5.1, 5.3**
     """
-    from app.repositories.saved_job_repo import SavedJobRepository
+    from app.domain.interfaces.repositories import ISavedJobRepository as SavedJobRepository
     
     db = AsyncMock(spec=AsyncSession)
     saved_job_repo = SavedJobRepository(db)
@@ -80,7 +80,7 @@ async def test_deleting_saved_job_removes_from_list(job_id, user_id):
     
     **Validates: Requirements 5.4**
     """
-    from app.repositories.saved_job_repo import SavedJobRepository
+    from app.domain.interfaces.repositories import ISavedJobRepository as SavedJobRepository
     
     db = AsyncMock(spec=AsyncSession)
     saved_job_repo = SavedJobRepository(db)
@@ -133,7 +133,7 @@ async def test_prevent_duplicate_saved_jobs(job_id, user_id):
     
     **Validates: Requirements 5.5**
     """
-    from app.repositories.saved_job_repo import SavedJobRepository
+    from app.domain.interfaces.repositories import ISavedJobRepository as SavedJobRepository
     
     db = AsyncMock(spec=AsyncSession)
     saved_job_repo = SavedJobRepository(db)

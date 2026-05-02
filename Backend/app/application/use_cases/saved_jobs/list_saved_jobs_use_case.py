@@ -8,8 +8,8 @@ import logging
 from dataclasses import dataclass
 from typing import List
 
-from app.models.saved_job import SavedJob
-from app.repositories.saved_job_repo import SavedJobRepository
+from app.domain.entities.saved_job import SavedJob
+from app.domain.interfaces.repositories import ISavedJobRepository
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class ListSavedJobsUseCase:
     Used by: List saved jobs endpoint
     """
     
-    def __init__(self, saved_job_repository: SavedJobRepository):
+    def __init__(self, saved_job_repository: ISavedJobRepository):
         """
         Initialize use case.
         

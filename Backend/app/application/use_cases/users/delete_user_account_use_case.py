@@ -5,7 +5,7 @@ Handles deleting a user account.
 """
 
 from uuid import UUID
-from app.repositories.user_repo import UserRepository
+from app.domain.interfaces.repositories import IUserRepository as UserRepository
 from app.shared.exceptions.application_exceptions import NotFoundException
 
 

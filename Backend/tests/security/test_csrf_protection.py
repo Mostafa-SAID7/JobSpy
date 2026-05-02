@@ -23,7 +23,7 @@ async def test_state_changing_operations_require_authentication():
     
     **Validates: Requirements 10.5**
     """
-    from app.routers.saved_jobs import router
+    from app.presentation.api.v1.routers.saved_jobs import router
     from fastapi.testclient import TestClient
     from fastapi import FastAPI
     
@@ -58,7 +58,7 @@ async def test_users_cannot_modify_other_users_data(user_id, other_user_id):
     
     **Validates: Requirements 10.5**
     """
-    from app.repositories.saved_job_repo import SavedJobRepository
+    from app.domain.interfaces.repositories import ISavedJobRepository as SavedJobRepository
     from sqlalchemy.ext.asyncio import AsyncSession
     
     db = AsyncMock(spec=AsyncSession)
@@ -86,7 +86,7 @@ async def test_post_requests_require_valid_content_type():
     
     **Validates: Requirements 10.5**
     """
-    from app.routers.saved_jobs import router
+    from app.presentation.api.v1.routers.saved_jobs import router
     from fastapi import FastAPI
     
     # Create a test app
@@ -117,7 +117,7 @@ async def test_delete_operations_require_authorization(job_id):
     
     **Validates: Requirements 10.5**
     """
-    from app.repositories.saved_job_repo import SavedJobRepository
+    from app.domain.interfaces.repositories import ISavedJobRepository as SavedJobRepository
     from sqlalchemy.ext.asyncio import AsyncSession
     
     db = AsyncMock(spec=AsyncSession)

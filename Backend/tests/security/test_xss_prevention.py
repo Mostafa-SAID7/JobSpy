@@ -34,7 +34,7 @@ async def test_xss_prevention_in_job_title(xss_payload):
     
     **Validates: Requirements 10.5**
     """
-    from app.schemas.job import JobResponse
+    from app.presentation.api.v1.schemas.job import JobResponse
     
     # Create a job response with XSS payload in title
     job_data = {
@@ -80,7 +80,7 @@ async def test_xss_prevention_in_search_results(xss_payload):
     
     **Validates: Requirements 10.5**
     """
-    from app.schemas.job import JobResponse
+    from app.presentation.api.v1.schemas.job import JobResponse
     
     # Create multiple job responses with XSS payloads
     jobs_data = [
@@ -119,7 +119,7 @@ async def test_html_escaping_in_responses():
     
     **Validates: Requirements 10.5**
     """
-    from app.schemas.job import JobResponse
+    from app.presentation.api.v1.schemas.job import JobResponse
     
     # Create a job with HTML special characters
     job_data = {

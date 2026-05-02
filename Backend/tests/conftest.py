@@ -31,9 +31,9 @@ backend_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(backend_dir))
 
 from app.main import app
-from app.core.database import Base, get_db
-from app.models.user import User
-from app.utils.security import hash_password
+from app.infrastructure.persistence.sqlalchemy.database import Base, get_db
+from app.domain.entities.user import User
+from app.shared.security.security import hash_password
 
 
 # Test database setup
@@ -91,7 +91,7 @@ async def test_user(db: AsyncSession) -> User:
 @pytest.fixture
 def auth_headers(test_user: User) -> dict:
     """Create authorization headers for a test user."""
-    from app.core.config import settings
+    from app.config.settings import settings
     from jose import jwt
 
     token = jwt.encode(
@@ -120,7 +120,7 @@ async def client(db: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 @pytest.fixture(autouse=True)
 async def mock_redis():
     """Replace redis with fakeredis for every test."""
-    from app.core.redis import redis_client
+    from app.infrastructure.cache.redis import redis_client
 
     fake_redis = fakeredis.aioredis.FakeRedis(decode_responses=True)
     redis_client.redis = fake_redis

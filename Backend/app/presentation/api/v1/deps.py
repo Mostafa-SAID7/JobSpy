@@ -11,7 +11,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
+from app.infrastructure.persistence.sqlalchemy.database import get_db
 from app.presentation.api.v1.dependencies import container
 
 # OAuth2 scheme for token authentication
@@ -81,7 +81,7 @@ async def get_current_user(
     # For now, this is a placeholder
     
     # Example implementation:
-    # from app.repositories.user_repo import UserRepository
+    # from app.domain.interfaces.repositories import IUserRepository as UserRepository
     # user_repo = UserRepository(db)
     # user = await user_repo.get_by_id(user_id)
     # if not user:

@@ -8,8 +8,8 @@ import logging
 from dataclasses import dataclass
 from datetime import timedelta
 
-from app.repositories.user_repo import UserRepository
-from app.utils.security import verify_password, create_access_token, create_refresh_token
+from app.domain.interfaces.repositories import IUserRepository as UserRepository
+from app.shared.security.security import verify_password, create_access_token, create_refresh_token
 
 logger = logging.getLogger(__name__)
 

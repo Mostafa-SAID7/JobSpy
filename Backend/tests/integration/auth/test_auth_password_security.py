@@ -7,7 +7,7 @@ Tests for password hashing and verification security.
 """
 
 import pytest
-from app.utils.security import hash_password, verify_password
+from app.shared.security.security import hash_password, verify_password
 
 
 class TestPasswordSecurity:

@@ -15,7 +15,7 @@ from uuid import uuid4
 from datetime import datetime
 
 from app.main import app
-from app.core.database import get_db
+from app.infrastructure.persistence.sqlalchemy.database import get_db
 
 
 @pytest.fixture

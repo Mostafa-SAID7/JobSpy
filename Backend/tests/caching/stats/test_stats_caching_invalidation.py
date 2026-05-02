@@ -6,9 +6,9 @@ Tests verify that statistics cache is properly invalidated
 import pytest
 from unittest.mock import AsyncMock, patch
 
-from app.core.redis import redis_client
-from app.repositories.stats_repo import StatsRepository
-from app.services.stats_service import StatsService
+from app.infrastructure.cache.redis import redis_client
+from app.domain.interfaces.repositories import IStatsRepository as StatsRepository
+from app.application.services.stats_service import StatsService
 
 
 @pytest.fixture

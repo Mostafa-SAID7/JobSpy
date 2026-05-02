@@ -7,11 +7,11 @@ import pytest
 from uuid import uuid4
 from unittest.mock import AsyncMock, patch, MagicMock
 
-from app.core.redis import redis_client
-from app.repositories.user_repo import UserRepository
-from app.repositories.search_history_repo import SearchHistoryRepository
-from app.schemas.user import UserUpdate
-from app.schemas.search_history import SearchHistoryCreate
+from app.infrastructure.cache.redis import redis_client
+from app.domain.interfaces.repositories import IUserRepository as UserRepository
+from app.domain.interfaces.repositories import ISearchHistoryRepository as SearchHistoryRepository
+from app.presentation.api.v1.schemas.user import UserUpdate
+from app.presentation.api.v1.schemas.search_history import SearchHistoryCreate
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

@@ -4,7 +4,7 @@ Tests cache invalidation works correctly with TTL
 """
 
 import pytest
-from app.core.redis import redis_client
+from app.infrastructure.cache.redis import redis_client
 
 
 class TestCacheInvalidationWithTTL:

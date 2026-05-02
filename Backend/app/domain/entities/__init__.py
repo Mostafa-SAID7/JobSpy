@@ -1,10 +1,10 @@
 """
 Domain Entities - Core business objects with identity
-
-Entities are defined by their identity (ID), not their attributes.
-They contain business logic and enforce invariants.
 """
 
 from .job import Job
+from .user import User
+from .saved_job import SavedJob
+from .alert import Alert
 
-__all__ = ["Job"]
+__all__ = ["Job", "User", "SavedJob", "Alert"]

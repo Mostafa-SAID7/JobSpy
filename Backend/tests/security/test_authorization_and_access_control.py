@@ -28,7 +28,7 @@ async def test_users_can_only_access_their_own_saved_jobs(user_id, other_user_id
     
     **Validates: Requirements 10.1, 10.5**
     """
-    from app.repositories.saved_job_repo import SavedJobRepository
+    from app.domain.interfaces.repositories import ISavedJobRepository as SavedJobRepository
     from sqlalchemy.ext.asyncio import AsyncSession
     
     db = AsyncMock(spec=AsyncSession)
@@ -67,7 +67,7 @@ async def test_users_cannot_delete_other_users_saved_jobs(user_id, other_user_id
     
     **Validates: Requirements 10.1, 10.5**
     """
-    from app.repositories.saved_job_repo import SavedJobRepository
+    from app.domain.interfaces.repositories import ISavedJobRepository as SavedJobRepository
     from sqlalchemy.ext.asyncio import AsyncSession
     
     db = AsyncMock(spec=AsyncSession)
@@ -104,7 +104,7 @@ async def test_users_can_only_update_their_own_profile(user_id):
     
     **Validates: Requirements 10.1, 10.5**
     """
-    from app.repositories.user_repo import UserRepository
+    from app.domain.interfaces.repositories import IUserRepository as UserRepository
     from sqlalchemy.ext.asyncio import AsyncSession
     
     db = AsyncMock(spec=AsyncSession)
@@ -139,7 +139,7 @@ async def test_unauthenticated_users_cannot_access_protected_endpoints():
     
     **Validates: Requirements 10.1, 10.5**
     """
-    from app.routers.saved_jobs import router
+    from app.presentation.api.v1.routers.saved_jobs import router
     from fastapi import FastAPI
     
     # Create a test app

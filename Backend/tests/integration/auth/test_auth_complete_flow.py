@@ -16,8 +16,8 @@ from uuid import uuid4
 from datetime import datetime
 
 from app.main import app
-from app.core.database import get_db
-from app.utils.security import create_access_token, decode_token
+from app.infrastructure.persistence.sqlalchemy.database import get_db
+from app.shared.security.security import create_access_token, decode_token
 
 
 @pytest.fixture

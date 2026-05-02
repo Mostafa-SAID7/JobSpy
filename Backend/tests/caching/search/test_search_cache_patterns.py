@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import AsyncMock
 
 from app.services.search_service import SearchService
-from app.core.config import settings
+from app.config.settings import settings
 
 
 class TestSearchCacheKeyPatterns:

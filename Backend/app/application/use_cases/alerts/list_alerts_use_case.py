@@ -5,8 +5,8 @@ Handles retrieving all alerts for a user with pagination.
 """
 
 from uuid import UUID
-from app.schemas.alert import AlertListResponse
-from app.repositories.alert_repo import AlertRepository
+from app.presentation.api.v1.schemas.alert import AlertListResponse
+from app.domain.interfaces.repositories import IAlertRepository as AlertRepository
 
 
 class ListAlertsUseCase:

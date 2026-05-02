@@ -5,8 +5,8 @@ Handles updating an existing alert with authorization.
 """
 
 from uuid import UUID
-from app.schemas.alert import AlertUpdate, AlertResponse
-from app.repositories.alert_repo import AlertRepository
+from app.presentation.api.v1.schemas.alert import AlertUpdate, AlertResponse
+from app.domain.interfaces.repositories import IAlertRepository as AlertRepository
 from app.shared.exceptions.application_exceptions import NotFoundException, AuthorizationException
 
 

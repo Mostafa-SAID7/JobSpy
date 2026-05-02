@@ -6,7 +6,7 @@ Handles password reset request generation.
 
 import secrets
 from datetime import datetime, timedelta
-from app.repositories.user_repo import UserRepository
+from app.domain.interfaces.repositories import IUserRepository as UserRepository
 
 
 class RequestPasswordResetUseCase:

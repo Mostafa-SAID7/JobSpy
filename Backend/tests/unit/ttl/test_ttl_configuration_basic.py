@@ -4,8 +4,8 @@ Verifies that TTL configuration is working correctly for different cache types
 """
 
 import pytest
-from app.core.redis import redis_client
-from app.core.config import settings
+from app.infrastructure.cache.redis import redis_client
+from app.config.settings import settings
 
 
 class TestTTLConfiguration:

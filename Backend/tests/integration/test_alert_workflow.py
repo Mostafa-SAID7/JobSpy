@@ -4,7 +4,7 @@ Integration tests for alert management workflow
 import pytest
 from httpx import AsyncClient
 
-from app.models.user import User
+from app.domain.entities.user import User
 
 
 @pytest.mark.asyncio

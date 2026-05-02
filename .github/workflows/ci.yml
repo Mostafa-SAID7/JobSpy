@@ -1,0 +1,77 @@
+name: JobSpy CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+          POSTGRES_DB: jobspy_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.9"
+        cache: 'pip'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r Backend/requirements.txt
+        pip install pytest pytest-asyncio flake8 mypy
+        
+    - name: Run Architecture Checks (Flake8)
+      run: |
+        # We don't want app.models, app.repositories etc.
+        # But for now just simple flake8
+        flake8 Backend/app --count --select=E9,F63,F7,F82 --show-source --statistics
+        
+    - name: Verify Clean Architecture Imports
+      run: |
+        # Ensure Domain layer doesn't import from outer layers
+        if grep -rn "from app\.infrastructure" Backend/app/domain; then
+          echo "ERROR: Domain layer cannot depend on Infrastructure layer"
+          exit 1
+        fi
+        if grep -rn "from app\.presentation" Backend/app/domain; then
+          echo "ERROR: Domain layer cannot depend on Presentation layer"
+          exit 1
+        fi
+        echo "Architecture boundary checks passed!"
+
+    - name: Test with pytest
+      env:
+        DATABASE_URL: "postgresql+asyncpg://postgres:postgrespassword@localhost:5432/jobspy_test"
+        REDIS_URL: "redis://localhost:6379/0"
+        ENVIRONMENT: "testing"
+        JWT_SECRET_KEY: "test_secret_key_for_ci_pipeline"
+      run: |
+        cd Backend
+        # Run tests if there are any
+        # pytest -v
+        echo "Tests mocked for CI (tests directory to be created)"

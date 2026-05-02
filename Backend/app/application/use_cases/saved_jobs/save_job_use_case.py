@@ -7,10 +7,9 @@ Handles saving a job for a user.
 import logging
 from uuid import UUID
 
-from app.schemas.saved_job import SavedJobCreate
-from app.models.saved_job import SavedJob
-from app.repositories.saved_job_repo import SavedJobRepository
-from app.repositories.job_repo import JobRepository
+from app.presentation.api.v1.schemas.saved_job import SavedJobCreate
+from app.domain.entities.saved_job import SavedJob
+from app.domain.interfaces.repositories import ISavedJobRepository, IJobRepository
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +29,8 @@ class SaveJobUseCase:
     
     def __init__(
         self,
-        saved_job_repository: SavedJobRepository,
-        job_repository: JobRepository,
+        saved_job_repository: ISavedJobRepository,
+        job_repository: IJobRepository,
     ):
         """
         Initialize use case.
@@ -75,9 +74,14 @@ class SaveJobUseCase:
             logger.warning(f"Job already saved: {saved_job_create.job_id} for user {user_id}")
             raise ValueError("Job is already saved")
         
-        # Create saved job
+        # Create saved job domain entity and persist
         try:
-            saved_job = await self.saved_job_repository.create(user_id, saved_job_create)
+            domain_saved_job = SavedJob(
+                user_id=user_id,
+                job_id=saved_job_create.job_id,
+                notes=getattr(saved_job_create, 'notes', None),
+            )
+            saved_job = await self.saved_job_repository.create(domain_saved_job)
             logger.info(f"Job saved successfully: {saved_job.id}")
             return saved_job
         except Exception as e:

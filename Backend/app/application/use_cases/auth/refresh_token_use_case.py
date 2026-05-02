@@ -8,7 +8,7 @@ import logging
 from dataclasses import dataclass
 from datetime import timedelta
 
-from app.utils.security import decode_token, create_access_token
+from app.shared.security.security import decode_token, create_access_token
 
 logger = logging.getLogger(__name__)
 

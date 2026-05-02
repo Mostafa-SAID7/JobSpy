@@ -5,8 +5,8 @@ Handles retrieving the current user's profile.
 """
 
 from uuid import UUID
-from app.schemas.user import UserResponse
-from app.repositories.user_repo import UserRepository
+from app.presentation.api.v1.schemas.user import UserResponse
+from app.domain.interfaces.repositories import IUserRepository as UserRepository
 from app.shared.exceptions.application_exceptions import NotFoundException
 
 

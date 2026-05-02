@@ -6,15 +6,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-from app.models.user import User
-from app.models.job import Job
-from app.models.saved_job import SavedJob
-from app.repositories.user_repo import UserRepository
-from app.repositories.job_repo import JobRepository
-from app.repositories.saved_job_repo import SavedJobRepository
-from app.schemas.user import UserCreate, UserUpdate
-from app.schemas.job import JobCreate, JobUpdate
-from app.schemas.saved_job import SavedJobCreate, SavedJobUpdate
+from app.domain.entities.user import User
+from app.domain.entities.job import Job
+from app.domain.entities.saved_job import SavedJob
+from app.domain.interfaces.repositories import IUserRepository as UserRepository
+from app.domain.interfaces.repositories import IJobRepository as JobRepository
+from app.domain.interfaces.repositories import ISavedJobRepository as SavedJobRepository
+from app.presentation.api.v1.schemas.user import UserCreate, UserUpdate
+from app.presentation.api.v1.schemas.job import JobCreate, JobUpdate
+from app.presentation.api.v1.schemas.saved_job import SavedJobCreate, SavedJobUpdate
 
 
 # ---------------------------------------------------------------------------

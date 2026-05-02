@@ -5,7 +5,7 @@ Tests that cached data expires correctly after TTL
 
 import pytest
 import asyncio
-from app.core.redis import redis_client
+from app.infrastructure.cache.redis import redis_client
 
 
 class TestTTLExpiration:

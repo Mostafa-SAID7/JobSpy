@@ -8,9 +8,9 @@ from uuid import uuid4
 from datetime import datetime
 from unittest.mock import AsyncMock, patch
 
-from app.core.redis import redis_client
-from app.repositories.job_repo import JobRepository
-from app.schemas.job import JobCreate
+from app.infrastructure.cache.redis import redis_client
+from app.domain.interfaces.repositories import IJobRepository as JobRepository
+from app.presentation.api.v1.schemas.job import JobCreate
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

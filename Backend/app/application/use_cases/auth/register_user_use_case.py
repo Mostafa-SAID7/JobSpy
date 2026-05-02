@@ -8,10 +8,10 @@ import logging
 from dataclasses import dataclass
 from typing import Optional
 
-from app.schemas.user import UserCreate
-from app.models.user import User
-from app.repositories.user_repo import UserRepository
-from app.utils.security import hash_password
+from app.presentation.api.v1.schemas.user import UserCreate
+from app.domain.entities.user import User
+from app.domain.interfaces.repositories import IUserRepository
+from app.shared.security.security import hash_password
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class RegisterUserUseCase:
     Used by: Registration endpoint
     """
     
-    def __init__(self, user_repository: UserRepository):
+    def __init__(self, user_repository: IUserRepository):
         """
         Initialize use case.
         
@@ -69,10 +69,15 @@ class RegisterUserUseCase:
         
         # Hash password
         hashed_password = hash_password(user_create.password)
-        
-        # Create user
+
+        # Build domain entity and create via repository
         try:
-            user = await self.user_repository.create(user_create, hashed_password)
+            domain_user = User(
+                email=user_create.email,
+                full_name=user_create.full_name,
+                hashed_password=hashed_password,
+            )
+            user = await self.user_repository.create(domain_user)
             logger.info(f"User registered successfully: {user.id}")
             return user
         except Exception as e:

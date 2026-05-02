@@ -32,8 +32,8 @@ async def test_email_uniqueness_constraint(email):
     
     **Validates: Requirements 4.2**
     """
-    from app.repositories.user_repo import UserRepository
-    from app.schemas.user import UserCreate
+    from app.domain.interfaces.repositories import IUserRepository as UserRepository
+    from app.presentation.api.v1.schemas.user import UserCreate
     from sqlalchemy.ext.asyncio import AsyncSession
     
     db = AsyncMock(spec=AsyncSession)

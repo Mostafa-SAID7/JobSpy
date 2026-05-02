@@ -8,7 +8,7 @@ import logging
 from typing import Any, Optional
 
 from app.domain.interfaces.cache_repository import ICacheRepository
-from app.core.redis import redis_client
+from app.infrastructure.cache.redis import redis_client
 
 logger = logging.getLogger(__name__)
 

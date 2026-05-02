@@ -35,7 +35,7 @@ async def test_sql_injection_prevention_in_search(malicious_input):
     
     **Validates: Requirements 10.5**
     """
-    from app.repositories.job_repo import JobRepository
+    from app.domain.interfaces.repositories import IJobRepository as JobRepository
     
     db = AsyncMock(spec=AsyncSession)
     job_repo = JobRepository(db)
@@ -77,7 +77,7 @@ async def test_sql_injection_prevention_in_filters(malicious_input):
     
     **Validates: Requirements 10.5**
     """
-    from app.repositories.job_repo import JobRepository
+    from app.domain.interfaces.repositories import IJobRepository as JobRepository
     
     db = AsyncMock(spec=AsyncSession)
     job_repo = JobRepository(db)
@@ -113,7 +113,7 @@ async def test_parameterized_queries_used():
     
     **Validates: Requirements 10.5**
     """
-    from app.repositories.job_repo import JobRepository
+    from app.domain.interfaces.repositories import IJobRepository as JobRepository
     
     db = AsyncMock(spec=AsyncSession)
     job_repo = JobRepository(db)

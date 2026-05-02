@@ -5,9 +5,9 @@ Tests stats and search service caching with TTL
 
 import pytest
 from unittest.mock import AsyncMock
-from app.services.stats_service import StatsService
+from app.application.services.stats_service import StatsService
 from app.services.search_service import SearchService
-from app.repositories.stats_repo import StatsRepository
+from app.domain.interfaces.repositories import IStatsRepository as StatsRepository
 
 
 class TestStatsServiceCaching:
