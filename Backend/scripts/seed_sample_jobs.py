@@ -1,6 +1,8 @@
 """
-Sample Job Data Seeder
-Creates sample job data for testing the JobSpy application
+Sample Job Data Seeder (Refactored to Clean Architecture)
+
+Creates sample job data for testing the JobSpy application.
+Now uses Clean Architecture with use cases and dependency injection.
 """
 import asyncio
 import sys
@@ -16,7 +18,13 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 from app.core.database import Base
-from app.services.job_processing_service import JobProcessingService
+
+# Clean Architecture imports
+from app.infrastructure.persistence.sqlalchemy.repositories.job_repository_impl import JobRepositoryImpl
+from app.domain.services.job_scoring_service import JobScoringService
+from app.domain.services.skill_extraction_service import SkillExtractionService
+from app.application.mappers.job_mapper import JobMapper
+from app.application.use_cases.scraping.process_scraped_jobs_use_case import ProcessScrapedJobsUseCase
 
 # Sample job data
 SAMPLE_JOBS = [
@@ -232,8 +240,12 @@ SAMPLE_JOBS = [
 
 
 async def seed_jobs():
-    """Seed the database with sample job data."""
-    print("🌱 Starting job data seeding...")
+    """
+    Seed the database with sample job data.
+    
+    REFACTORED: Now uses Clean Architecture with use cases.
+    """
+    print("🌱 Starting job data seeding (Clean Architecture)...")
     
     # Create database engine
     engine = create_async_engine(
@@ -252,15 +264,30 @@ async def seed_jobs():
     )
     
     async with AsyncSessionLocal() as session:
-        job_processor = JobProcessingService(session)
+        # Initialize dependencies (Clean Architecture)
+        job_repository = JobRepositoryImpl(session)
+        scoring_service = JobScoringService()
+        skill_service = SkillExtractionService()
+        job_mapper = JobMapper()
+        
+        # Create use case
+        process_jobs_use_case = ProcessScrapedJobsUseCase(
+            job_repository=job_repository,
+            scoring_service=scoring_service,
+            skill_service=skill_service,
+            job_mapper=job_mapper,
+        )
         
         print(f"📝 Processing {len(SAMPLE_JOBS)} sample jobs...")
         
-        # Process jobs using the unified pipeline
-        result = await job_processor.process_scraped_jobs(
+        # Process jobs using the use case
+        result = await process_jobs_use_case.execute(
             SAMPLE_JOBS, 
             source="SampleData"
         )
+        
+        # Commit the transaction
+        await session.commit()
         
         print(f"✅ Seeding completed!")
         print(f"   - Saved: {result['saved']} jobs")
