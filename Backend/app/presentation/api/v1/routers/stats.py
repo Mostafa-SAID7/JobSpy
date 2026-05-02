@@ -11,7 +11,7 @@ from dependency_injector.wiring import inject, Provide
 
 from app.infrastructure.persistence.sqlalchemy.database import get_db
 
-from app.presentation.api.v1.dependencies import Container
+from app.container import Container
 from app.application.services.stats_service import StatsService
 
 router = APIRouter(prefix="/api/v1/stats", tags=["Statistics"])
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api/v1/stats", tags=["Statistics"])
 async def get_job_statistics(
     use_cache: bool = True,
     db: AsyncSession = Depends(get_db),
-    stats_service: StatsService = Depends(Provide[Container.stats_service]),
+    stats_service: StatsService = Depends(Provide[Container.application.stats_service]),
 ):
     """
     Get comprehensive job statistics
@@ -57,7 +57,7 @@ async def get_job_statistics(
 async def get_user_statistics(
     use_cache: bool = True,
     db: AsyncSession = Depends(get_db),
-    stats_service: StatsService = Depends(Provide[Container.stats_service]),
+    stats_service: StatsService = Depends(Provide[Container.application.stats_service]),
 ):
     """
     Get user statistics
@@ -87,7 +87,7 @@ async def get_user_statistics(
 async def get_search_statistics(
     use_cache: bool = True,
     db: AsyncSession = Depends(get_db),
-    stats_service: StatsService = Depends(Provide[Container.stats_service]),
+    stats_service: StatsService = Depends(Provide[Container.application.stats_service]),
 ):
     """
     Get search statistics
@@ -117,7 +117,7 @@ async def get_search_statistics(
 async def get_saved_jobs_statistics(
     use_cache: bool = True,
     db: AsyncSession = Depends(get_db),
-    stats_service: StatsService = Depends(Provide[Container.stats_service]),
+    stats_service: StatsService = Depends(Provide[Container.application.stats_service]),
 ):
     """
     Get saved jobs statistics
@@ -144,7 +144,7 @@ async def get_saved_jobs_statistics(
 async def get_dashboard_statistics(
     use_cache: bool = True,
     db: AsyncSession = Depends(get_db),
-    stats_service: StatsService = Depends(Provide[Container.stats_service]),
+    stats_service: StatsService = Depends(Provide[Container.application.stats_service]),
 ):
     """
     Get comprehensive dashboard statistics
@@ -173,7 +173,7 @@ async def get_dashboard_statistics(
 @inject
 async def invalidate_job_statistics(
     db: AsyncSession = Depends(get_db),
-    stats_service: StatsService = Depends(Provide[Container.stats_service]),
+    stats_service: StatsService = Depends(Provide[Container.application.stats_service]),
 ):
     """
     Invalidate job statistics cache
@@ -199,7 +199,7 @@ async def invalidate_job_statistics(
 @inject
 async def invalidate_user_statistics(
     db: AsyncSession = Depends(get_db),
-    stats_service: StatsService = Depends(Provide[Container.stats_service]),
+    stats_service: StatsService = Depends(Provide[Container.application.stats_service]),
 ):
     """
     Invalidate user statistics cache
@@ -225,7 +225,7 @@ async def invalidate_user_statistics(
 @inject
 async def invalidate_search_statistics(
     db: AsyncSession = Depends(get_db),
-    stats_service: StatsService = Depends(Provide[Container.stats_service]),
+    stats_service: StatsService = Depends(Provide[Container.application.stats_service]),
 ):
     """
     Invalidate search statistics cache
@@ -251,7 +251,7 @@ async def invalidate_search_statistics(
 @inject
 async def invalidate_saved_jobs_statistics(
     db: AsyncSession = Depends(get_db),
-    stats_service: StatsService = Depends(Provide[Container.stats_service]),
+    stats_service: StatsService = Depends(Provide[Container.application.stats_service]),
 ):
     """
     Invalidate saved jobs statistics cache
@@ -277,7 +277,7 @@ async def invalidate_saved_jobs_statistics(
 @inject
 async def invalidate_all_statistics(
     db: AsyncSession = Depends(get_db),
-    stats_service: StatsService = Depends(Provide[Container.stats_service]),
+    stats_service: StatsService = Depends(Provide[Container.application.stats_service]),
 ):
     """
     Invalidate all statistics cache

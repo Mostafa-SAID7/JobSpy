@@ -5,7 +5,7 @@ Tests that the DI container is properly configured and can provide
 all required dependencies.
 """
 import pytest
-from app.presentation.api.v1.dependencies import container, get_container, reset_container
+from app.container import container, get_container, reset_container
 
 # Domain Services
 from app.domain.services.job_scoring_service import JobScoringService

@@ -17,7 +17,7 @@ from app.infrastructure.persistence.sqlalchemy.database import init_db, close_db
 from app.presentation.api.v1.routers import auth, jobs, saved_jobs, alerts, users, stats
 
 # Import DI container
-from app.presentation.api.v1.dependencies import wire_container, reset_container
+from app.container import wire_container, reset_container
 
 # Setup logging
 setup_logging()
@@ -51,6 +51,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             "app.presentation.api.v1.routers.saved_jobs",
             "app.presentation.api.v1.routers.stats",
             "app.presentation.api.v1.routers.users",
+            "app.infrastructure.tasks.tasks",
         ])
         logger.info("Ã¢Å“â€¦ Dependency Injection container wired successfully")
     except Exception as e:

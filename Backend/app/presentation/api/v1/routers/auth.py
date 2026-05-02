@@ -11,8 +11,8 @@ import logging
 from dependency_injector.wiring import inject, Provide
 
 from app.infrastructure.persistence.sqlalchemy.database import get_db
-from app.presentation.api.v1.schemas.user import UserCreate, UserResponse
-from app.presentation.api.v1.dependencies import Container
+from app.presentation.api.v1.schemas.user import UserCreate, UserResponse, UserLogin
+from app.container import Container
 
 # Use Cases
 from app.application.use_cases.auth.register_user_use_case import RegisterUserUseCase
@@ -29,7 +29,7 @@ router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 async def register(
     user_create: UserCreate,
     db: AsyncSession = Depends(get_db),
-    use_case: RegisterUserUseCase = Depends(Provide[Container.register_user_use_case]),
+    use_case: RegisterUserUseCase = Depends(Provide[Container.application.register_user_use_case]),
 ):
     """
     Register a new user.
@@ -68,10 +68,9 @@ async def register(
 @router.post("/login")
 @inject
 async def login(
-    email: str,
-    password: str,
+    login_data: UserLogin,
     db: AsyncSession = Depends(get_db),
-    use_case: LoginUserUseCase = Depends(Provide[Container.login_user_use_case]),
+    use_case: LoginUserUseCase = Depends(Provide[Container.application.login_user_use_case]),
 ):
     """
     Login user and return tokens.
@@ -83,13 +82,14 @@ async def login(
         Container.db_session.override(db)
         
         # Execute use case
-        result = await use_case.execute(email, password)
+        result = await use_case.execute(login_data.email, login_data.password)
         
         return {
             "access_token": result.access_token,
             "refresh_token": result.refresh_token,
             "token_type": result.token_type,
-            "expires_in": result.expires_in
+            "expires_in": result.expires_in,
+            "user": result.user
         }
         
     except ValueError as e:
@@ -115,7 +115,7 @@ async def login(
 @inject
 async def refresh(
     refresh_token: str,
-    use_case: RefreshTokenUseCase = Depends(Provide[Container.refresh_token_use_case]),
+    use_case: RefreshTokenUseCase = Depends(Provide[Container.application.refresh_token_use_case]),
 ):
     """
     Refresh access token using refresh token.

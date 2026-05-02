@@ -5,7 +5,7 @@
 
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { setLocalStorage, getLocalStorage } from '@/utils/useLocalStorage'
+import { setLocalStorage, getLocalStorage } from '@/shared/utils/useLocalStorage'
 
 export interface Toast {
   id: string

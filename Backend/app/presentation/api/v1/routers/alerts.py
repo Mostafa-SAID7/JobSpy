@@ -13,7 +13,7 @@ from dependency_injector.wiring import inject, Provide
 from app.infrastructure.persistence.sqlalchemy.database import get_db
 from app.presentation.api.v1.schemas.alert import AlertCreate, AlertUpdate, AlertResponse, AlertListResponse
 from app.shared.security.security import get_current_user
-from app.presentation.api.v1.dependencies import Container
+from app.container import Container
 
 # Use Cases
 from app.application.use_cases.alerts.create_alert_use_case import CreateAlertUseCase
@@ -34,7 +34,7 @@ async def create_alert(
     alert_create: AlertCreate,
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: CreateAlertUseCase = Depends(Provide[Container.create_alert_use_case]),
+    use_case: CreateAlertUseCase = Depends(Provide[Container.application.create_alert_use_case]),
 ):
     """
     Create a new alert.
@@ -65,7 +65,7 @@ async def get_alert(
     alert_id: UUID,
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: GetAlertUseCase = Depends(Provide[Container.get_alert_use_case]),
+    use_case: GetAlertUseCase = Depends(Provide[Container.application.get_alert_use_case]),
 ):
     """
     Get alert by ID.
@@ -94,7 +94,7 @@ async def list_alerts(
     limit: int = Query(100, ge=1, le=1000),
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: ListAlertsUseCase = Depends(Provide[Container.list_alerts_use_case]),
+    use_case: ListAlertsUseCase = Depends(Provide[Container.application.list_alerts_use_case]),
 ):
     """
     Get all alerts for current user.
@@ -118,7 +118,7 @@ async def update_alert(
     alert_update: AlertUpdate,
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: UpdateAlertUseCase = Depends(Provide[Container.update_alert_use_case]),
+    use_case: UpdateAlertUseCase = Depends(Provide[Container.application.update_alert_use_case]),
 ):
     """
     Update alert.
@@ -155,7 +155,7 @@ async def delete_alert(
     alert_id: UUID,
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: DeleteAlertUseCase = Depends(Provide[Container.delete_alert_use_case]),
+    use_case: DeleteAlertUseCase = Depends(Provide[Container.application.delete_alert_use_case]),
 ):
     """
     Delete alert.

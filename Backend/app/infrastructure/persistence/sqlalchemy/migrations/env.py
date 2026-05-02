@@ -22,7 +22,16 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from app.infrastructure.persistence.sqlalchemy.database import Base
+# Import models to ensure they are registered with Base.metadata
+from app.infrastructure.persistence.sqlalchemy.models.job_orm import JobORM
+from app.infrastructure.persistence.sqlalchemy.models.user_orm import UserORM
+from app.infrastructure.persistence.sqlalchemy.models.saved_job_orm import SavedJobORM
+from app.infrastructure.persistence.sqlalchemy.models.alert_orm import AlertORM
+from app.infrastructure.persistence.sqlalchemy.models.search_history_orm import SearchHistoryORM
+
 target_metadata = Base.metadata
+
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -45,7 +54,7 @@ def run_migrations_offline() -> None:
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = os.getenv(
         "DATABASE_URL",
-        "postgresql://user:password@localhost/jobspy"
+        "postgresql+asyncpg://user:password@localhost/jobspy"
     )
 
     context.configure(
@@ -77,11 +86,10 @@ async def run_async_migrations():
         "postgresql+asyncpg://user:password@localhost/jobspy"
     )
 
-    connectable = engine_from_config(
+    connectable = async_engine_from_config(
         configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
-        future=True,
     )
 
     async with connectable.begin() as connection:
@@ -100,7 +108,14 @@ def run_migrations_online() -> None:
     if context.is_offline_mode():
         run_migrations_offline()
     else:
-        asyncio.run(run_async_migrations())
+        try:
+            asyncio.run(run_async_migrations())
+        except RuntimeError:
+            # If a loop is already running, we might need a different approach
+            # but for standard CLI usage, asyncio.run is the correct way.
+            # In CI/CD or scripts, this is the safest.
+            loop = asyncio.get_event_loop_policy().get_event_loop()
+            loop.run_until_complete(run_async_migrations())
 
 
 if context.is_offline_mode():

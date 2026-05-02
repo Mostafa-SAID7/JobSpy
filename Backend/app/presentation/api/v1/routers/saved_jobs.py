@@ -13,7 +13,7 @@ from dependency_injector.wiring import inject, Provide
 
 from app.infrastructure.persistence.sqlalchemy.database import get_db
 from app.presentation.api.v1.schemas.saved_job import SavedJobCreate, SavedJobUpdate, SavedJobDetailResponse, SavedJobListResponse
-from app.presentation.api.v1.dependencies import Container
+from app.container import Container
 from app.shared.security.security import get_current_user
 
 # Use Cases
@@ -34,7 +34,7 @@ async def save_job(
     saved_job_create: SavedJobCreate,
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: SaveJobUseCase = Depends(Provide[Container.save_job_use_case]),
+    use_case: SaveJobUseCase = Depends(Provide[Container.application.save_job_use_case]),
 ):
     """
     Save a job.
@@ -93,7 +93,7 @@ async def list_saved_jobs(
     limit: int = Query(100, ge=1, le=1000),
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: ListSavedJobsUseCase = Depends(Provide[Container.list_saved_jobs_use_case]),
+    use_case: ListSavedJobsUseCase = Depends(Provide[Container.application.list_saved_jobs_use_case]),
 ):
     """
     Get all saved jobs for current user.
@@ -141,7 +141,7 @@ async def update_saved_job(
     saved_job_update: SavedJobUpdate,
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: UpdateSavedJobUseCase = Depends(Provide[Container.update_saved_job_use_case]),
+    use_case: UpdateSavedJobUseCase = Depends(Provide[Container.application.update_saved_job_use_case]),
 ):
     """
     Update saved job notes.
@@ -200,7 +200,7 @@ async def delete_saved_job(
     saved_job_id: UUID,
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: DeleteSavedJobUseCase = Depends(Provide[Container.delete_saved_job_use_case]),
+    use_case: DeleteSavedJobUseCase = Depends(Provide[Container.application.delete_saved_job_use_case]),
 ):
     """
     Delete saved job.
@@ -258,7 +258,7 @@ async def unsave_job(
     job_id: UUID,
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: UnsaveJobUseCase = Depends(Provide[Container.unsave_job_use_case]),
+    use_case: UnsaveJobUseCase = Depends(Provide[Container.application.unsave_job_use_case]),
 ):
     """
     Unsave a job.

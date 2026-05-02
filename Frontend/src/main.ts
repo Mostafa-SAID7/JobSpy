@@ -5,12 +5,12 @@
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import App from './App.vue'
-import router from './router'
-import './styles/index.css'
-import { useAuthStore } from './stores/auth'
+import App from './app/App.vue'
+import router from './app/router'
+import './assets/styles/index.css'
+import { useAuthStore } from './features/auth/stores/auth'
 import { useUIStore } from './stores/ui'
-import { usePreferencesStore } from './stores/preferences'
+import { usePreferencesStore } from './features/profile/stores/preferences'
 
 // Global error handler for browser extension conflicts
 window.addEventListener('error', (event) => {

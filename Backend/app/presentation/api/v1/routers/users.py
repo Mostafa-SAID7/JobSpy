@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from app.infrastructure.persistence.sqlalchemy.database import get_db
 from app.presentation.api.v1.schemas.user import UserResponse, UserUpdate
 from app.shared.security.security import get_current_user
-from app.presentation.api.v1.dependencies import Container
+from app.container import Container
 
 # Use Cases
 from app.application.use_cases.users.get_user_profile_use_case import GetUserProfileUseCase
@@ -61,7 +61,7 @@ class EmailVerificationRequest(BaseModel):
 async def get_current_user_profile(
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: GetUserProfileUseCase = Depends(Provide[Container.get_user_profile_use_case]),
+    use_case: GetUserProfileUseCase = Depends(Provide[Container.application.get_user_profile_use_case]),
 ):
     """Get current user profile."""
     try:
@@ -80,7 +80,7 @@ async def update_user_profile(
     user_update: UserUpdate,
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: UpdateUserProfileUseCase = Depends(Provide[Container.update_user_profile_use_case]),
+    use_case: UpdateUserProfileUseCase = Depends(Provide[Container.application.update_user_profile_use_case]),
 ):
     """Update current user profile."""
     try:
@@ -117,7 +117,7 @@ async def update_user_profile(
 async def delete_user_account(
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: DeleteUserAccountUseCase = Depends(Provide[Container.delete_user_account_use_case]),
+    use_case: DeleteUserAccountUseCase = Depends(Provide[Container.application.delete_user_account_use_case]),
 ):
     """Delete current user account."""
     try:
@@ -144,7 +144,7 @@ async def change_password(
     password_change: PasswordChangeRequest,
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: ChangePasswordUseCase = Depends(Provide[Container.change_password_use_case]),
+    use_case: ChangePasswordUseCase = Depends(Provide[Container.application.change_password_use_case]),
 ):
     """Change current user password."""
     try:
@@ -181,7 +181,7 @@ async def change_password(
 async def send_email_verification(
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: GetUserProfileUseCase = Depends(Provide[Container.get_user_profile_use_case]),
+    use_case: GetUserProfileUseCase = Depends(Provide[Container.application.get_user_profile_use_case]),
 ):
     """Send email verification link to current user."""
     try:
@@ -226,7 +226,7 @@ async def send_email_verification(
 async def verify_email(
     verification: EmailVerificationRequest,
     db: AsyncSession = Depends(get_db),
-    use_case: VerifyEmailUseCase = Depends(Provide[Container.verify_email_use_case]),
+    use_case: VerifyEmailUseCase = Depends(Provide[Container.application.verify_email_use_case]),
 ):
     """Verify email with token."""
     try:
@@ -259,7 +259,7 @@ async def verify_email(
 async def request_password_reset(
     reset_request: PasswordResetRequest,
     db: AsyncSession = Depends(get_db),
-    use_case: RequestPasswordResetUseCase = Depends(Provide[Container.request_password_reset_use_case]),
+    use_case: RequestPasswordResetUseCase = Depends(Provide[Container.application.request_password_reset_use_case]),
 ):
     """Request password reset."""
     try:
@@ -278,7 +278,7 @@ async def request_password_reset(
 async def confirm_password_reset(
     reset_confirm: PasswordResetConfirm,
     db: AsyncSession = Depends(get_db),
-    use_case: ConfirmPasswordResetUseCase = Depends(Provide[Container.confirm_password_reset_use_case]),
+    use_case: ConfirmPasswordResetUseCase = Depends(Provide[Container.application.confirm_password_reset_use_case]),
 ):
     """Confirm password reset with token."""
     try:
@@ -311,7 +311,7 @@ async def confirm_password_reset(
 async def get_user_preferences(
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: GetUserProfileUseCase = Depends(Provide[Container.get_user_profile_use_case]),
+    use_case: GetUserProfileUseCase = Depends(Provide[Container.application.get_user_profile_use_case]),
 ):
     """Get user preferences from database."""
     try:
@@ -333,7 +333,7 @@ async def update_user_preferences(
     preferences: UserPreferences,
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: UpdateUserPreferencesUseCase = Depends(Provide[Container.update_user_preferences_use_case]),
+    use_case: UpdateUserPreferencesUseCase = Depends(Provide[Container.application.update_user_preferences_use_case]),
 ):
     """Update user preferences in database."""
     try:
@@ -360,7 +360,7 @@ async def update_user_preferences(
 async def get_user_stats(
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    use_case: GetUserStatsUseCase = Depends(Provide[Container.get_user_stats_use_case]),
+    use_case: GetUserStatsUseCase = Depends(Provide[Container.application.get_user_stats_use_case]),
 ):
     """Get user statistics (saved jobs, alerts, searches)."""
     try:

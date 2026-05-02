@@ -8,34 +8,24 @@ ScrapingService has been replaced with ProcessScrapedJobsUseCase.
 """
 
 import logging
+import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, Any, List
 
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-
 from app.infrastructure.tasks.celery_app import celery_app
 from app.config.settings import settings
-from app.services.alert_service import AlertService
-from app.infrastructure.external.email_service import EmailService
-from app.domain.interfaces.repositories import IJobRepository as JobRepository
-from app.domain.interfaces.repositories import IAlertRepository as AlertRepository
+from app.container import Container
+from dependency_injector.wiring import Provide, inject
+
+# Use cases
+from app.application.use_cases.alert_processing.trigger_alert_use_case import TriggerAlertUseCase
+from app.application.use_cases.scraping.process_scraped_jobs_use_case import ProcessScrapedJobsUseCase
 
 logger = logging.getLogger(__name__)
 
-
-# Create async database session for Celery tasks
-async_engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=False,
-    future=True,
-)
-
-AsyncSessionLocal = sessionmaker(
-    async_engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-)
+# Initialize container and wire this module
+container = Container()
+container.wire(modules=[__name__])
 
 
 # â”€â”€ Scraping Tasks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -268,20 +258,25 @@ def update_job_database(self, jobs_data: List[Dict[str, Any]], source: str):
 # â”€â”€ Alert Tasks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @celery_app.task(bind=True)
-def check_alerts(self):
+@inject
+def check_alerts(
+    self,
+    trigger_use_case: TriggerAlertUseCase = Provide[Container.application.trigger_alert_use_case]
+):
     """
     Check all active alerts and trigger if needed.
-    
-    Returns:
-        Dictionary with alert check results
     """
     try:
         logger.info("Starting alert check task")
         
-        # This would use AlertService to check alerts
+        # Run the async use case in the sync Celery task
+        # In a real production app, you might want a more sophisticated event loop management
+        loop = asyncio.get_event_loop()
+        stats = loop.run_until_complete(trigger_use_case.execute_all())
+        
         result = {
-            "alerts_checked": 0,
-            "alerts_triggered": 0,
+            "alerts_checked": stats.get("checked", 0),
+            "alerts_triggered": stats.get("triggered", 0),
             "status": "completed",
             "timestamp": datetime.utcnow().isoformat(),
         }
