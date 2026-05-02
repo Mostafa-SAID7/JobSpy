@@ -1,136 +1,185 @@
+"""
+Alerts Router - Clean Architecture
+
+This router handles alert-related endpoints using dependency injection
+and use cases following Clean Architecture principles.
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
+from dependency_injector.wiring import inject, Provide
+
 from app.core.database import get_db
 from app.schemas.alert import AlertCreate, AlertUpdate, AlertResponse, AlertListResponse
-from app.repositories.alert_repo import AlertRepository
 from app.utils.security import get_current_user
+from app.presentation.api.v1.dependencies import Container
+
+# Use Cases
+from app.application.use_cases.alerts.create_alert_use_case import CreateAlertUseCase
+from app.application.use_cases.alerts.get_alert_use_case import GetAlertUseCase
+from app.application.use_cases.alerts.list_alerts_use_case import ListAlertsUseCase
+from app.application.use_cases.alerts.update_alert_use_case import UpdateAlertUseCase
+from app.application.use_cases.alerts.delete_alert_use_case import DeleteAlertUseCase
+
+# Exceptions
+from app.shared.exceptions.application_exceptions import NotFoundException, AuthorizationException
 
 router = APIRouter(prefix="/api/v1/alerts", tags=["alerts"])
 
 
 @router.post("", response_model=AlertResponse, status_code=status.HTTP_201_CREATED)
+@inject
 async def create_alert(
     alert_create: AlertCreate,
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: CreateAlertUseCase = Depends(Provide[Container.create_alert_use_case]),
 ):
-    """Create a new alert."""
-    alert_repo = AlertRepository(db)
+    """
+    Create a new alert.
     
+    This endpoint allows users to create job alerts with custom search criteria.
+    """
     try:
-        alert = await alert_repo.create(current_user.id, alert_create)
+        alert = await use_case.execute(current_user.id, alert_create)
         await db.commit()
-        await db.refresh(alert)
         return alert
-    except Exception as e:
+    except ValueError as e:
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create alert: {str(e)}"
+        )
 
 
 @router.get("/{alert_id}", response_model=AlertResponse)
+@inject
 async def get_alert(
     alert_id: UUID,
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: GetAlertUseCase = Depends(Provide[Container.get_alert_use_case]),
 ):
-    """Get alert by ID."""
-    alert_repo = AlertRepository(db)
-    alert = await alert_repo.get_by_id(alert_id)
+    """
+    Get alert by ID.
     
-    if not alert:
+    Retrieves a specific alert with authorization check.
+    """
+    try:
+        alert = await use_case.execute(alert_id, current_user.id)
+        return alert
+    except NotFoundException as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Alert not found"
+            detail=str(e)
         )
-    
-    if alert.user_id != current_user.id:
+    except AuthorizationException as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to access this alert"
+            detail=str(e)
         )
-    
-    return alert
 
 
 @router.get("", response_model=AlertListResponse)
+@inject
 async def list_alerts(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: ListAlertsUseCase = Depends(Provide[Container.list_alerts_use_case]),
 ):
-    """Get all alerts for current user."""
-    alert_repo = AlertRepository(db)
-    alerts = await alert_repo.get_by_user(current_user.id, skip, limit)
-    total = await alert_repo.count_by_user(current_user.id)
+    """
+    Get all alerts for current user.
     
-    return AlertListResponse(
-        total=total,
-        page=skip // limit + 1,
-        page_size=limit,
-        items=alerts
-    )
+    Returns a paginated list of alerts for the authenticated user.
+    """
+    try:
+        alerts = await use_case.execute(current_user.id, skip, limit)
+        return alerts
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to list alerts: {str(e)}"
+        )
 
 
 @router.put("/{alert_id}", response_model=AlertResponse)
+@inject
 async def update_alert(
     alert_id: UUID,
     alert_update: AlertUpdate,
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: UpdateAlertUseCase = Depends(Provide[Container.update_alert_use_case]),
 ):
-    """Update alert."""
-    alert_repo = AlertRepository(db)
-    alert = await alert_repo.get_by_id(alert_id)
+    """
+    Update alert.
     
-    if not alert:
+    Updates an existing alert with authorization check.
+    """
+    try:
+        updated_alert = await use_case.execute(alert_id, current_user.id, alert_update)
+        await db.commit()
+        return updated_alert
+    except NotFoundException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Alert not found"
+            detail=str(e)
         )
-    
-    if alert.user_id != current_user.id:
+    except AuthorizationException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to update this alert"
+            detail=str(e)
         )
-    
-    updated_alert = await alert_repo.update(alert_id, alert_update)
-    await db.commit()
-    return updated_alert
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update alert: {str(e)}"
+        )
 
 
 @router.delete("/{alert_id}", status_code=status.HTTP_204_NO_CONTENT)
+@inject
 async def delete_alert(
     alert_id: UUID,
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: DeleteAlertUseCase = Depends(Provide[Container.delete_alert_use_case]),
 ):
-    """Delete alert."""
-    alert_repo = AlertRepository(db)
-    alert = await alert_repo.get_by_id(alert_id)
+    """
+    Delete alert.
     
-    if not alert:
+    Deletes an alert with authorization check.
+    """
+    try:
+        await use_case.execute(alert_id, current_user.id)
+        await db.commit()
+    except NotFoundException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Alert not found"
+            detail=str(e)
         )
-    
-    if alert.user_id != current_user.id:
+    except AuthorizationException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to delete this alert"
+            detail=str(e)
         )
-    
-    success = await alert_repo.delete(alert_id)
-    await db.commit()
-    
-    if not success:
+    except Exception as e:
+        await db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Alert not found"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete alert: {str(e)}"
         )

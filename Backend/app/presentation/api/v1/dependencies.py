@@ -60,9 +60,17 @@ from app.application.use_cases.saved_jobs.update_saved_job_use_case import Updat
 from app.application.use_cases.saved_jobs.delete_saved_job_use_case import DeleteSavedJobUseCase
 from app.application.use_cases.saved_jobs.unsave_job_use_case import UnsaveJobUseCase
 
+# Application - Use Cases - Alerts
+from app.application.use_cases.alerts.create_alert_use_case import CreateAlertUseCase
+from app.application.use_cases.alerts.get_alert_use_case import GetAlertUseCase
+from app.application.use_cases.alerts.list_alerts_use_case import ListAlertsUseCase
+from app.application.use_cases.alerts.update_alert_use_case import UpdateAlertUseCase
+from app.application.use_cases.alerts.delete_alert_use_case import DeleteAlertUseCase
+
 # Repositories
 from app.repositories.user_repo import UserRepository
 from app.repositories.saved_job_repo import SavedJobRepository
+from app.repositories.alert_repo import AlertRepository
 
 
 class Container(containers.DeclarativeContainer):
@@ -101,6 +109,11 @@ class Container(containers.DeclarativeContainer):
     
     saved_job_repository = providers.Factory(
         SavedJobRepository,
+        session=db_session,
+    )
+    
+    alert_repository = providers.Factory(
+        AlertRepository,
         session=db_session,
     )
     
@@ -238,6 +251,32 @@ class Container(containers.DeclarativeContainer):
     unsave_job_use_case = providers.Factory(
         UnsaveJobUseCase,
         saved_job_repository=saved_job_repository,
+    )
+    
+    # Use Cases - Alerts (Factory - new instance per request)
+    create_alert_use_case = providers.Factory(
+        CreateAlertUseCase,
+        alert_repository=alert_repository,
+    )
+    
+    get_alert_use_case = providers.Factory(
+        GetAlertUseCase,
+        alert_repository=alert_repository,
+    )
+    
+    list_alerts_use_case = providers.Factory(
+        ListAlertsUseCase,
+        alert_repository=alert_repository,
+    )
+    
+    update_alert_use_case = providers.Factory(
+        UpdateAlertUseCase,
+        alert_repository=alert_repository,
+    )
+    
+    delete_alert_use_case = providers.Factory(
+        DeleteAlertUseCase,
+        alert_repository=alert_repository,
     )
 
 

@@ -25,3 +25,18 @@ class DuplicateEntityError(ApplicationException):
         self.entity_type = entity_type
         self.identifier = identifier
         super().__init__(f"{entity_type} already exists: {identifier}")
+
+
+class NotFoundException(ApplicationException):
+    """Raised when an entity is not found"""
+    
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class AuthorizationException(ApplicationException):
+    """Raised when a user is not authorized to perform an action"""
+    
+    def __init__(self, message: str):
+        super().__init__(message)
+
