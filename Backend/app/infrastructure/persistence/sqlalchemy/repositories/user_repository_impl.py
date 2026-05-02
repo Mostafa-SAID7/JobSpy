@@ -23,6 +23,7 @@ class UserRepositoryImpl(IUserRepository):
         orm_user = UserMapper.to_orm(user)
         self.session.add(orm_user)
         await self.session.flush()
+        await self.session.commit()
         return UserMapper.to_domain(orm_user)
 
     async def get_by_id(self, user_id: UUID) -> Optional[User]:

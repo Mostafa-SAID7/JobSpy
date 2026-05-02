@@ -73,8 +73,8 @@ async def get_current_user(credentials = Depends(security)):
     
     try:
         payload = decode_token(token)
-        user_id: str = payload.get("sub")
-        if user_id is None:
+        user_id_str: str = payload.get("sub")
+        if user_id_str is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token"
@@ -85,9 +85,18 @@ async def get_current_user(credentials = Depends(security)):
             detail="Invalid token"
         )
     
+    import uuid
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token subject"
+        )
+        
     # Return a simple user object with id
     class CurrentUser:
-        def __init__(self, user_id: str):
+        def __init__(self, user_id: uuid.UUID):
             self.id = user_id
     
     return CurrentUser(user_id)

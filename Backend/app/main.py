@@ -7,17 +7,18 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from dependency_injector import providers
 
 from app.config.settings import settings
 from app.shared.logging.logger import setup_logging
-from app.infrastructure.persistence.sqlalchemy.database import init_db, close_db
+from app.infrastructure.persistence.sqlalchemy.database import init_db, close_db, AsyncSessionLocal
 from app.presentation.api.v1.routers import auth, jobs, saved_jobs, alerts, users, stats
 
 # Import DI container
-from app.container import wire_container, reset_container
+from app.container import container, wire_container, reset_container
 
 # Setup logging
 setup_logging()
@@ -89,11 +90,36 @@ app = FastAPI(
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=settings.CORS_ORIGINS if isinstance(settings.CORS_ORIGINS, list) else settings.CORS_ORIGINS.split(","),
     allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
     allow_methods=settings.CORS_ALLOW_METHODS,
     allow_headers=settings.CORS_ALLOW_HEADERS,
 )
+
+
+@app.middleware("http")
+async def inject_db_session(request: Request, call_next):
+    """
+    Middleware to inject DB session into the DI container for each request
+    """
+    async with AsyncSessionLocal() as session:
+        # Override the dependency in the main container
+        container.db_session.override(providers.Object(session))
+        # Also override in the infrastructure container just in case
+        container.infrastructure.db_session.override(providers.Object(session))
+        try:
+            response = await call_next(request)
+            if response.status_code < 400:
+                await session.commit()
+            else:
+                await session.rollback()
+            return response
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            container.infrastructure.db_session.reset_override()
+            container.db_session.reset_override()
 
 
 # Ã¢â€â‚¬Ã¢â€â‚¬ Health Check Endpoint Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬

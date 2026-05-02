@@ -244,6 +244,32 @@ export const useJobsStore = defineStore('jobs', () => {
     }
   }
 
+  const scrapeJobs = async (params: { 
+    query: string; 
+    location?: string; 
+    site_names?: string[]; 
+    max_results?: number;
+    distance?: number;
+    easy_apply?: boolean;
+  }) => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await apiClient.post('/jobs/scrape', params)
+      
+      // Refresh the search after scraping to show new results
+      await searchJobs({ query: params.query })
+      
+      return response.data
+    } catch (err: any) {
+      error.value = err.response?.data?.detail || 'Error scraping jobs'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     jobs,
     currentJob,
@@ -255,6 +281,7 @@ export const useJobsStore = defineStore('jobs', () => {
     savedJobs,
     alerts,
     searchJobs,
+    scrapeJobs,
     getJobDetails,
     loadMore,
     resetSearch,

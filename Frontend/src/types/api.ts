@@ -15,6 +15,10 @@ export interface SearchParams {
   salary_min?: number
   salary_max?: number
   is_remote?: number
+  // New Scraping Parameters
+  site_names?: string[]
+  distance?: number
+  easy_apply?: boolean
   skip: number
   limit: number
 }

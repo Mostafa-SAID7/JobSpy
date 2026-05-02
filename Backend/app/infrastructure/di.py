@@ -13,6 +13,10 @@ from app.infrastructure.persistence.redis.cache_repository_impl import CacheRepo
 # Mappers
 from app.infrastructure.persistence.sqlalchemy.mappers.job_orm_mapper import JobORMMapper
 
+# Scrapers
+from app.infrastructure.scrapers.jobspy_scraper_impl import JobSpyLibraryScraper
+from app.infrastructure.scrapers.mock_scraper import MockScraper
+
 class InfrastructureContainer(containers.DeclarativeContainer):
     db_session = providers.Dependency(instance_of=AsyncSession)
     
@@ -25,3 +29,7 @@ class InfrastructureContainer(containers.DeclarativeContainer):
     
     cache_repository = providers.Singleton(CacheRepositoryImpl)
     job_orm_mapper = providers.Singleton(JobORMMapper)
+    
+    # Scrapers
+    jobspy_scraper = providers.Singleton(JobSpyLibraryScraper)
+    mock_scraper = providers.Singleton(MockScraper)

@@ -1,15 +1,9 @@
 <template>
-  <div class="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 bg-gray-50 dark:bg-gray-950">
+  <div class="flex items-center justify-center">
     <div class="w-full max-w-md">
-      <!-- Card -->
-      <div class="fluent-card bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-10">
-        <!-- Header -->
+      <!-- Content -->
+      <div class="p-0">
         <div class="text-center mb-10">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-[#0078d4]/10 rounded-2xl mb-6">
-            <svg class="w-8 h-8 text-[#0078d4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-            </svg>
-          </div>
           <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Recover Account</h1>
           <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mt-3">Follow the steps to reset your security</p>
         </div>
@@ -143,15 +137,6 @@
           </form>
         </div>
 
-        <!-- Footer -->
-        <div class="mt-10 pt-8 border-t border-gray-50 dark:border-gray-800 text-center">
-          <RouterLink
-            to="/auth/login"
-            class="text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-[#0078d4] transition-colors"
-          >
-            ← Return to Sign In
-          </RouterLink>
-        </div>
       </div>
     </div>
   </div>

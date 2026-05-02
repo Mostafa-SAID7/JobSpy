@@ -27,6 +27,18 @@ window.addEventListener('error', (event) => {
   }
 })
 
+// Unregister any rogue service workers from previous PWA experiments or extensions
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for (let registration of registrations) {
+      registration.unregister()
+      console.log('Unregistered rogue service worker:', registration)
+    }
+  }).catch(function(err) {
+    console.warn('Service Worker unregistration failed: ', err)
+  })
+}
+
 // Handle unhandled promise rejections from extensions
 window.addEventListener('unhandledrejection', (event) => {
   if (

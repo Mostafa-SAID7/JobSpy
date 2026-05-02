@@ -94,6 +94,14 @@ class StatsRepositoryImpl(IStatsRepository):
         )
         return result.scalar() or 0
 
+    async def get_jobs_posted_this_week(self) -> int:
+        """Get count of jobs created in the last 7 days."""
+        threshold = datetime.utcnow() - timedelta(days=7)
+        result = await self.session.execute(
+            select(func.count(JobORM.id)).where(JobORM.created_at >= threshold)
+        )
+        return result.scalar() or 0
+
     async def get_total_users(self) -> int:
         """Get total number of users."""
         result = await self.session.execute(select(func.count(UserORM.id)))
@@ -111,6 +119,22 @@ class StatsRepositoryImpl(IStatsRepository):
             select(func.count(UserORM.id)).where(UserORM.updated_at >= threshold)
         )
         return result.scalar() or 0
+
+    async def get_search_statistics(self) -> Dict[str, Any]:
+        """Get general search statistics."""
+        total_searches = await self.session.execute(select(func.count(SearchHistoryORM.id)))
+        unique_users = await self.session.execute(
+            select(func.count(func.distinct(SearchHistoryORM.user_id)))
+        )
+        
+        t_searches = total_searches.scalar() or 0
+        u_users = unique_users.scalar() or 0
+        
+        return {
+            "total_searches": t_searches,
+            "unique_users": u_users,
+            "avg_searches_per_user": round(t_searches / u_users, 2) if u_users > 0 else 0
+        }
 
     async def get_trending_searches(self, limit: int = 10, days: int = 7) -> List[Dict[str, Any]]:
         """Get trending search queries."""

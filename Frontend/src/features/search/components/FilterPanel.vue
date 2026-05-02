@@ -1,5 +1,5 @@
 <template>
-  <div class="fluent-card bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+  <div class="fluent-card bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
     <!-- Panel Header -->
     <div class="px-6 py-4 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
       <h2 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-widest flex items-center">

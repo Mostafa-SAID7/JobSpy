@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useJobsStore } from '../jobs'
 
-vi.mock('@/services/api', () => ({
+vi.mock('@/shared/services/api', () => ({
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),
@@ -31,7 +31,7 @@ describe('Jobs Store', () => {
 
   describe('Search jobs', () => {
     it('should search jobs successfully', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const store = useJobsStore()
       const mockJobs = [
         {
@@ -65,7 +65,7 @@ describe('Jobs Store', () => {
     })
 
     it('should handle search error', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const store = useJobsStore()
       const error = new Error('Search failed') as any
       error.response = { data: { detail: 'Search failed' } }
@@ -79,7 +79,7 @@ describe('Jobs Store', () => {
     })
 
     it('should set loading state during search', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const store = useJobsStore()
       vi.mocked(apiClient.get).mockImplementation(
         () =>
@@ -98,7 +98,7 @@ describe('Jobs Store', () => {
 
   describe('Save job', () => {
     it('should save job successfully', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const store = useJobsStore()
       const mockJob = {
         id: 1,
@@ -129,7 +129,7 @@ describe('Jobs Store', () => {
     })
 
     it('should handle save error', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const store = useJobsStore()
       const error = new Error('Save failed') as any
       error.response = { data: { detail: 'Save failed' } }
@@ -148,7 +148,7 @@ describe('Jobs Store', () => {
 
   describe('Unsave job', () => {
     it('should remove job from saved jobs', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const store = useJobsStore()
       store.savedJobs = [
         {
@@ -181,7 +181,7 @@ describe('Jobs Store', () => {
 
   describe('Alerts management', () => {
     it('should fetch alerts', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const store = useJobsStore()
       const mockAlerts = [
         {
@@ -205,7 +205,7 @@ describe('Jobs Store', () => {
     })
 
     it('should create alert', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const store = useJobsStore()
       const mockAlert = {
         id: 1,
@@ -232,7 +232,7 @@ describe('Jobs Store', () => {
     })
 
     it('should update alert', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const store = useJobsStore()
       store.alerts = [
         {
@@ -261,7 +261,7 @@ describe('Jobs Store', () => {
     })
 
     it('should delete alert', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const store = useJobsStore()
       store.alerts = [
         {

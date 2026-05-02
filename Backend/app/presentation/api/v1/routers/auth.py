@@ -2,17 +2,15 @@
 Auth Router - JobSpy Backend (Clean Architecture)
 
 Thin controllers that delegate all business logic to use cases.
-Uses dependency injection for all dependencies.
+Uses manual dependency injection getters (no @inject/Provide).
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 
-from dependency_injector.wiring import inject, Provide
-
 from app.infrastructure.persistence.sqlalchemy.database import get_db
 from app.presentation.api.v1.schemas.user import UserCreate, UserResponse, UserLogin
-from app.container import Container
+from app.container import container
 
 # Use Cases
 from app.application.use_cases.auth.register_user_use_case import RegisterUserUseCase
@@ -24,40 +22,37 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 
+def get_register_user_use_case():
+    return container.application.register_user_use_case()
+
+def get_login_user_use_case():
+    return container.application.login_user_use_case()
+
+def get_refresh_token_use_case():
+    return container.application.refresh_token_use_case()
+
+
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-@inject
 async def register(
     user_create: UserCreate,
-    db: AsyncSession = Depends(get_db),
-    use_case: RegisterUserUseCase = Depends(Provide[Container.application.register_user_use_case]),
+    use_case: RegisterUserUseCase = Depends(get_register_user_use_case),
 ):
     """
     Register a new user.
-    
+
     Thin controller - delegates to RegisterUserUseCase.
     """
     try:
-        # Provide db session to container
-        Container.db_session.override(db)
-        
-        # Execute use case
         user = await use_case.execute(user_create)
-        
-        # Commit transaction
-        await db.commit()
-        await db.refresh(user)
-        
         logger.info(f"User registered: {user.id}")
         return user
-        
+
     except ValueError as e:
-        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
     except Exception as e:
-        await db.rollback()
         logger.error(f"Error registering user: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -66,24 +61,18 @@ async def register(
 
 
 @router.post("/login")
-@inject
 async def login(
     login_data: UserLogin,
-    db: AsyncSession = Depends(get_db),
-    use_case: LoginUserUseCase = Depends(Provide[Container.application.login_user_use_case]),
+    use_case: LoginUserUseCase = Depends(get_login_user_use_case),
 ):
     """
     Login user and return tokens.
-    
+
     Thin controller - delegates to LoginUserUseCase.
     """
     try:
-        # Provide db session to container
-        Container.db_session.override(db)
-        
-        # Execute use case
         result = await use_case.execute(login_data.email, login_data.password)
-        
+
         return {
             "access_token": result.access_token,
             "refresh_token": result.refresh_token,
@@ -91,9 +80,8 @@ async def login(
             "expires_in": result.expires_in,
             "user": result.user
         }
-        
+
     except ValueError as e:
-        # ValueError is raised for invalid credentials or inactive user
         if "inactive" in str(e).lower():
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -112,26 +100,24 @@ async def login(
 
 
 @router.post("/refresh")
-@inject
 async def refresh(
     refresh_token: str,
-    use_case: RefreshTokenUseCase = Depends(Provide[Container.application.refresh_token_use_case]),
+    use_case: RefreshTokenUseCase = Depends(get_refresh_token_use_case),
 ):
     """
     Refresh access token using refresh token.
-    
+
     Thin controller - delegates to RefreshTokenUseCase.
     """
     try:
-        # Execute use case
         result = await use_case.execute(refresh_token)
-        
+
         return {
             "access_token": result.access_token,
             "token_type": result.token_type,
             "expires_in": result.expires_in
         }
-        
+
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -149,7 +135,7 @@ async def refresh(
 async def logout():
     """
     Logout user (client-side token removal).
-    
+
     Note: This is a client-side operation. The client should remove the tokens.
     """
     return {"message": "Logged out successfully"}

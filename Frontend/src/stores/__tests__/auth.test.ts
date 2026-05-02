@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useAuthStore } from '../auth'
 
-vi.mock('@/services/api', () => ({
+vi.mock('@/shared/services/api', () => ({
   apiClient: {
     post: vi.fn(),
     get: vi.fn(),
@@ -34,7 +34,7 @@ describe('Auth Store', () => {
 
   describe('Login action', () => {
     it('should login user successfully', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const mockResponse = {
         data: {
           access_token: 'test-token',
@@ -54,7 +54,7 @@ describe('Auth Store', () => {
     })
 
     it('should handle login error', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const error = new Error('Invalid credentials') as any
       error.response = { data: { detail: 'Invalid credentials' } }
 
@@ -68,7 +68,7 @@ describe('Auth Store', () => {
     })
 
     it('should set loading state during login', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       vi.mocked(apiClient.post).mockImplementation(
         () =>
           new Promise((resolve) => {
@@ -93,7 +93,7 @@ describe('Auth Store', () => {
 
   describe('Register action', () => {
     it('should register user successfully', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const mockResponse = {
         data: {
           access_token: 'test-token',
@@ -112,7 +112,7 @@ describe('Auth Store', () => {
     })
 
     it('should handle registration error', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const error = new Error('Email already exists') as any
       error.response = { data: { detail: 'Email already exists' } }
 
@@ -128,7 +128,7 @@ describe('Auth Store', () => {
 
   describe('Logout action', () => {
     it('should logout user', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       vi.mocked(apiClient.post).mockResolvedValue({})
 
       const store = useAuthStore()
@@ -145,7 +145,7 @@ describe('Auth Store', () => {
 
   describe('Token management', () => {
     it('should check auth', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const mockUser = { id: 1, email: 'test@example.com', full_name: 'Test User' }
 
       vi.mocked(apiClient.get).mockResolvedValue({ data: mockUser })
@@ -158,7 +158,7 @@ describe('Auth Store', () => {
     })
 
     it('should clear session if token is invalid', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const error = new Error('Unauthorized')
 
       vi.mocked(apiClient.get).mockRejectedValue(error)
@@ -174,7 +174,7 @@ describe('Auth Store', () => {
 
   describe('Error handling', () => {
     it('should clear error on successful action', async () => {
-      const { apiClient } = await import('@/services/api')
+      const { apiClient } = await import('@/shared/services/api')
       const mockResponse = {
         data: {
           access_token: 'test-token',

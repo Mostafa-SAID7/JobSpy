@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import ProfilePage from '../ProfilePage.vue'
-import { useAuthStore } from '@/stores/auth'
-import { apiClient } from '@/services/api'
+import { useAuthStore } from '@/features/auth/stores/auth'
+import { apiClient } from '@/shared/services/api'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { createI18n } from 'vue-i18n'
 
@@ -24,7 +24,7 @@ const router = createRouter({
 })
 
 // Mock the API client
-vi.mock('@/services/api', () => ({
+vi.mock('@/shared/services/api', () => ({
   apiClient: {
     get: vi.fn(),
     put: vi.fn(),

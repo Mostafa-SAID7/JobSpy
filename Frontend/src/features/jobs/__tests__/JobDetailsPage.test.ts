@@ -16,7 +16,7 @@ const i18n = createI18n({
 })
 
 // Mock the API client
-vi.mock('@/services/api', () => ({
+vi.mock('@/shared/services/api', () => ({
   apiClient: {
     get: vi.fn(),
   },
@@ -65,7 +65,7 @@ describe('JobDetailsPage', () => {
       updated_at: '2024-01-01T00:00:00Z',
     }
 
-    const { apiClient } = await import('@/services/api')
+    const { apiClient } = await import('@/shared/services/api')
     vi.mocked(apiClient.get).mockResolvedValue({ data: mockJob })
 
     await router.push('/jobs/1')
@@ -116,7 +116,7 @@ describe('JobDetailsPage', () => {
       updated_at: '2024-01-01T00:00:00Z',
     }
 
-    const { apiClient } = await import('@/services/api')
+    const { apiClient } = await import('@/shared/services/api')
     vi.mocked(apiClient.get).mockResolvedValue({ data: mockJob })
 
     await router.push('/jobs/1')
@@ -173,7 +173,7 @@ describe('JobDetailsPage', () => {
       updated_at: '2024-01-01T00:00:00Z',
     }
 
-    const { apiClient } = await import('@/services/api')
+    const { apiClient } = await import('@/shared/services/api')
     vi.mocked(apiClient.get).mockResolvedValue({ data: mockJob })
 
     // Mock window.open
@@ -236,7 +236,7 @@ describe('JobDetailsPage', () => {
       updated_at: '2024-01-01T00:00:00Z',
     }
 
-    const { apiClient } = await import('@/services/api')
+    const { apiClient } = await import('@/shared/services/api')
     vi.mocked(apiClient.get).mockResolvedValue({ data: mockJob })
 
     await router.push('/jobs/1')
@@ -284,7 +284,7 @@ describe('JobDetailsPage', () => {
       updated_at: '2024-01-01T00:00:00Z',
     }
 
-    const { apiClient } = await import('@/services/api')
+    const { apiClient } = await import('@/shared/services/api')
     vi.mocked(apiClient.get).mockResolvedValue({ data: mockJob })
 
     await router.push('/jobs/1')

@@ -22,7 +22,7 @@ vi.mock('vue-router', () => ({
   useRouter: () => mockRouter,
 }))
 
-vi.mock('@/services/api', () => ({
+vi.mock('@/shared/services/api', () => ({
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),
@@ -243,7 +243,7 @@ describe('SavedJobsPage', () => {
   })
 
   it('removes saved job when delete button is clicked', async () => {
-    const { apiClient } = await import('@/services/api')
+    const { apiClient } = await import('@/shared/services/api')
     const store = useJobsStore()
     
     const mockJob = {
@@ -290,7 +290,7 @@ describe('SavedJobsPage', () => {
   })
 
   it('navigates to job details when job card is clicked', async () => {
-    const { apiClient } = await import('@/services/api')
+    const { apiClient } = await import('@/shared/services/api')
     const store = useJobsStore()
     
     const mockJob = {

@@ -11,6 +11,7 @@ from typing import List, Dict, Any
 
 from app.domain.entities.job import Job
 from app.domain.interfaces.repositories import IJobRepository
+from app.domain.interfaces.cache_repository import ICacheRepository
 from app.domain.services.job_scoring_service import JobScoringService
 from app.domain.services.skill_extraction_service import SkillExtractionService
 from app.application.mappers.job_mapper import JobMapper
@@ -56,6 +57,7 @@ class ProcessScrapedJobsUseCase:
     def __init__(
         self,
         job_repository: IJobRepository,
+        cache_repository: ICacheRepository,
         scoring_service: JobScoringService,
         skill_service: SkillExtractionService,
         job_mapper: JobMapper,
@@ -65,11 +67,13 @@ class ProcessScrapedJobsUseCase:
         
         Args:
             job_repository: Repository for job persistence
+            cache_repository: Repository for caching
             scoring_service: Service for calculating job scores
             skill_service: Service for extracting skills
             job_mapper: Mapper for converting raw data to domain entities
         """
         self.job_repository = job_repository
+        self.cache_repository = cache_repository
         self.scoring_service = scoring_service
         self.skill_service = skill_service
         self.job_mapper = job_mapper
@@ -149,12 +153,16 @@ class ProcessScrapedJobsUseCase:
             total_processed=len(jobs_data),
             processed_jobs=processed_jobs
         )
-        
         logger.info(
             f"Processing complete: {saved_count} saved, "
             f"{duplicate_count} duplicates, {error_count} errors"
         )
         
+        # Clear cache after successful scraping to ensure new jobs are visible
+        if saved_count > 0:
+            logger.info(f"Clearing cache after saving {saved_count} jobs")
+            await self.cache_repository.clear()
+            
         return result
     
     async def execute_single(

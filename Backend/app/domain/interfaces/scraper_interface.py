@@ -18,6 +18,19 @@ class ScraperConfig:
     delay: int = 1
     max_results: int = 100
     user_agent: Optional[str] = None
+    
+    # python-jobspy specific parameters
+    site_name: Optional[List[str]] = None
+    location: Optional[str] = None
+    distance: Optional[int] = 50
+    job_type: Optional[str] = None
+    is_remote: Optional[bool] = False
+    easy_apply: Optional[bool] = None
+    hours_old: Optional[int] = None
+    country_indeed: Optional[str] = 'USA'
+    enforce_annual_salary: Optional[bool] = False
+    proxies: Optional[List[str]] = None
+    linkedin_fetch_description: Optional[bool] = False
 
 
 class IJobScraper(ABC):

@@ -11,7 +11,8 @@ from app.application.use_cases.jobs.list_jobs_use_case import ListJobsUseCase
 from app.application.use_cases.search.search_jobs_use_case import SearchJobsUseCase
 from app.application.use_cases.search.advanced_search_use_case import AdvancedSearchUseCase
 
-from app.application.use_cases.scraping.process_scraped_jobs_use_case import ProcessScrapedJobsUseCase
+from app.application.use_cases.scraping.process_scraped_jobs_use_case import ProcessScrapedJobsUseCase, ProcessingResult
+from app.application.use_cases.scraping.scrape_jobs_use_case import ScrapeJobsUseCase, ScrapeJobsRequest
 
 from app.application.use_cases.alert_processing.trigger_alert_use_case import TriggerAlertUseCase
 
@@ -50,7 +51,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
     job_mapper = providers.Singleton(JobMapper)
     
     # Jobs
-    create_job_use_case = providers.Factory(CreateJobUseCase, job_repository=infrastructure.job_repository, job_mapper=job_mapper, scoring_service=domain.job_scoring_service)
+    create_job_use_case = providers.Factory(CreateJobUseCase, job_repository=infrastructure.job_repository, skill_service=domain.skill_extraction_service, job_mapper=job_mapper)
     get_job_details_use_case = providers.Factory(GetJobDetailsUseCase, job_repository=infrastructure.job_repository, cache_repository=infrastructure.cache_repository)
     update_job_use_case = providers.Factory(UpdateJobUseCase, job_repository=infrastructure.job_repository, cache_repository=infrastructure.cache_repository, scoring_service=domain.job_scoring_service)
     delete_job_use_case = providers.Factory(DeleteJobUseCase, job_repository=infrastructure.job_repository, cache_repository=infrastructure.cache_repository)
@@ -58,10 +59,18 @@ class ApplicationContainer(containers.DeclarativeContainer):
     
     # Search
     search_jobs_use_case = providers.Factory(SearchJobsUseCase, job_repository=infrastructure.job_repository, cache_repository=infrastructure.cache_repository, scoring_service=domain.job_scoring_service)
-    advanced_search_use_case = providers.Factory(AdvancedSearchUseCase, job_repository=infrastructure.job_repository, cache_repository=infrastructure.cache_repository, scoring_service=domain.job_scoring_service, matching_service=domain.job_matching_service)
+    advanced_search_use_case = providers.Factory(AdvancedSearchUseCase, job_repository=infrastructure.job_repository, cache_repository=infrastructure.cache_repository, scoring_service=domain.job_scoring_service)
     
     # Scraping
-    process_scraped_jobs_use_case = providers.Factory(ProcessScrapedJobsUseCase, job_repository=infrastructure.job_repository, scoring_service=domain.job_scoring_service, skill_service=domain.skill_extraction_service, job_mapper=job_mapper)
+    process_scraped_jobs_use_case = providers.Factory(
+        ProcessScrapedJobsUseCase,
+        job_repository=infrastructure.job_repository,
+        cache_repository=infrastructure.cache_repository,
+        scoring_service=domain.job_scoring_service,
+        skill_service=domain.skill_extraction_service,
+        job_mapper=job_mapper
+    )
+    scrape_jobs_use_case = providers.Factory(ScrapeJobsUseCase, scraper=infrastructure.jobspy_scraper, process_use_case=process_scraped_jobs_use_case)
     
     # Alert Processing
     trigger_alert_use_case = providers.Factory(TriggerAlertUseCase, alert_repository=infrastructure.alert_repository, job_repository=infrastructure.job_repository, filtering_service=domain.job_filtering_service)

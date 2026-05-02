@@ -21,7 +21,9 @@
           v-model="searchQuery"
           v-model:site="selectedSite"
           v-model:filters="searchFilters"
+          :is-scraping="isScraping"
           @search="handleSearch"
+          @scrape="handleScrape"
         />
       </div>
     </div>
@@ -134,6 +136,7 @@ const currentPage = ref(1)
 const pageSize = ref(25)
 const totalJobs = ref(0)
 const sortBy = ref('recent')
+const isScraping = ref(false)
 
 const searchQuery = ref((route.query.q as string) || '')
 const selectedSite = ref((route.query.site as string) || '')
@@ -142,7 +145,9 @@ const searchFilters = ref({
   jobTypes: [],
   remote: [],
   experienceLevel: '',
-  postedDate: ''
+  postedDate: '',
+  distance: 50,
+  easyApply: false
 })
 
 const filterState = ref({
@@ -153,6 +158,8 @@ const filterState = ref({
   remote: [] as string[],
   experienceLevel: '',
   postedDate: '',
+  distance: 50,
+  easyApply: false,
   companySizes: [] as string[]
 })
 
@@ -178,6 +185,30 @@ const isSaved = (jobId: string | number) => {
 const handleSearch = async () => {
   currentPage.value = 1
   await searchJobs()
+}
+
+/**
+ * Handle live scraping from job boards
+ */
+const handleScrape = async () => {
+  if (!searchQuery.value.trim()) return
+  
+  isScraping.value = true
+  try {
+    await jobsStore.scrapeJobs({
+      query: searchQuery.value,
+      location: filterState.value.location,
+      site_names: selectedSite.value ? [selectedSite.value] : ['linkedin', 'indeed', 'glassdoor', 'google'],
+      distance: searchFilters.value.distance,
+      easy_apply: searchFilters.value.easyApply
+    })
+    // searchJobs is automatically called inside scrapeJobs store method
+    currentPage.value = 1
+  } catch (err) {
+    console.error('Scraping failed:', err)
+  } finally {
+    isScraping.value = false
+  }
 }
 
 /**
@@ -237,31 +268,38 @@ const searchJobs = async () => {
       pageSize: pageSize.value 
     })
 
-    // If there's a search query, use the search endpoint
-    if (searchQuery.value.trim()) {
-      const params: any = {
-        query: searchQuery.value.trim(),
-        skip: (currentPage.value - 1) * pageSize.value,
-        limit: pageSize.value
-      }
+    // Determine which endpoint to use
+    const advancedKeys = ['location', 'job_type', 'experience_level', 'salary_min', 'salary_max', 'is_remote']
+    const hasAdvancedParams = Object.keys(filterState.value).some(key => 
+      advancedKeys.includes(key) && filterState.value[key as keyof typeof filterState.value] !== undefined && filterState.value[key as keyof typeof filterState.value] !== null && filterState.value[key as keyof typeof filterState.value] !== ''
+    )
 
-      console.log('📡 Making search API call with params:', params)
-      response = await apiClient.post('/jobs/search', null, { params })
-    } else {
-      // Otherwise, use the list endpoint
-      const params: any = {
-        skip: (currentPage.value - 1) * pageSize.value,
-        limit: pageSize.value
-      }
-
-      // Add source filter if site is selected
-      if (selectedSite.value) {
-        params.source = selectedSite.value
-      }
-
-      console.log('📡 Making list API call with params:', params)
-      response = await apiClient.get('/jobs', { params })
+    let endpoint = '/jobs'
+    const params: any = {
+      skip: (currentPage.value - 1) * pageSize.value,
+      limit: pageSize.value
     }
+
+    if (searchQuery.value.trim()) {
+      endpoint = hasAdvancedParams ? '/jobs/search/advanced' : '/jobs/search'
+      params.query = searchQuery.value.trim()
+    } else if (hasAdvancedParams) {
+      endpoint = '/jobs/search/advanced'
+    }
+
+    // Merge filter state into params
+    Object.assign(params, {
+      ...filterState.value,
+      salary_min: filterState.value.minSalary,
+      salary_max: filterState.value.maxSalary,
+    })
+
+    if (selectedSite.value) {
+      params.source = selectedSite.value
+    }
+
+    console.log(`📡 Making API call to ${endpoint} with params:`, params)
+    response = await apiClient.get(endpoint, { params })
 
     console.log('✅ API response received:', {
       status: response.status,

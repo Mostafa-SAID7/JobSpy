@@ -110,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import FormButton from '@/components/forms/FormButton.vue'
+import FormButton from '@/shared/components/ui/FormButton.vue'
 interface Alert {
   id: string
   name: string

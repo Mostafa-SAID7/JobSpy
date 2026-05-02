@@ -184,14 +184,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useJobsStore } from '@/stores/jobs'
-import FormInput from '@/components/forms/FormInput.vue'
-import FormSelect from '@/components/forms/FormSelect.vue'
-import AlertCard from '@/components/cards/AlertCard.vue'
-import StatsCard from '@/components/cards/StatsCard.vue'
-import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
-import ErrorState from '@/components/common/ErrorState.vue'
-import EmptyState from '@/components/common/EmptyState.vue'
+import { useJobsStore } from '@/features/jobs/stores/jobs'
+import FormInput from '@/shared/components/ui/FormInput.vue'
+import FormSelect from '@/shared/components/ui/FormSelect.vue'
+import FormButton from '@/shared/components/ui/FormButton.vue'
+import AlertCard from '../components/AlertCard.vue'
+import StatsCard from '@/shared/components/common/StatsCard.vue'
+import LoadingSpinner from '@/shared/components/common/LoadingSpinner.vue'
+import ErrorState from '@/shared/components/common/ErrorState.vue'
+import EmptyState from '@/shared/components/common/EmptyState.vue'
 
 // Icons
 const BellIcon = 'svg'

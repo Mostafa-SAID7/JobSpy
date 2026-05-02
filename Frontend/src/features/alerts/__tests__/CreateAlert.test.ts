@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import AlertsPage from '../AlertsPage.vue'
 import { createPinia, setActivePinia } from 'pinia'
-import { useJobsStore } from '@/stores/jobs'
+import { useJobsStore } from '@/features/jobs/stores/jobs'
 
 /**
  * Test suite for Create New Alert functionality

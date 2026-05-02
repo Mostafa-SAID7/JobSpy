@@ -62,3 +62,5 @@ slowapi==0.1.9
 
 # API Documentation
 swagger-ui-bundle==1.1.0
+python-jobspy>=1.1.0
+pandas

@@ -59,6 +59,22 @@
         <span>Advanced</span>
       </FormButton>
 
+      <!-- Live Scrape Button -->
+      <FormButton
+        v-if="localQuery"
+        variant="secondary"
+        class="w-full md:w-auto !bg-amber-50 !text-amber-700 !border-amber-200 hover:!bg-amber-100"
+        :loading="isScraping"
+        @click="handleScrape"
+      >
+        <template #icon>
+          <svg class="w-4 h-4" :class="isScraping ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </template>
+        Scrape
+      </FormButton>
+
       <!-- Search Button -->
       <FormButton
         label="Search Jobs"
@@ -124,12 +140,36 @@
 
           <!-- Posted Date -->
           <div class="space-y-3">
-            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Date Posted</label>
+            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 px-1">Date Posted</label>
             <FormSelect
               v-model="filters.postedDate"
               :options="dateOptions"
               placeholder="Anytime"
             />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6 pt-6 border-t border-gray-50 dark:border-gray-800">
+          <!-- Search Radius -->
+          <div class="space-y-3">
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Search Radius ({{ filters.distance }} km)</label>
+            <input
+              v-model.number="filters.distance"
+              type="range"
+              min="0"
+              max="500"
+              step="10"
+              class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#0078d4]"
+            />
+          </div>
+
+          <!-- Easy Apply Toggle -->
+          <div class="flex items-center space-x-3 pt-6">
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" v-model="filters.easyApply" class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+              <span class="ml-3 text-sm font-bold text-gray-500 uppercase tracking-widest">Easy Apply Only</span>
+            </label>
           </div>
         </div>
 
@@ -159,6 +199,8 @@ interface SearchFilters {
   remote: string[]
   experienceLevel: string
   postedDate: string
+  distance: number
+  easyApply: boolean
 }
 
 const props = withDefaults(
@@ -166,6 +208,7 @@ const props = withDefaults(
     modelValue?: string
     site?: string
     filters?: SearchFilters
+    isScraping?: boolean
   }>(),
   {
     modelValue: '',
@@ -174,8 +217,11 @@ const props = withDefaults(
       jobTypes: [],
       remote: [],
       experienceLevel: '',
-      postedDate: ''
-    })
+      postedDate: '',
+      distance: 50,
+      easyApply: false
+    }),
+    isScraping: false
   }
 )
 
@@ -184,6 +230,7 @@ const emit = defineEmits<{
   'update:site': [value: string]
   'update:filters': [value: SearchFilters]
   search: [query: string, site: string, filters: SearchFilters]
+  scrape: [query: string, site: string, filters: SearchFilters]
 }>()
 
 const localQuery = ref(props.modelValue)
@@ -195,8 +242,12 @@ const siteOptions = [
   { value: '', label: 'All Sources' },
   { value: 'linkedin', label: 'LinkedIn' },
   { value: 'indeed', label: 'Indeed' },
-  { value: 'wuzzuf', label: 'Wuzzuf' },
-  { value: 'bayt', label: 'Bayt' }
+  { value: 'glassdoor', label: 'Glassdoor' },
+  { value: 'zip_recruiter', label: 'ZipRecruiter' },
+  { value: 'google', label: 'Google Jobs' },
+  { value: 'bayt', label: 'Bayt' },
+  { value: 'naukri', label: 'Naukri' },
+  { value: 'bdjobs', label: 'BDJobs' }
 ]
 
 const experienceOptions = [
@@ -220,6 +271,13 @@ const handleSearch = () => {
   emit('search', localQuery.value, localSite.value, filters.value)
 }
 
+const handleScrape = () => {
+  emit('update:modelValue', localQuery.value)
+  emit('update:site', localSite.value)
+  emit('update:filters', filters.value)
+  emit('scrape', localQuery.value, localSite.value, filters.value)
+}
+
 const clearSearch = () => {
   localQuery.value = ''
   emit('update:modelValue', '')
@@ -234,7 +292,9 @@ const clearFilters = () => {
     jobTypes: [],
     remote: [],
     experienceLevel: '',
-    postedDate: ''
+    postedDate: '',
+    distance: 50,
+    easyApply: false
   }
   emit('update:filters', filters.value)
 }

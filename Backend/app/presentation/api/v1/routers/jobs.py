@@ -2,7 +2,7 @@
 Jobs Router - JobSpy Backend (Clean Architecture)
 
 Thin controllers that delegate all business logic to use cases.
-Uses dependency injection for all dependencies.
+Uses manual dependency injection getters (no @inject/Provide).
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,11 +11,10 @@ from typing import Optional
 from datetime import datetime
 import logging
 
-from dependency_injector.wiring import inject, Provide
-
 from app.infrastructure.persistence.sqlalchemy.database import get_db
 from app.presentation.api.v1.schemas.job import JobCreate, JobUpdate, JobResponse, JobListResponse
-from app.container import Container
+from app.presentation.api.v1.schemas.scraping import ScrapeRequest, ScrapeResponse
+from app.container import container
 from app.shared.security.security import get_current_user
 
 # Use Cases
@@ -25,34 +24,54 @@ from app.application.use_cases.jobs.update_job_use_case import UpdateJobUseCase
 from app.application.use_cases.jobs.delete_job_use_case import DeleteJobUseCase
 from app.application.use_cases.jobs.list_jobs_use_case import ListJobsUseCase
 from app.application.use_cases.search.search_jobs_use_case import SearchJobsUseCase
-from app.application.use_cases.search.advanced_search_use_case import AdvancedSearchUseCase
+from app.application.use_cases.search.advanced_search_use_case import AdvancedSearchUseCase, AdvancedSearchRequest
+from app.application.use_cases.scraping.scrape_jobs_use_case import ScrapeJobsUseCase, ScrapeJobsRequest
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
 
+
+def get_create_job_use_case():
+    return container.application.create_job_use_case()
+
+def get_get_job_details_use_case():
+    return container.application.get_job_details_use_case()
+
+def get_list_jobs_use_case():
+    return container.application.list_jobs_use_case()
+
+def get_search_jobs_use_case():
+    return container.application.search_jobs_use_case()
+
+def get_advanced_search_use_case():
+    return container.application.advanced_search_use_case()
+
+def get_update_job_use_case():
+    return container.application.update_job_use_case()
+
+def get_delete_job_use_case():
+    return container.application.delete_job_use_case()
+
+def get_scrape_jobs_use_case():
+    return container.application.scrape_jobs_use_case()
+
+
 @router.post("", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
-@inject
 async def create_job(
     job_create: JobCreate,
-    db: AsyncSession = Depends(get_db),
-    use_case: CreateJobUseCase = Depends(Provide[Container.application.create_job_use_case]),
+    use_case: CreateJobUseCase = Depends(get_create_job_use_case),
 ):
     """
     Create a new job (admin only).
-    
+
     Thin controller - delegates all business logic to CreateJobUseCase.
     """
     try:
-        # Provide db session to container
-        Container.db_session.override(db)
-        
-        # Execute use case
         job = await use_case.execute(job_create)
-        
         logger.info(f"New job created: {job.id}")
         return job
-        
+
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -66,187 +85,46 @@ async def create_job(
         )
 
 
-@router.get("/debug", tags=["Debug"])
-async def debug_jobs(db: AsyncSession = Depends(get_db)):
-    """Debug endpoint to check jobs data."""
-    from app.domain.interfaces.repositories import IJobRepository as JobRepository
-    
-    job_repo = JobRepository(db)
-    
-    # Get first few jobs
-    jobs = await job_repo.get_all(0, 3)
-    count = await job_repo.count()
-    
-    return {
-        "total_jobs": count,
-        "sample_jobs": [
-            {
-                "id": str(job.id),
-                "title": job.title,
-                "company": job.company,
-                "location": job.location
-            } for job in jobs
-        ],
-        "api_working": True,
-        "timestamp": datetime.utcnow().isoformat()
-    }
-
-
-@router.get("/api-test", tags=["Test"])
-async def test_jobs_endpoint(db: AsyncSession = Depends(get_db)):
-    """Test endpoint to verify jobs API is working."""
-    from app.domain.interfaces.repositories import IJobRepository as JobRepository
-    
-    job_repo = JobRepository(db)
-    count = await job_repo.count()
-    
-    return {
-        "status": "success",
-        "message": "Jobs API is working",
-        "total_jobs": count,
-        "timestamp": datetime.utcnow().isoformat()
-    }
-
-
-@router.get("/{job_id}", response_model=JobResponse)
-@inject
-async def get_job(
-    job_id: UUID,
-    db: AsyncSession = Depends(get_db),
-    use_case: GetJobDetailsUseCase = Depends(Provide[Container.application.get_job_details_use_case]),
+@router.post("/scrape", response_model=ScrapeResponse)
+async def scrape_jobs_trigger(
+    request: ScrapeRequest,
+    use_case: ScrapeJobsUseCase = Depends(get_scrape_jobs_use_case),
+    current_user = Depends(get_current_user)
 ):
     """
-    Get job by ID.
-    
-    Thin controller - delegates to GetJobDetailsUseCase.
+    Trigger a real-time scrape for jobs.
     """
     try:
-        # Provide db session to container
-        Container.db_session.override(db)
+        scrape_request = ScrapeJobsRequest(
+            query=request.query,
+            location=request.location,
+            site_names=request.site_names,
+            max_results=request.max_results,
+            hours_old=request.hours_old,
+            job_type=request.job_type,
+            is_remote=request.is_remote,
+            country_indeed=request.country_indeed
+        )
         
-        # Execute use case
-        job = await use_case.execute(job_id)
+        result = await use_case.execute(scrape_request)
         
-        if not job:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Job not found"
-            )
-        
-        return job
-        
-    except HTTPException:
-        raise
+        return ScrapeResponse(
+            saved_count=result.saved_count,
+            duplicate_count=result.duplicate_count,
+            error_count=result.error_count,
+            total_processed=result.total_processed,
+            jobs=result.processed_jobs
+        )
+
     except Exception as e:
-        logger.error(f"Error getting job {job_id}: {str(e)}")
+        logger.error(f"Error triggering scrape: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve job"
+            detail=f"Scrape failed: {str(e)}"
         )
-
-
-@router.get("", response_model=JobListResponse)
-@inject
-async def list_jobs(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
-    source: Optional[str] = Query(None),
-    company: Optional[str] = Query(None),
-    db: AsyncSession = Depends(get_db),
-    use_case: ListJobsUseCase = Depends(Provide[Container.application.list_jobs_use_case]),
-):
-    """
-    List jobs with pagination and filtering.
-    
-    Thin controller - delegates to ListJobsUseCase.
-    Note: Company filtering is handled by repository directly for now.
-    """
-    try:
-        # Provide db session to container
-        Container.db_session.override(db)
-        
-        # If company filter is provided, use repository directly (temporary)
-        # TODO: Add company parameter to ListJobsUseCase
-        if company:
-            from app.domain.interfaces.repositories import IJobRepository as JobRepository
-            job_repo = JobRepository(db)
-            jobs = await job_repo.get_by_company(company, skip, limit)
-            total = len(jobs)
-            
-            return JobListResponse(
-                total=total,
-                page=skip // limit + 1,
-                page_size=limit,
-                items=jobs
-            )
-        
-        # Execute use case for source filtering or no filtering
-        result = await use_case.execute(
-            skip=skip,
-            limit=limit,
-            source=source
-        )
-        
-        return JobListResponse(
-            total=result.total_count,
-            page=skip // limit + 1,
-            page_size=limit,
-            items=result.jobs
-        )
-        
-    except Exception as e:
-        logger.error(f"Error listing jobs: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to list jobs"
-        )
-
-
-@router.post("/search", response_model=JobListResponse)
-@inject
-async def search_jobs(
-    query: str,
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
-    db: AsyncSession = Depends(get_db),
-    use_case: SearchJobsUseCase = Depends(Provide[Container.application.search_jobs_use_case]),
-):
-    """
-    Search jobs by keyword.
-    
-    Thin controller - delegates to SearchJobsUseCase.
-    """
-    try:
-        # Provide db session to container
-        Container.db_session.override(db)
-        
-        # Execute use case
-        result = await use_case.execute(
-            query=query,
-            skip=skip,
-            limit=limit
-        )
-        
-        return JobListResponse(
-            total=result.total_count,
-            page=skip // limit + 1,
-            page_size=limit,
-            items=result.jobs
-        )
-        
-    except Exception as e:
-        logger.error(f"Error searching jobs: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to search jobs"
-        )
-
-
-from app.application.use_cases.search.advanced_search_use_case import AdvancedSearchUseCase, AdvancedSearchRequest
 
 
 @router.get("/search/advanced", response_model=JobListResponse)
-@inject
 async def advanced_search(
     query: str = Query(..., description="Search query"),
     location: Optional[str] = Query(None, description="Job location"),
@@ -258,19 +136,12 @@ async def advanced_search(
     source: Optional[str] = Query(None, description="Job source (LinkedIn, Indeed, etc.)"),
     skip: int = Query(0, ge=0, description="Number of results to skip"),
     limit: int = Query(20, ge=1, le=100, description="Maximum number of results"),
-    db: AsyncSession = Depends(get_db),
-    use_case: AdvancedSearchUseCase = Depends(Provide[Container.application.advanced_search_use_case]),
+    use_case: AdvancedSearchUseCase = Depends(get_advanced_search_use_case),
 ):
     """
     Advanced search for jobs with multiple filter criteria.
-    
-    Thin controller - delegates to AdvancedSearchUseCase.
     """
     try:
-        # Provide db session to container
-        Container.db_session.override(db)
-        
-        # Build request object
         request = AdvancedSearchRequest(
             query=query,
             location=location,
@@ -283,17 +154,15 @@ async def advanced_search(
             skip=skip,
             limit=limit
         )
-        
-        # Execute use case
         result = await use_case.execute(request)
-        
+
         return JobListResponse(
             total=result.total_count,
             page=skip // limit + 1,
             page_size=limit,
             items=result.jobs
         )
-        
+
     except Exception as e:
         logger.error(f"Error in advanced search: {str(e)}")
         raise HTTPException(
@@ -302,35 +171,120 @@ async def advanced_search(
         )
 
 
-@router.put("/{job_id}", response_model=JobResponse)
-@inject
-async def update_job(
-    job_id: UUID,
-    job_update: JobUpdate,
-    db: AsyncSession = Depends(get_db),
-    use_case: UpdateJobUseCase = Depends(Provide[Container.application.update_job_use_case]),
+@router.get("/search", response_model=JobListResponse)
+async def search_jobs(
+    query: str = Query(...),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    use_case: SearchJobsUseCase = Depends(get_search_jobs_use_case),
 ):
     """
-    Update job (admin only).
-    
-    Thin controller - delegates to UpdateJobUseCase.
+    Search jobs by keyword.
     """
     try:
-        # Provide db session to container
-        Container.db_session.override(db)
-        
-        # Execute use case
-        job = await use_case.execute(job_id, job_update)
-        
+        result = await use_case.execute(
+            query=query,
+            skip=skip,
+            limit=limit
+        )
+
+        return JobListResponse(
+            total=result.total_count,
+            page=skip // limit + 1,
+            page_size=limit,
+            items=result.jobs
+        )
+
+    except Exception as e:
+        logger.error(f"Error searching jobs: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to search jobs"
+        )
+
+
+@router.get("", response_model=JobListResponse)
+async def list_jobs(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    source: Optional[str] = Query(None),
+    use_case: ListJobsUseCase = Depends(get_list_jobs_use_case),
+):
+    """
+    List jobs with pagination and filtering.
+    """
+    try:
+        result = await use_case.execute(
+            skip=skip,
+            limit=limit,
+            source=source
+        )
+
+        return JobListResponse(
+            total=result.total_count,
+            page=skip // limit + 1,
+            page_size=limit,
+            items=result.jobs
+        )
+
+    except Exception as e:
+        logger.error(f"Error listing jobs: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to list jobs"
+        )
+
+
+@router.get("/{job_id}", response_model=JobResponse)
+async def get_job(
+    job_id: UUID,
+    use_case: GetJobDetailsUseCase = Depends(get_get_job_details_use_case),
+):
+    """
+    Get job by ID.
+    """
+    try:
+        job = await use_case.execute(job_id)
+
         if not job:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Job not found"
             )
-        
+
+        return job
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting job {job_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve job"
+        )
+
+
+@router.put("/{job_id}", response_model=JobResponse)
+async def update_job(
+    job_id: UUID,
+    job_update: JobUpdate,
+    use_case: UpdateJobUseCase = Depends(get_update_job_use_case),
+):
+    """
+    Update job (admin only).
+    """
+    try:
+        job = await use_case.execute(job_id, job_update)
+
+        if not job:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Job not found"
+            )
+
         logger.info(f"Job updated: {job_id}")
         return job
-        
+
     except HTTPException:
         raise
     except ValueError as e:
@@ -347,32 +301,24 @@ async def update_job(
 
 
 @router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
-@inject
 async def delete_job(
     job_id: UUID,
-    db: AsyncSession = Depends(get_db),
-    use_case: DeleteJobUseCase = Depends(Provide[Container.application.delete_job_use_case]),
+    use_case: DeleteJobUseCase = Depends(get_delete_job_use_case),
 ):
     """
     Delete job (admin only).
-    
-    Thin controller - delegates to DeleteJobUseCase.
     """
     try:
-        # Provide db session to container
-        Container.db_session.override(db)
-        
-        # Execute use case
         success = await use_case.execute(job_id)
-        
+
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Job not found"
             )
-        
+
         logger.info(f"Job deleted: {job_id}")
-        
+
     except HTTPException:
         raise
     except Exception as e:

@@ -157,10 +157,25 @@ class IStatsRepository(ABC):
     async def get_jobs_posted_today(self) -> int: pass
     
     @abstractmethod
+    async def get_jobs_posted_this_week(self) -> int: pass
+    
+    @abstractmethod
     async def get_total_users(self) -> int: pass
     
     @abstractmethod
     async def get_total_saved_jobs(self) -> int: pass
+    
+    @abstractmethod
+    async def get_active_users(self, days: int = 30) -> int: pass
+    
+    @abstractmethod
+    async def get_search_statistics(self) -> Dict[str, Any]: pass
+    
+    @abstractmethod
+    async def get_trending_searches(self, limit: int = 10, days: int = 7) -> List[Dict[str, Any]]: pass
+    
+    @abstractmethod
+    async def get_jobs_by_location(self, limit: int = 10) -> List[Dict[str, Any]]: pass
 
 
 class ISearchHistoryRepository(ABC):
