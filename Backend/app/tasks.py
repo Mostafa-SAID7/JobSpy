@@ -1,6 +1,10 @@
 """
-Background Services - Celery Tasks
-Celery Background Tasks for JobSpy
+Background Services - Celery Tasks (Refactored)
+
+Celery Background Tasks for JobSpy.
+
+REFACTORED: Now uses Clean Architecture with use cases.
+ScrapingService has been replaced with ProcessScrapedJobsUseCase.
 """
 
 import logging
@@ -12,7 +16,6 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.celery import celery_app
 from app.core.config import settings
-from app.services.scraping_service import ScrapingService
 from app.services.alert_service import AlertService
 from app.services.email_service import EmailService
 from app.repositories.job_repo import JobRepository
