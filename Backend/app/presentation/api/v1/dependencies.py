@@ -71,6 +71,10 @@ from app.application.use_cases.alerts.delete_alert_use_case import DeleteAlertUs
 from app.repositories.user_repo import UserRepository
 from app.repositories.saved_job_repo import SavedJobRepository
 from app.repositories.alert_repo import AlertRepository
+from app.repositories.stats_repo import StatsRepository
+
+# Services
+from app.services.stats_service import StatsService
 
 
 class Container(containers.DeclarativeContainer):
@@ -114,6 +118,11 @@ class Container(containers.DeclarativeContainer):
     
     alert_repository = providers.Factory(
         AlertRepository,
+        session=db_session,
+    )
+    
+    stats_repository = providers.Factory(
+        StatsRepository,
         session=db_session,
     )
     
@@ -277,6 +286,16 @@ class Container(containers.DeclarativeContainer):
     delete_alert_use_case = providers.Factory(
         DeleteAlertUseCase,
         alert_repository=alert_repository,
+    )
+    
+    # ========================================================================
+    # SERVICES LAYER
+    # ========================================================================
+    
+    # Stats Service (Factory - new instance per request)
+    stats_service = providers.Factory(
+        StatsService,
+        stats_repo=stats_repository,
     )
 
 

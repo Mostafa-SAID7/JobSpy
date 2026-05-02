@@ -1,28 +1,27 @@
 """
-Statistics API Endpoints
-Provides endpoints for retrieving cached statistics
+Statistics Router - Clean Architecture
+
+This router handles statistics endpoints using dependency injection
+and the StatsService following Clean Architecture principles.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from dependency_injector.wiring import inject, Provide
 
 from app.core.database import get_db
-from app.repositories.stats_repo import StatsRepository
 from app.services.stats_service import StatsService
+from app.presentation.api.v1.dependencies import Container
 
 router = APIRouter(prefix="/api/v1/stats", tags=["Statistics"])
 
 
-async def get_stats_service(session: AsyncSession = Depends(get_db)) -> StatsService:
-    """Dependency to get stats service"""
-    stats_repo = StatsRepository(session)
-    return StatsService(stats_repo)
-
-
 @router.get("/jobs", summary="Get Job Statistics")
+@inject
 async def get_job_statistics(
     use_cache: bool = True,
-    stats_service: StatsService = Depends(get_stats_service),
+    db: AsyncSession = Depends(get_db),
+    stats_service: StatsService = Depends(Provide[Container.stats_service]),
 ):
     """
     Get comprehensive job statistics
@@ -53,9 +52,11 @@ async def get_job_statistics(
 
 
 @router.get("/users", summary="Get User Statistics")
+@inject
 async def get_user_statistics(
     use_cache: bool = True,
-    stats_service: StatsService = Depends(get_stats_service),
+    db: AsyncSession = Depends(get_db),
+    stats_service: StatsService = Depends(Provide[Container.stats_service]),
 ):
     """
     Get user statistics
@@ -81,9 +82,11 @@ async def get_user_statistics(
 
 
 @router.get("/searches", summary="Get Search Statistics")
+@inject
 async def get_search_statistics(
     use_cache: bool = True,
-    stats_service: StatsService = Depends(get_stats_service),
+    db: AsyncSession = Depends(get_db),
+    stats_service: StatsService = Depends(Provide[Container.stats_service]),
 ):
     """
     Get search statistics
@@ -109,9 +112,11 @@ async def get_search_statistics(
 
 
 @router.get("/saved-jobs", summary="Get Saved Jobs Statistics")
+@inject
 async def get_saved_jobs_statistics(
     use_cache: bool = True,
-    stats_service: StatsService = Depends(get_stats_service),
+    db: AsyncSession = Depends(get_db),
+    stats_service: StatsService = Depends(Provide[Container.stats_service]),
 ):
     """
     Get saved jobs statistics
@@ -134,9 +139,11 @@ async def get_saved_jobs_statistics(
 
 
 @router.get("/dashboard", summary="Get Dashboard Statistics")
+@inject
 async def get_dashboard_statistics(
     use_cache: bool = True,
-    stats_service: StatsService = Depends(get_stats_service),
+    db: AsyncSession = Depends(get_db),
+    stats_service: StatsService = Depends(Provide[Container.stats_service]),
 ):
     """
     Get comprehensive dashboard statistics
@@ -162,8 +169,10 @@ async def get_dashboard_statistics(
 
 
 @router.post("/invalidate/jobs", summary="Invalidate Job Statistics Cache")
+@inject
 async def invalidate_job_statistics(
-    stats_service: StatsService = Depends(get_stats_service),
+    db: AsyncSession = Depends(get_db),
+    stats_service: StatsService = Depends(Provide[Container.stats_service]),
 ):
     """
     Invalidate job statistics cache
@@ -186,8 +195,10 @@ async def invalidate_job_statistics(
 
 
 @router.post("/invalidate/users", summary="Invalidate User Statistics Cache")
+@inject
 async def invalidate_user_statistics(
-    stats_service: StatsService = Depends(get_stats_service),
+    db: AsyncSession = Depends(get_db),
+    stats_service: StatsService = Depends(Provide[Container.stats_service]),
 ):
     """
     Invalidate user statistics cache
@@ -210,8 +221,10 @@ async def invalidate_user_statistics(
 
 
 @router.post("/invalidate/searches", summary="Invalidate Search Statistics Cache")
+@inject
 async def invalidate_search_statistics(
-    stats_service: StatsService = Depends(get_stats_service),
+    db: AsyncSession = Depends(get_db),
+    stats_service: StatsService = Depends(Provide[Container.stats_service]),
 ):
     """
     Invalidate search statistics cache
@@ -234,8 +247,10 @@ async def invalidate_search_statistics(
 
 
 @router.post("/invalidate/saved-jobs", summary="Invalidate Saved Jobs Statistics Cache")
+@inject
 async def invalidate_saved_jobs_statistics(
-    stats_service: StatsService = Depends(get_stats_service),
+    db: AsyncSession = Depends(get_db),
+    stats_service: StatsService = Depends(Provide[Container.stats_service]),
 ):
     """
     Invalidate saved jobs statistics cache
@@ -258,8 +273,10 @@ async def invalidate_saved_jobs_statistics(
 
 
 @router.post("/invalidate/all", summary="Invalidate All Statistics Cache")
+@inject
 async def invalidate_all_statistics(
-    stats_service: StatsService = Depends(get_stats_service),
+    db: AsyncSession = Depends(get_db),
+    stats_service: StatsService = Depends(Provide[Container.stats_service]),
 ):
     """
     Invalidate all statistics cache
