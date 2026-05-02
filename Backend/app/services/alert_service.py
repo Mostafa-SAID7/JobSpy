@@ -1,32 +1,48 @@
 """
-Alert Service - JobSpy
-Alert service for JobSpy
+Alert Service - JobSpy (Refactored to Clean Architecture)
+
+Alert service for JobSpy - now a thin wrapper around use cases.
+This service is kept for backward compatibility with background jobs/schedulers.
 """
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 import logging
-import json
 from sqlalchemy.ext.asyncio import AsyncSession
+from uuid import UUID
+
 from app.models.alert import Alert
 from app.repositories.alert_repo import AlertRepository
 from app.repositories.job_repo import JobRepository
-from app.repositories.search_history_repo import SearchHistoryRepository
 from app.core.redis import redis_client
-from app.core.config import settings
-from app.services.job_processing_service import JobProcessingService
+from app.domain.services.job_filtering_service import JobFilteringService
+from app.application.use_cases.alert_processing.trigger_alert_use_case import TriggerAlertUseCase
 
 logger = logging.getLogger(__name__)
 
 
 class AlertService:
-    """Service for handling alert operations."""
+    """
+    Service for handling alert operations.
+    
+    REFACTORED: Now uses Clean Architecture with use cases and domain services.
+    This service is kept as a thin wrapper for backward compatibility with
+    background jobs and schedulers.
+    """
     
     def __init__(self, db: AsyncSession):
         self.db = db
         self.alert_repo = AlertRepository(db)
         self.job_repo = JobRepository(db)
-        self.search_repo = SearchHistoryRepository(db)
-        self.job_processor = JobProcessingService(db)
+        
+        # Domain services
+        self.filtering_service = JobFilteringService()
+        
+        # Use cases
+        self.trigger_alert_use_case = TriggerAlertUseCase(
+            alert_repository=self.alert_repo,
+            job_repository=self.job_repo,
+            filtering_service=self.filtering_service,
+        )
     
     async def get_alerts_to_trigger(self) -> List[Alert]:
         """Get alerts that need to be triggered."""
@@ -36,7 +52,7 @@ class AlertService:
         """
         Trigger an alert and search for new jobs.
         
-        CONSOLIDATED: Uses unified filtering logic from JobProcessingService.
+        REFACTORED: Now delegates to TriggerAlertUseCase.
         
         Args:
             alert: Alert to trigger
@@ -44,65 +60,9 @@ class AlertService:
         Returns:
             Dictionary with alert trigger results
         """
-        try:
-            # Search for jobs matching alert criteria
-            jobs = await self.job_repo.search(alert.query)
-            
-            # Filter by additional criteria if provided using unified logic
-            if alert.filters:
-                jobs = self.job_processor.filter_jobs(jobs, alert.filters)
-            
-            # Count new jobs (posted after last trigger)
-            new_jobs_count = 0
-            new_jobs = []
-            
-            if alert.last_triggered:
-                new_jobs = [
-                    job for job in jobs
-                    if job.posted_date and job.posted_date > alert.last_triggered
-                ]
-                new_jobs_count = len(new_jobs)
-            else:
-                new_jobs = jobs
-                new_jobs_count = len(jobs)
-            
-            # Update alert trigger info
-            next_trigger = self._calculate_next_trigger(alert.frequency)
-            await self.alert_repo.update_trigger_info(alert.id, next_trigger)
-            await self.db.commit()
-            
-            logger.info(f"Alert {alert.id} triggered: {new_jobs_count} new jobs found")
-            
-            return {
-                "alert_id": alert.id,
-                "new_jobs_count": new_jobs_count,
-                "new_jobs": new_jobs,
-                "next_trigger": next_trigger,
-                "success": True,
-            }
-        except Exception as e:
-            logger.error(f"Error triggering alert {alert.id}: {str(e)}")
-            return {
-                "alert_id": alert.id,
-                "new_jobs_count": 0,
-                "new_jobs": [],
-                "success": False,
-                "error": str(e),
-            }
-    
-    @staticmethod
-    def _calculate_next_trigger(frequency: str) -> datetime:
-        """Calculate next trigger time based on frequency."""
-        now = datetime.utcnow()
-        
-        if frequency == "hourly":
-            return now + timedelta(hours=1)
-        elif frequency == "daily":
-            return now + timedelta(days=1)
-        elif frequency == "weekly":
-            return now + timedelta(weeks=1)
-        else:
-            return now + timedelta(days=1)
+        result = await self.trigger_alert_use_case.execute(alert)
+        await self.db.commit()
+        return result
     
     async def send_alert_notification(self, alert: Alert, new_jobs_count: int, new_jobs: List[Any]) -> bool:
         """
@@ -130,9 +90,12 @@ class AlertService:
             logger.error(f"Error sending alert notification: {str(e)}")
             return False
     
-    async def get_user_alerts(self, user_id: int) -> List[Alert]:
+    async def get_user_alerts(self, user_id: UUID) -> List[Alert]:
         """
         Get all alerts for a user.
+        
+        DEPRECATED: Use ListAlertsUseCase instead.
+        Kept for backward compatibility.
         
         Args:
             user_id: User ID
@@ -148,7 +111,7 @@ class AlertService:
                 logger.info(f"Cache hit for user alerts: {user_id}")
                 return cached_result
             
-            alerts = await self.alert_repo.get_by_user_id(user_id)
+            alerts = await self.alert_repo.get_by_user(user_id)
             
             # Cache the result
             await redis_client.set(cache_key, alerts, ttl=1800)  # Cache for 30 minutes
@@ -158,9 +121,12 @@ class AlertService:
             logger.error(f"Error getting user alerts: {str(e)}")
             return []
     
-    async def create_alert(self, user_id: int, alert_data: Dict[str, Any]) -> Optional[Alert]:
+    async def create_alert(self, user_id: UUID, alert_data: Dict[str, Any]) -> Optional[Alert]:
         """
         Create a new alert for a user.
+        
+        DEPRECATED: Use CreateAlertUseCase instead.
+        Kept for backward compatibility.
         
         Args:
             user_id: User ID
@@ -170,17 +136,10 @@ class AlertService:
             Created alert or None if failed
         """
         try:
-            alert = Alert(
-                user_id=user_id,
-                query=alert_data.get("query"),
-                frequency=alert_data.get("frequency", "daily"),
-                filters=alert_data.get("filters", {}),
-                is_active=alert_data.get("is_active", True),
-                created_at=datetime.utcnow(),
-                next_trigger=self._calculate_next_trigger(alert_data.get("frequency", "daily")),
-            )
+            from app.schemas.alert import AlertCreate
             
-            await self.alert_repo.create(alert)
+            alert_create = AlertCreate(**alert_data)
+            alert = await self.alert_repo.create(user_id, alert_create)
             await self.db.commit()
             
             # Invalidate user alerts cache
@@ -193,9 +152,12 @@ class AlertService:
             logger.error(f"Error creating alert: {str(e)}")
             return None
     
-    async def update_alert(self, alert_id: int, alert_data: Dict[str, Any]) -> bool:
+    async def update_alert(self, alert_id: UUID, alert_data: Dict[str, Any]) -> bool:
         """
         Update an existing alert.
+        
+        DEPRECATED: Use UpdateAlertUseCase instead.
+        Kept for backward compatibility.
         
         Args:
             alert_id: Alert ID
@@ -205,17 +167,12 @@ class AlertService:
             True if updated successfully
         """
         try:
-            alert = await self.alert_repo.get_by_id(alert_id)
+            from app.schemas.alert import AlertUpdate
+            
+            alert_update = AlertUpdate(**alert_data)
+            alert = await self.alert_repo.update(alert_id, alert_update)
+            
             if alert:
-                if "query" in alert_data:
-                    alert.query = alert_data["query"]
-                if "frequency" in alert_data:
-                    alert.frequency = alert_data["frequency"]
-                if "filters" in alert_data:
-                    alert.filters = alert_data["filters"]
-                if "is_active" in alert_data:
-                    alert.is_active = alert_data["is_active"]
-                
                 await self.db.commit()
                 
                 # Invalidate user alerts cache
@@ -229,9 +186,12 @@ class AlertService:
         
         return False
     
-    async def delete_alert(self, alert_id: int) -> bool:
+    async def delete_alert(self, alert_id: UUID) -> bool:
         """
         Delete an alert.
+        
+        DEPRECATED: Use DeleteAlertUseCase instead.
+        Kept for backward compatibility.
         
         Args:
             alert_id: Alert ID

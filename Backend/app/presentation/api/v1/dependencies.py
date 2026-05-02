@@ -23,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.domain.services.job_scoring_service import JobScoringService
 from app.domain.services.skill_extraction_service import SkillExtractionService
 from app.domain.services.job_matching_service import JobMatchingService
+from app.domain.services.job_filtering_service import JobFilteringService
 
 # Infrastructure - Repositories
 from app.infrastructure.persistence.sqlalchemy.repositories.job_repository_impl import JobRepositoryImpl
@@ -47,6 +48,9 @@ from app.application.use_cases.search.advanced_search_use_case import AdvancedSe
 
 # Application - Use Cases - Scraping
 from app.application.use_cases.scraping.process_scraped_jobs_use_case import ProcessScrapedJobsUseCase
+
+# Application - Use Cases - Alert Processing
+from app.application.use_cases.alert_processing.trigger_alert_use_case import TriggerAlertUseCase
 
 # Application - Use Cases - Auth
 from app.application.use_cases.auth.register_user_use_case import RegisterUserUseCase
@@ -170,6 +174,10 @@ class Container(containers.DeclarativeContainer):
         scoring_service=job_scoring_service,
     )
     
+    job_filtering_service = providers.Singleton(
+        JobFilteringService,
+    )
+    
     # ========================================================================
     # APPLICATION LAYER
     # ========================================================================
@@ -235,6 +243,14 @@ class Container(containers.DeclarativeContainer):
         scoring_service=job_scoring_service,
         skill_service=skill_extraction_service,
         job_mapper=job_mapper,
+    )
+    
+    # Use Cases - Alert Processing (Factory - new instance per request)
+    trigger_alert_use_case = providers.Factory(
+        TriggerAlertUseCase,
+        alert_repository=alert_repository,
+        job_repository=job_repository,
+        filtering_service=job_filtering_service,
     )
     
     # Use Cases - Auth (Factory - new instance per request)
