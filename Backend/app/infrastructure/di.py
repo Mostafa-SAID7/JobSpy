@@ -14,8 +14,15 @@ from app.infrastructure.persistence.redis.cache_repository_impl import CacheRepo
 from app.infrastructure.persistence.sqlalchemy.mappers.job_orm_mapper import JobORMMapper
 
 # Scrapers
-from app.infrastructure.scrapers.jobspy_scraper_impl import JobSpyLibraryScraper
 from app.infrastructure.scrapers.mock_scraper import MockScraper
+
+# Optional: JobSpy scraper (requires python-jobspy package)
+try:
+    from app.infrastructure.scrapers.jobspy_scraper_impl import JobSpyLibraryScraper
+    JOBSPY_AVAILABLE = True
+except ImportError:
+    JOBSPY_AVAILABLE = False
+    JobSpyLibraryScraper = None
 
 class InfrastructureContainer(containers.DeclarativeContainer):
     db_session = providers.Dependency(instance_of=AsyncSession)
@@ -31,5 +38,10 @@ class InfrastructureContainer(containers.DeclarativeContainer):
     job_orm_mapper = providers.Singleton(JobORMMapper)
     
     # Scrapers
-    jobspy_scraper = providers.Singleton(JobSpyLibraryScraper)
     mock_scraper = providers.Singleton(MockScraper)
+    
+    # Optional: JobSpy scraper (only if package is installed)
+    if JOBSPY_AVAILABLE:
+        jobspy_scraper = providers.Singleton(JobSpyLibraryScraper)
+    else:
+        jobspy_scraper = providers.Singleton(MockScraper)  # Fallback to mock scraper
