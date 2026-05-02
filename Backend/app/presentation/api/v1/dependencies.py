@@ -67,11 +67,23 @@ from app.application.use_cases.alerts.list_alerts_use_case import ListAlertsUseC
 from app.application.use_cases.alerts.update_alert_use_case import UpdateAlertUseCase
 from app.application.use_cases.alerts.delete_alert_use_case import DeleteAlertUseCase
 
+# Application - Use Cases - Users
+from app.application.use_cases.users.get_user_profile_use_case import GetUserProfileUseCase
+from app.application.use_cases.users.update_user_profile_use_case import UpdateUserProfileUseCase
+from app.application.use_cases.users.delete_user_account_use_case import DeleteUserAccountUseCase
+from app.application.use_cases.users.change_password_use_case import ChangePasswordUseCase
+from app.application.use_cases.users.verify_email_use_case import VerifyEmailUseCase
+from app.application.use_cases.users.request_password_reset_use_case import RequestPasswordResetUseCase
+from app.application.use_cases.users.confirm_password_reset_use_case import ConfirmPasswordResetUseCase
+from app.application.use_cases.users.update_user_preferences_use_case import UpdateUserPreferencesUseCase
+from app.application.use_cases.users.get_user_stats_use_case import GetUserStatsUseCase
+
 # Repositories
 from app.repositories.user_repo import UserRepository
 from app.repositories.saved_job_repo import SavedJobRepository
 from app.repositories.alert_repo import AlertRepository
 from app.repositories.stats_repo import StatsRepository
+from app.repositories.search_history_repo import SearchHistoryRepository
 
 # Services
 from app.services.stats_service import StatsService
@@ -123,6 +135,11 @@ class Container(containers.DeclarativeContainer):
     
     stats_repository = providers.Factory(
         StatsRepository,
+        session=db_session,
+    )
+    
+    search_history_repository = providers.Factory(
+        SearchHistoryRepository,
         session=db_session,
     )
     
@@ -286,6 +303,54 @@ class Container(containers.DeclarativeContainer):
     delete_alert_use_case = providers.Factory(
         DeleteAlertUseCase,
         alert_repository=alert_repository,
+    )
+    
+    # Use Cases - Users (Factory - new instance per request)
+    get_user_profile_use_case = providers.Factory(
+        GetUserProfileUseCase,
+        user_repository=user_repository,
+    )
+    
+    update_user_profile_use_case = providers.Factory(
+        UpdateUserProfileUseCase,
+        user_repository=user_repository,
+    )
+    
+    delete_user_account_use_case = providers.Factory(
+        DeleteUserAccountUseCase,
+        user_repository=user_repository,
+    )
+    
+    change_password_use_case = providers.Factory(
+        ChangePasswordUseCase,
+        user_repository=user_repository,
+    )
+    
+    verify_email_use_case = providers.Factory(
+        VerifyEmailUseCase,
+        user_repository=user_repository,
+    )
+    
+    request_password_reset_use_case = providers.Factory(
+        RequestPasswordResetUseCase,
+        user_repository=user_repository,
+    )
+    
+    confirm_password_reset_use_case = providers.Factory(
+        ConfirmPasswordResetUseCase,
+        user_repository=user_repository,
+    )
+    
+    update_user_preferences_use_case = providers.Factory(
+        UpdateUserPreferencesUseCase,
+        user_repository=user_repository,
+    )
+    
+    get_user_stats_use_case = providers.Factory(
+        GetUserStatsUseCase,
+        saved_job_repository=saved_job_repository,
+        alert_repository=alert_repository,
+        search_history_repository=search_history_repository,
     )
     
     # ========================================================================

@@ -1,15 +1,36 @@
+"""
+Users Router - Clean Architecture
+
+This router handles user-related endpoints using dependency injection
+and use cases following Clean Architecture principles.
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from pydantic import BaseModel, EmailStr
+from dependency_injector.wiring import inject, Provide
 import logging
-from app.core.database import get_db
-from app.models.user import User
-from app.schemas.user import UserResponse, UserUpdate
-from app.repositories.user_repo import UserRepository
-from app.utils.security import get_current_user, hash_password, verify_password
 import secrets
 from datetime import datetime, timedelta
+
+from app.core.database import get_db
+from app.schemas.user import UserResponse, UserUpdate
+from app.utils.security import get_current_user
+from app.presentation.api.v1.dependencies import Container
+
+# Use Cases
+from app.application.use_cases.users.get_user_profile_use_case import GetUserProfileUseCase
+from app.application.use_cases.users.update_user_profile_use_case import UpdateUserProfileUseCase
+from app.application.use_cases.users.delete_user_account_use_case import DeleteUserAccountUseCase
+from app.application.use_cases.users.change_password_use_case import ChangePasswordUseCase
+from app.application.use_cases.users.verify_email_use_case import VerifyEmailUseCase
+from app.application.use_cases.users.request_password_reset_use_case import RequestPasswordResetUseCase
+from app.application.use_cases.users.confirm_password_reset_use_case import ConfirmPasswordResetUseCase
+from app.application.use_cases.users.update_user_preferences_use_case import UpdateUserPreferencesUseCase, UserPreferences
+from app.application.use_cases.users.get_user_stats_use_case import GetUserStatsUseCase
+
+# Exceptions
+from app.shared.exceptions.application_exceptions import NotFoundException, AuthorizationException, DuplicateEntityError
 
 logger = logging.getLogger(__name__)
 
@@ -35,340 +56,318 @@ class EmailVerificationRequest(BaseModel):
     token: str
 
 
-class UserPreferences(BaseModel):
-    theme: str = "light"
-    notifications_enabled: bool = True
-    email_alerts: bool = True
-    job_recommendations: bool = True
-    saved_jobs_limit: int = 1000
-
-
 @router.get("/me", response_model=UserResponse)
+@inject
 async def get_current_user_profile(
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: GetUserProfileUseCase = Depends(Provide[Container.get_user_profile_use_case]),
 ):
     """Get current user profile."""
-    user_repo = UserRepository(db)
-    user = await user_repo.get_by_id(current_user.id)
-    
-    if not user:
+    try:
+        user = await use_case.execute(current_user.id)
+        return user
+    except NotFoundException as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail=str(e)
         )
-    
-    return user
 
 
 @router.put("/me", response_model=UserResponse)
+@inject
 async def update_user_profile(
     user_update: UserUpdate,
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: UpdateUserProfileUseCase = Depends(Provide[Container.update_user_profile_use_case]),
 ):
     """Update current user profile."""
-    user_repo = UserRepository(db)
-    
-    # Check if email is being changed and if it's already taken
-    if user_update.email and user_update.email != current_user.email:
-        existing_user = await user_repo.get_by_email(user_update.email)
-        if existing_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already in use"
-            )
-    
-    updated_user = await user_repo.update(current_user.id, user_update)
-    await db.commit()
-    
-    if not updated_user:
+    try:
+        updated_user = await use_case.execute(
+            current_user.id, 
+            user_update, 
+            current_user.email
+        )
+        await db.commit()
+        logger.info(f"User profile updated: {current_user.id}, cache invalidated")
+        return updated_user
+    except NotFoundException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail=str(e)
         )
-    
-    # Invalidate user cache
-    await user_repo.invalidate_user_cache(current_user.id)
-    if user_update.email and user_update.email != current_user.email:
-        await user_repo.invalidate_user_email_cache(current_user.email)
-        await user_repo.invalidate_user_email_cache(user_update.email)
-    
-    logger.info(f"User profile updated: {current_user.id}, cache invalidated")
-    
-    return updated_user
+    except DuplicateEntityError as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already in use"
+        )
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update profile: {str(e)}"
+        )
 
 
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+@inject
 async def delete_user_account(
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: DeleteUserAccountUseCase = Depends(Provide[Container.delete_user_account_use_case]),
 ):
     """Delete current user account."""
-    user_repo = UserRepository(db)
-    success = await user_repo.delete(current_user.id)
-    await db.commit()
-    
-    if not success:
+    try:
+        await use_case.execute(current_user.id)
+        await db.commit()
+        logger.info(f"User account deleted: {current_user.id}, cache invalidated")
+    except NotFoundException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail=str(e)
         )
-    
-    # Invalidate user cache
-    await user_repo.invalidate_user_cache(current_user.id)
-    logger.info(f"User account deleted: {current_user.id}, cache invalidated")
-
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete account: {str(e)}"
+        )
 
 
 @router.post("/me/password", response_model=dict)
+@inject
 async def change_password(
     password_change: PasswordChangeRequest,
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: ChangePasswordUseCase = Depends(Provide[Container.change_password_use_case]),
 ):
     """Change current user password."""
-    user_repo = UserRepository(db)
-    user = await user_repo.get_by_id(current_user.id)
-    
-    if not user:
+    try:
+        result = await use_case.execute(
+            current_user.id,
+            password_change.current_password,
+            password_change.new_password
+        )
+        await db.commit()
+        logger.info(f"Password changed for user: {current_user.id}")
+        return result
+    except NotFoundException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail=str(e)
         )
-    
-    # Verify current password
-    if not verify_password(password_change.current_password, user.hashed_password):
+    except AuthorizationException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Current password is incorrect"
+            detail=str(e)
         )
-    
-    # Update password
-    user.hashed_password = hash_password(password_change.new_password)
-    db.add(user)
-    await db.commit()
-    
-    # Invalidate user cache
-    await user_repo.invalidate_user_cache(current_user.id)
-    logger.info(f"Password changed for user: {current_user.id}")
-    
-    return {"message": "Password changed successfully"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to change password: {str(e)}"
+        )
 
 
 @router.post("/me/email-verification/send", response_model=dict)
+@inject
 async def send_email_verification(
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: GetUserProfileUseCase = Depends(Provide[Container.get_user_profile_use_case]),
 ):
     """Send email verification link to current user."""
-    user_repo = UserRepository(db)
-    user = await user_repo.get_by_id(current_user.id)
-    
-    if not user:
+    try:
+        user = await use_case.execute(current_user.id)
+        
+        if user.email_verified:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email is already verified"
+            )
+        
+        # Generate verification token
+        verification_token = secrets.token_urlsafe(32)
+        
+        # Store token in database (you'll need to add this field to User model)
+        from app.repositories.user_repo import UserRepository
+        user_repo = UserRepository(db)
+        db_user = await user_repo.get_by_id(current_user.id)
+        db_user.email_verification_token = verification_token
+        db_user.email_verification_token_expires = datetime.utcnow() + timedelta(hours=24)
+        db.add(db_user)
+        await db.commit()
+        
+        # TODO: Send email with verification link
+        # await send_verification_email(user.email, verification_token)
+        
+        logger.info(f"Email verification sent to user: {current_user.id}")
+        
+        return {"message": "Verification email sent"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to send verification email: {str(e)}"
         )
-    
-    if user.email_verified:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email is already verified"
-        )
-    
-    # Generate verification token
-    verification_token = secrets.token_urlsafe(32)
-    
-    # Store token in database (you'll need to add this field to User model)
-    user.email_verification_token = verification_token
-    user.email_verification_token_expires = datetime.utcnow() + timedelta(hours=24)
-    db.add(user)
-    await db.commit()
-    
-    # TODO: Send email with verification link
-    # await send_verification_email(user.email, verification_token)
-    
-    logger.info(f"Email verification sent to user: {current_user.id}")
-    
-    return {"message": "Verification email sent"}
 
 
 @router.post("/me/email-verification/verify", response_model=dict)
+@inject
 async def verify_email(
     verification: EmailVerificationRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: VerifyEmailUseCase = Depends(Provide[Container.verify_email_use_case]),
 ):
     """Verify email with token."""
-    user_repo = UserRepository(db)
-    
-    # Find user by verification token
-    result = await db.execute(
-        select(User).where(User.email_verification_token == verification.token)
-    )
-    user = result.scalar_one_or_none()
-    
-    if not user:
+    try:
+        result = await use_case.execute(verification.token)
+        await db.commit()
+        logger.info("Email verified successfully")
+        return result
+    except NotFoundException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid verification token"
+            detail=str(e)
         )
-    
-    # Check if token is expired
-    if user.email_verification_token_expires < datetime.utcnow():
+    except AuthorizationException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Verification token has expired"
+            detail=str(e)
         )
-    
-    # Mark email as verified
-    user.email_verified = True
-    user.email_verification_token = None
-    user.email_verification_token_expires = None
-    db.add(user)
-    await db.commit()
-    
-    logger.info(f"Email verified for user: {user.id}")
-    
-    return {"message": "Email verified successfully"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to verify email: {str(e)}"
+        )
 
 
 @router.post("/password-reset/request", response_model=dict)
+@inject
 async def request_password_reset(
     reset_request: PasswordResetRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: RequestPasswordResetUseCase = Depends(Provide[Container.request_password_reset_use_case]),
 ):
     """Request password reset."""
-    user_repo = UserRepository(db)
-    user = await user_repo.get_by_email(reset_request.email)
-    
-    if not user:
-        # Don't reveal if email exists
+    try:
+        result = await use_case.execute(reset_request.email)
+        await db.commit()
+        logger.info(f"Password reset requested for email: {reset_request.email}")
+        return result
+    except Exception as e:
+        await db.rollback()
+        # Always return success message for security
         return {"message": "If email exists, password reset link has been sent"}
-    
-    # Generate reset token
-    reset_token = secrets.token_urlsafe(32)
-    
-    # Store token in database
-    user.password_reset_token = reset_token
-    user.password_reset_token_expires = datetime.utcnow() + timedelta(hours=1)
-    db.add(user)
-    await db.commit()
-    
-    # TODO: Send email with reset link
-    # await send_password_reset_email(user.email, reset_token)
-    
-    logger.info(f"Password reset requested for user: {user.id}")
-    
-    return {"message": "If email exists, password reset link has been sent"}
 
 
 @router.post("/password-reset/confirm", response_model=dict)
+@inject
 async def confirm_password_reset(
     reset_confirm: PasswordResetConfirm,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: ConfirmPasswordResetUseCase = Depends(Provide[Container.confirm_password_reset_use_case]),
 ):
     """Confirm password reset with token."""
-    # Find user by reset token
-    result = await db.execute(
-        select(User).where(User.password_reset_token == reset_confirm.token)
-    )
-    user = result.scalar_one_or_none()
-    
-    if not user:
+    try:
+        result = await use_case.execute(reset_confirm.token, reset_confirm.new_password)
+        await db.commit()
+        logger.info("Password reset confirmed")
+        return result
+    except NotFoundException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid reset token"
+            detail=str(e)
         )
-    
-    # Check if token is expired
-    if user.password_reset_token_expires < datetime.utcnow():
+    except AuthorizationException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Reset token has expired"
+            detail=str(e)
         )
-    
-    # Update password
-    user.hashed_password = hash_password(reset_confirm.new_password)
-    user.password_reset_token = None
-    user.password_reset_token_expires = None
-    db.add(user)
-    await db.commit()
-    
-    logger.info(f"Password reset confirmed for user: {user.id}")
-    
-    return {"message": "Password reset successfully"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to reset password: {str(e)}"
+        )
 
 
 @router.get("/me/preferences", response_model=UserPreferences)
+@inject
 async def get_user_preferences(
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: GetUserProfileUseCase = Depends(Provide[Container.get_user_profile_use_case]),
 ):
     """Get user preferences from database."""
-    user_repo = UserRepository(db)
-    user = await user_repo.get_by_id(current_user.id)
-    
-    if not user:
+    try:
+        user = await use_case.execute(current_user.id)
+        
+        # Return preferences (stored as JSON in user model)
+        preferences = user.preferences or {}
+        return UserPreferences(**preferences)
+    except NotFoundException as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail=str(e)
         )
-    
-    # Return preferences (stored as JSON in user model)
-    preferences = user.preferences or {}
-    return UserPreferences(**preferences)
 
 
 @router.put("/me/preferences", response_model=UserPreferences)
+@inject
 async def update_user_preferences(
     preferences: UserPreferences,
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: UpdateUserPreferencesUseCase = Depends(Provide[Container.update_user_preferences_use_case]),
 ):
     """Update user preferences in database."""
-    user_repo = UserRepository(db)
-    user = await user_repo.get_by_id(current_user.id)
-    
-    if not user:
+    try:
+        updated_preferences = await use_case.execute(current_user.id, preferences)
+        await db.commit()
+        logger.info(f"Preferences updated for user: {current_user.id}")
+        return updated_preferences
+    except NotFoundException as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail=str(e)
         )
-    
-    # Update preferences
-    user.preferences = preferences.model_dump()
-    db.add(user)
-    await db.commit()
-    
-    # Invalidate user cache
-    await user_repo.invalidate_user_cache(current_user.id)
-    logger.info(f"Preferences updated for user: {current_user.id}")
-    
-    return preferences
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update preferences: {str(e)}"
+        )
 
 
 @router.get("/me/stats", response_model=dict)
+@inject
 async def get_user_stats(
     current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    use_case: GetUserStatsUseCase = Depends(Provide[Container.get_user_stats_use_case]),
 ):
     """Get user statistics (saved jobs, alerts, searches)."""
-    from app.repositories.saved_job_repo import SavedJobRepository
-    from app.repositories.alert_repo import AlertRepository
-    from app.repositories.search_history_repo import SearchHistoryRepository
-    
-    saved_job_repo = SavedJobRepository(db)
-    alert_repo = AlertRepository(db)
-    search_history_repo = SearchHistoryRepository(db)
-    
-    # Get counts
-    saved_jobs_count = await saved_job_repo.count_by_user(current_user.id)
-    alerts_count = await alert_repo.count_by_user(current_user.id)
-    searches_count = await search_history_repo.count_by_user(current_user.id)
-    
-    return {
-        "saved_jobs": saved_jobs_count,
-        "active_alerts": alerts_count,
-        "total_searches": searches_count
-    }
+    try:
+        stats = await use_case.execute(current_user.id)
+        return stats
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get user stats: {str(e)}"
+        )
