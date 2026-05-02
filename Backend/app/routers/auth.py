@@ -1,113 +1,155 @@
+"""
+Auth Router - JobSpy Backend (Clean Architecture)
+
+Thin controllers that delegate all business logic to use cases.
+Uses dependency injection for all dependencies.
+"""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import timedelta
+import logging
+
+from dependency_injector.wiring import inject, Provide
+
 from app.core.database import get_db
 from app.schemas.user import UserCreate, UserResponse
-from app.models.user import User
-from app.repositories.user_repo import UserRepository
-from app.utils.security import hash_password, verify_password, create_access_token, create_refresh_token
+from app.presentation.api.v1.dependencies import Container
+
+# Use Cases
+from app.application.use_cases.auth.register_user_use_case import RegisterUserUseCase
+from app.application.use_cases.auth.login_user_use_case import LoginUserUseCase
+from app.application.use_cases.auth.refresh_token_use_case import RefreshTokenUseCase
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def register(user_create: UserCreate, db: AsyncSession = Depends(get_db)):
-    """Register a new user."""
-    user_repo = UserRepository(db)
+@inject
+async def register(
+    user_create: UserCreate,
+    db: AsyncSession = Depends(get_db),
+    use_case: RegisterUserUseCase = Depends(Provide[Container.register_user_use_case]),
+):
+    """
+    Register a new user.
     
-    # Check if user already exists
-    existing_user = await user_repo.get_by_email(user_create.email)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
-        )
-    
-    # Hash password and create user
-    hashed_password = hash_password(user_create.password)
+    Thin controller - delegates to RegisterUserUseCase.
+    """
     try:
-        user = await user_repo.create(user_create, hashed_password)
+        # Provide db session to container
+        Container.db_session.override(db)
+        
+        # Execute use case
+        user = await use_case.execute(user_create)
+        
+        # Commit transaction
         await db.commit()
         await db.refresh(user)
+        
+        logger.info(f"User registered: {user.id}")
         return user
+        
     except ValueError as e:
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error registering user: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to register user"
+        )
 
 
 @router.post("/login")
-async def login(email: str, password: str, db: AsyncSession = Depends(get_db)):
-    """Login user and return tokens."""
-    user_repo = UserRepository(db)
+@inject
+async def login(
+    email: str,
+    password: str,
+    db: AsyncSession = Depends(get_db),
+    use_case: LoginUserUseCase = Depends(Provide[Container.login_user_use_case]),
+):
+    """
+    Login user and return tokens.
     
-    # Get user by email
-    user = await user_repo.get_by_email(email)
-    if not user or not verify_password(password, user.hashed_password):
+    Thin controller - delegates to LoginUserUseCase.
+    """
+    try:
+        # Provide db session to container
+        Container.db_session.override(db)
+        
+        # Execute use case
+        result = await use_case.execute(email, password)
+        
+        return {
+            "access_token": result.access_token,
+            "refresh_token": result.refresh_token,
+            "token_type": result.token_type,
+            "expires_in": result.expires_in
+        }
+        
+    except ValueError as e:
+        # ValueError is raised for invalid credentials or inactive user
+        if "inactive" in str(e).lower():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=str(e)
+            )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
+            detail=str(e)
         )
-    
-    if not user.is_active:
+    except Exception as e:
+        logger.error(f"Error during login: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Login failed"
         )
-    
-    # Create tokens
-    access_token = create_access_token(
-        data={"sub": str(user.id)},
-        expires_delta=timedelta(hours=1)
-    )
-    refresh_token = create_refresh_token(
-        data={"sub": str(user.id)},
-        expires_delta=timedelta(days=7)
-    )
-    
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-        "expires_in": 3600
-    }
 
 
 @router.post("/refresh")
-async def refresh(refresh_token: str, db: AsyncSession = Depends(get_db)):
-    """Refresh access token using refresh token."""
-    from app.utils.security import decode_token
+@inject
+async def refresh(
+    refresh_token: str,
+    use_case: RefreshTokenUseCase = Depends(Provide[Container.refresh_token_use_case]),
+):
+    """
+    Refresh access token using refresh token.
     
+    Thin controller - delegates to RefreshTokenUseCase.
+    """
     try:
-        payload = decode_token(refresh_token)
-        user_id = payload.get("sub")
-        if not user_id:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token"
-            )
-    except Exception:
+        # Execute use case
+        result = await use_case.execute(refresh_token)
+        
+        return {
+            "access_token": result.access_token,
+            "token_type": result.token_type,
+            "expires_in": result.expires_in
+        }
+        
+    except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid refresh token"
+            detail=str(e)
         )
-    
-    # Create new access token
-    access_token = create_access_token(
-        data={"sub": user_id},
-        expires_delta=timedelta(hours=1)
-    )
-    
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "expires_in": 3600
-    }
+    except Exception as e:
+        logger.error(f"Error refreshing token: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Token refresh failed"
+        )
 
 
 @router.post("/logout")
 async def logout():
-    """Logout user (client-side token removal)."""
+    """
+    Logout user (client-side token removal).
+    
+    Note: This is a client-side operation. The client should remove the tokens.
+    """
     return {"message": "Logged out successfully"}

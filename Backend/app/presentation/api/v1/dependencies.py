@@ -48,6 +48,14 @@ from app.application.use_cases.search.advanced_search_use_case import AdvancedSe
 # Application - Use Cases - Scraping
 from app.application.use_cases.scraping.process_scraped_jobs_use_case import ProcessScrapedJobsUseCase
 
+# Application - Use Cases - Auth
+from app.application.use_cases.auth.register_user_use_case import RegisterUserUseCase
+from app.application.use_cases.auth.login_user_use_case import LoginUserUseCase
+from app.application.use_cases.auth.refresh_token_use_case import RefreshTokenUseCase
+
+# Repositories
+from app.repositories.user_repo import UserRepository
+
 
 class Container(containers.DeclarativeContainer):
     """
@@ -75,6 +83,11 @@ class Container(containers.DeclarativeContainer):
     # Repositories
     job_repository = providers.Factory(
         JobRepositoryImpl,
+        session=db_session,
+    )
+    
+    user_repository = providers.Factory(
+        UserRepository,
         session=db_session,
     )
     
@@ -170,6 +183,21 @@ class Container(containers.DeclarativeContainer):
         scoring_service=job_scoring_service,
         skill_service=skill_extraction_service,
         job_mapper=job_mapper,
+    )
+    
+    # Use Cases - Auth (Factory - new instance per request)
+    register_user_use_case = providers.Factory(
+        RegisterUserUseCase,
+        user_repository=user_repository,
+    )
+    
+    login_user_use_case = providers.Factory(
+        LoginUserUseCase,
+        user_repository=user_repository,
+    )
+    
+    refresh_token_use_case = providers.Factory(
+        RefreshTokenUseCase,
     )
 
 
