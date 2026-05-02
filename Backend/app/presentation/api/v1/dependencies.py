@@ -53,8 +53,16 @@ from app.application.use_cases.auth.register_user_use_case import RegisterUserUs
 from app.application.use_cases.auth.login_user_use_case import LoginUserUseCase
 from app.application.use_cases.auth.refresh_token_use_case import RefreshTokenUseCase
 
+# Application - Use Cases - Saved Jobs
+from app.application.use_cases.saved_jobs.save_job_use_case import SaveJobUseCase
+from app.application.use_cases.saved_jobs.list_saved_jobs_use_case import ListSavedJobsUseCase
+from app.application.use_cases.saved_jobs.update_saved_job_use_case import UpdateSavedJobUseCase
+from app.application.use_cases.saved_jobs.delete_saved_job_use_case import DeleteSavedJobUseCase
+from app.application.use_cases.saved_jobs.unsave_job_use_case import UnsaveJobUseCase
+
 # Repositories
 from app.repositories.user_repo import UserRepository
+from app.repositories.saved_job_repo import SavedJobRepository
 
 
 class Container(containers.DeclarativeContainer):
@@ -88,6 +96,11 @@ class Container(containers.DeclarativeContainer):
     
     user_repository = providers.Factory(
         UserRepository,
+        session=db_session,
+    )
+    
+    saved_job_repository = providers.Factory(
+        SavedJobRepository,
         session=db_session,
     )
     
@@ -198,6 +211,33 @@ class Container(containers.DeclarativeContainer):
     
     refresh_token_use_case = providers.Factory(
         RefreshTokenUseCase,
+    )
+    
+    # Use Cases - Saved Jobs (Factory - new instance per request)
+    save_job_use_case = providers.Factory(
+        SaveJobUseCase,
+        saved_job_repository=saved_job_repository,
+        job_repository=job_repository,
+    )
+    
+    list_saved_jobs_use_case = providers.Factory(
+        ListSavedJobsUseCase,
+        saved_job_repository=saved_job_repository,
+    )
+    
+    update_saved_job_use_case = providers.Factory(
+        UpdateSavedJobUseCase,
+        saved_job_repository=saved_job_repository,
+    )
+    
+    delete_saved_job_use_case = providers.Factory(
+        DeleteSavedJobUseCase,
+        saved_job_repository=saved_job_repository,
+    )
+    
+    unsave_job_use_case = providers.Factory(
+        UnsaveJobUseCase,
+        saved_job_repository=saved_job_repository,
     )
 
 
