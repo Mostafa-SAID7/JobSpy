@@ -1,4 +1,10 @@
 from passlib.context import CryptContext
+try:
+    import passlib.handlers.bcrypt as _passlib_bcrypt
+    _passlib_bcrypt.detect_wrap_bug = lambda ident: False
+except Exception:
+    pass
+
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt

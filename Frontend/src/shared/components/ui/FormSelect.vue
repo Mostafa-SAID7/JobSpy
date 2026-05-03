@@ -17,7 +17,7 @@
         class="fluent-select-trigger"
         :class="[
           error ? 'border-red-500 ring-red-500/20' : '',
-          isOpen ? 'ring-2 ring-[#0078d4]/20 border-[#0078d4]' : ''
+          isOpen ? 'ring-4 ring-brand/10 border-brand shadow-md' : ''
         ]"
         @click="toggleDropdown"
       >
@@ -26,7 +26,7 @@
           <component 
             v-if="selectedOption?.icon" 
             :is="selectedOption.icon" 
-            class="w-4 h-4 mr-2.5 text-gray-400 group-hover:text-[#0078d4]"
+            class="w-4 h-4 mr-2.5 text-gray-400 group-hover:text-brand"
           />
           <span :class="!selectedLabel ? 'text-gray-400' : 'text-gray-900 dark:text-gray-100'">
             {{ selectedLabel || placeholder }}
@@ -47,16 +47,16 @@
       <transition name="dropdown">
         <div
           v-if="isOpen"
-          class="absolute z-[100] w-full mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl overflow-hidden py-1 max-h-60 overflow-y-auto"
+          class="absolute z-[100] w-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto"
         >
           <div
             v-for="option in normalizedOptions"
             :key="option.value"
-            class="px-3 py-2 text-sm cursor-pointer flex items-center transition-colors group"
+            class="px-3 py-2.5 text-sm cursor-pointer flex items-center transition-colors group"
             :class="[
               modelValue === option.value 
-                ? 'bg-[#0078d4]/10 text-[#0078d4] font-semibold' 
-                : 'text-gray-700 dark:text-gray-300 hover:bg-[#0078d4] hover:text-white'
+                ? 'bg-brand/10 text-brand font-semibold' 
+                : 'text-gray-700 dark:text-gray-300 hover:bg-brand hover:text-white'
             ]"
             @click="selectOption(option)"
           >

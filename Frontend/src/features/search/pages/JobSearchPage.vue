@@ -1,17 +1,17 @@
 <template>
   <div class="space-y-8 pb-12">
     <!-- Page Header -->
-    <div class="relative overflow-hidden py-12 px-6 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
+    <div class="relative overflow-hidden py-12 px-6 rounded-3xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
       <div class="relative z-10 max-w-3xl">
         <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-          Explore Your <span class="text-[#0078d4]">Next Career</span>
+          Explore Your <span class="text-brand">Next Career</span>
         </h1>
         <p class="text-lg text-gray-600 dark:text-gray-400 mt-4 max-w-xl leading-relaxed">
           Discover thousands of job opportunities across multiple platforms, aggregated and filtered just for you.
         </p>
       </div>
       <!-- Subtle Decorative Background -->
-      <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-[#0078d4]/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-brand/5 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
     <!-- Search Bar Section -->
@@ -47,7 +47,7 @@
             <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
               Found <span class="text-gray-900 dark:text-white font-bold">{{ totalJobs }}</span> matching positions
             </span>
-            <div v-if="loading" class="w-4 h-4 border-2 border-[#0078d4] border-t-transparent rounded-full animate-spin"></div>
+            <div v-if="loading" class="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>
           </div>
           
           <div class="flex items-center gap-3">

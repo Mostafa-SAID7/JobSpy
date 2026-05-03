@@ -45,7 +45,16 @@ export default {
         'fluent-xl': '0 16px 48px rgba(0, 0, 0, 0.16)',
       },
       borderRadius: {
-        'fluent': '4px', // Fluent standard
+        'none': '0',
+        'sm': '0.375rem',
+        'DEFAULT': '0.75rem', // 12px
+        'md': '0.875rem',
+        'lg': '1rem', // 16px
+        'xl': '1.25rem', // 20px
+        '2xl': '1.5rem', // 24px
+        '3xl': '2rem',
+        'full': '9999px',
+        'fluent': '4px',
         'fluent-lg': '8px',
         'fluent-xl': '12px',
       },
@@ -74,7 +83,7 @@ export default {
           padding: '0.625rem 1rem',
           backgroundColor: theme('colors.white'),
           border: `1px solid ${theme('colors.gray.300')}`,
-          borderRadius: theme('borderRadius.fluent'),
+          borderRadius: theme('borderRadius.DEFAULT'),
           fontSize: '0.875rem',
           lineHeight: '1.25rem',
           transition: 'all 0.15s ease-in-out',
@@ -113,7 +122,7 @@ export default {
           padding: '0.625rem 2.5rem 0.625rem 1rem',
           backgroundColor: theme('colors.white'),
           border: `1px solid ${theme('colors.gray.300')}`,
-          borderRadius: theme('borderRadius.fluent'),
+          borderRadius: theme('borderRadius.DEFAULT'),
           fontSize: '0.875rem',
           lineHeight: '1.25rem',
           transition: 'all 0.15s ease-in-out',
@@ -155,7 +164,7 @@ export default {
           alignItems: 'center',
           justifyContent: 'center',
           padding: '0.5rem 1.25rem',
-          borderRadius: theme('borderRadius.fluent'),
+          borderRadius: theme('borderRadius.DEFAULT'),
           fontSize: '0.875rem',
           fontWeight: '600',
           transition: 'all 0.15s ease-in-out',
@@ -163,6 +172,9 @@ export default {
           '&:disabled': {
             opacity: '0.6',
             cursor: 'not-allowed',
+          },
+          '&:active:not(:disabled)': {
+            transform: 'scale(0.98)',
           },
         },
         '.fluent-button-primary': {
@@ -173,7 +185,6 @@ export default {
           },
           '&:active:not(:disabled)': {
             backgroundColor: theme('colors.brand.active'),
-            transform: 'scale(0.98)',
           },
         },
         '.fluent-card': {
@@ -181,10 +192,18 @@ export default {
           border: `1px solid ${theme('colors.gray.200')}`,
           borderRadius: theme('borderRadius.fluent-lg'),
           boxShadow: theme('boxShadow.fluent-sm'),
+          transition: 'all 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: theme('boxShadow.fluent-md'),
+          },
           '.dark &': {
             backgroundColor: theme('colors.gray.900'),
             borderColor: theme('colors.gray.800'),
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+            '&:hover': {
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)',
+            },
           },
         },
       });

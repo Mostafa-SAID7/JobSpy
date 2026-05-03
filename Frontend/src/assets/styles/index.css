@@ -16,18 +16,12 @@ html {
 }
 
 body {
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #f3f2f1; /* Fluent light gray background */
-  color: #323130; /* Fluent dark gray text */
-  min-height: 100%;
+  @apply font-sans antialiased bg-gray-100 text-gray-700 min-h-full;
 }
 
 /* Dark Mode Overrides */
 .dark body {
-  background-color: #11100f; /* Fluent dark gray background */
-  color: #f3f2f1;
+  @apply bg-gray-900 text-gray-100;
 }
 
 /* Select and Option Styling - CRITICAL for proper display */
@@ -119,18 +113,4 @@ select option:checked {
 .page-slide-leave-to {
   opacity: 0;
   transform: translateY(-10px);
-}
-
-/* Card Hover Animation */
-.fluent-card {
-  @apply transition-all duration-200 ease-in-out;
-}
-
-.fluent-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.dark .fluent-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }

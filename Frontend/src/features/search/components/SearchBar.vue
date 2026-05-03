@@ -8,7 +8,7 @@
         </label>
         <div class="relative group">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="w-5 h-5 text-gray-400 group-focus-within:text-[#0078d4] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-gray-400 group-focus-within:text-brand transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -17,7 +17,7 @@
             v-model="localQuery"
             type="text"
             placeholder="Job title, skills, or company..."
-            class="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded focus:outline-none focus:ring-2 focus:ring-[#0078d4]/20 focus:border-[#0078d4] dark:text-white transition-all shadow-sm"
+            class="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand/10 focus:border-brand dark:text-white transition-all shadow-sm"
             @keyup.enter="handleSearch"
           />
           <button
@@ -96,7 +96,7 @@
                   v-model="filters.jobTypes"
                   type="checkbox"
                   :value="type.toLowerCase()"
-                  class="w-4 h-4 text-[#0078d4] border-gray-300 rounded focus:ring-[#0078d4] transition-all cursor-pointer"
+                  class="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand transition-all cursor-pointer"
                 />
                 <span class="ml-2.5 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">{{ type }}</span>
               </label>
@@ -112,7 +112,7 @@
                   v-model="filters.remote"
                   type="checkbox"
                   value="remote"
-                  class="w-4 h-4 text-[#0078d4] border-gray-300 rounded focus:ring-[#0078d4] transition-all cursor-pointer"
+                  class="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand transition-all cursor-pointer"
                 />
                 <span class="ml-2.5 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">Remote Only</span>
               </label>
@@ -121,7 +121,7 @@
                   v-model="filters.remote"
                   type="checkbox"
                   value="hybrid"
-                  class="w-4 h-4 text-[#0078d4] border-gray-300 rounded focus:ring-[#0078d4] transition-all cursor-pointer"
+                  class="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand transition-all cursor-pointer"
                 />
                 <span class="ml-2.5 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">Hybrid</span>
               </label>
@@ -159,7 +159,7 @@
               min="0"
               max="500"
               step="10"
-              class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#0078d4]"
+              class="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-brand"
             />
           </div>
 

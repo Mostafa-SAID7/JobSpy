@@ -1,11 +1,11 @@
 <template>
-  <div class="fluent-card bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 p-5 transition-all group">
+  <div class="fluent-card bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 transition-all group">
     <!-- Header -->
     <div class="flex justify-between items-start gap-4 mb-4">
       <div class="flex-1 min-w-0">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate group-hover:text-[#0078d4] transition-colors">{{ job.title }}</h3>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate group-hover:text-brand transition-colors">{{ job.title }}</h3>
         <div class="flex items-center gap-2">
-          <span class="text-sm font-medium text-[#0078d4] dark:text-blue-400">{{ job.company }}</span>
+          <span class="text-sm font-medium text-brand dark:text-blue-400">{{ job.company }}</span>
           <span class="text-gray-300 dark:text-gray-700">•</span>
           <span class="text-xs text-gray-500 dark:text-gray-400 font-medium px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">{{ job.site_name }}</span>
         </div>
@@ -13,10 +13,10 @@
       <button
         @click="toggleSave"
         :class="[
-          'p-2 rounded transition-all active:scale-90',
+          'p-2 rounded-lg transition-all active:scale-90',
           isSaved
             ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
-            : 'bg-[#f3f2f1] dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-[#edebe9] dark:hover:bg-gray-700'
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
         ]"
         :title="isSaved ? 'Remove from saved' : 'Save job'"
       >
@@ -35,7 +35,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
         <span class="truncate max-w-[150px]">{{ job.location }}</span>
-        <span v-if="job.is_remote" class="ml-2 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 text-[#107c10] dark:text-green-400 text-[10px] font-bold uppercase tracking-wider rounded border border-green-200 dark:border-green-800/50">Remote</span>
+        <span v-if="job.is_remote" class="ml-2 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 text-success dark:text-green-400 text-[10px] font-bold uppercase tracking-wider rounded-md border border-green-200 dark:border-green-800/50">Remote</span>
       </div>
 
       <!-- Job Type -->
@@ -48,7 +48,7 @@
 
       <!-- Salary -->
       <div v-if="job.salary_min || job.salary_max" class="flex items-center text-sm text-gray-700 dark:text-gray-300 font-semibold">
-        <svg class="w-4 h-4 mr-1.5 text-[#107c10]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 mr-1.5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span>{{ formatSalary(job.salary_min) }} - {{ formatSalary(job.salary_max) }}</span>
@@ -73,7 +73,7 @@
         :href="job.job_url"
         target="_blank"
         rel="noopener noreferrer"
-        class="flex-1 bg-[#0078d4] hover:bg-[#106ebe] text-white px-4 py-2 rounded transition-all text-center text-xs font-bold shadow-sm active:scale-95 flex items-center justify-center gap-2"
+        class="flex-1 bg-brand hover:bg-brand-hover text-white px-4 py-2 rounded-lg transition-all text-center text-xs font-bold shadow-sm active:scale-95 flex items-center justify-center gap-2"
       >
         Apply Now
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

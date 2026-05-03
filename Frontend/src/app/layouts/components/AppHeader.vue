@@ -4,7 +4,7 @@
       <div class="flex items-center justify-between">
         <!-- Logo -->
         <RouterLink to="/" class="flex items-center gap-2 group">
-          <div class="w-9 h-9 bg-[#0078d4] rounded flex items-center justify-center transition-transform group-hover:scale-105 shadow-sm">
+          <div class="w-10 h-10 bg-brand rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm">
             <span class="text-white font-bold text-sm tracking-tighter">JS</span>
           </div>
           <span class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">JobSpy</span>
@@ -14,31 +14,31 @@
         <nav class="hidden md:flex items-center gap-6">
           <RouterLink
             to="/jobs"
-            class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-[#0078d4] dark:hover:text-blue-400 transition-colors py-2 relative group"
-            active-class="text-[#0078d4] dark:text-blue-400"
+            class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-blue-400 transition-colors py-2 relative group"
+            active-class="text-brand dark:text-blue-400"
           >
             Search Jobs
-            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-[#0078d4] transition-all group-hover:w-full" :class="route.name === 'JobSearch' ? 'w-full' : ''"></span>
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all group-hover:w-full" :class="route.name === 'JobSearch' ? 'w-full' : ''"></span>
           </RouterLink>
 
           <RouterLink
             v-if="authStore.isAuthenticated"
             to="/saved-jobs"
-            class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-[#0078d4] dark:hover:text-blue-400 transition-colors py-2 relative group"
-            active-class="text-[#0078d4] dark:text-blue-400"
+            class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-blue-400 transition-colors py-2 relative group"
+            active-class="text-brand dark:text-blue-400"
           >
             Saved Jobs
-            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-[#0078d4] transition-all group-hover:w-full" :class="route.name === 'SavedJobs' ? 'w-full' : ''"></span>
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all group-hover:w-full" :class="route.name === 'SavedJobs' ? 'w-full' : ''"></span>
           </RouterLink>
 
           <RouterLink
             v-if="authStore.isAuthenticated"
             to="/alerts"
-            class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-[#0078d4] dark:hover:text-blue-400 transition-colors py-2 relative group"
-            active-class="text-[#0078d4] dark:text-blue-400"
+            class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-blue-400 transition-colors py-2 relative group"
+            active-class="text-brand dark:text-blue-400"
           >
             Alerts
-            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-[#0078d4] transition-all group-hover:w-full" :class="route.name === 'Alerts' ? 'w-full' : ''"></span>
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all group-hover:w-full" :class="route.name === 'Alerts' ? 'w-full' : ''"></span>
           </RouterLink>
         </nav>
 
@@ -52,13 +52,13 @@
           <template v-if="authStore.isAuthenticated">
             <RouterLink
               to="/profile"
-              class="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#0078d4] dark:hover:text-blue-400 transition-colors"
+              class="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand dark:hover:text-blue-400 transition-colors"
             >
               {{ authStore.user?.full_name }}
             </RouterLink>
             <button
               @click="handleLogout"
-              class="text-sm font-semibold px-4 py-1.5 bg-[#f3f2f1] dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-[#edebe9] dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded transition-all active:scale-95"
+              class="text-sm font-semibold px-4 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg transition-all active:scale-95"
             >
               Logout
             </button>
@@ -67,13 +67,13 @@
           <template v-else>
             <RouterLink
               to="/auth/login"
-              class="text-sm font-semibold px-4 py-1.5 text-[#0078d4] dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded transition-all"
+              class="text-sm font-semibold px-4 py-1.5 text-brand dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-lg transition-all"
             >
               Login
             </RouterLink>
             <RouterLink
               to="/auth/register"
-              class="text-sm font-semibold px-4 py-1.5 bg-[#0078d4] hover:bg-[#106ebe] text-white rounded shadow-sm transition-all active:scale-95"
+              class="text-sm font-semibold px-4 py-1.5 bg-brand hover:bg-brand-hover text-white rounded-lg shadow-sm transition-all active:scale-95"
             >
               Register
             </RouterLink>

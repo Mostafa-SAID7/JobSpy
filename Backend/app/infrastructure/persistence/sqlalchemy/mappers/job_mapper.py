@@ -19,14 +19,14 @@ class JobMapper:
             id=orm_job.id,
             title=orm_job.title,
             company=orm_job.company,
-            location=Location(address=orm_job.location),
-            salary=Salary(
-                min_amount=orm_job.salary_min,
-                max_amount=orm_job.salary_max,
-                currency=orm_job.salary_currency
+            location=Location.from_string(orm_job.location) if orm_job.location else Location.remote(),
+            salary=Salary.from_range(
+                orm_job.salary_min,
+                orm_job.salary_max,
+                orm_job.salary_currency or "USD"
             ),
-            job_type=JobType(orm_job.job_type) if orm_job.job_type else None,
-            experience_level=ExperienceLevel(orm_job.experience_level) if orm_job.experience_level else None,
+            job_type=JobType.from_string(orm_job.job_type) if orm_job.job_type else None,
+            experience_level=ExperienceLevel.from_string(orm_job.experience_level) if orm_job.experience_level else None,
             description=orm_job.description,
             requirements=orm_job.requirements or [],
             benefits=orm_job.benefits or [],
