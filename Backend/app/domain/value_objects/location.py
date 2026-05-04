@@ -162,6 +162,30 @@ class Location:
         """
         search_lower = search_location.lower()
         
+        # Country code mappings for better matching
+        country_mappings = {
+            'united states': ['us', 'usa', 'united states', 'america'],
+            'united kingdom': ['uk', 'gb', 'united kingdom', 'britain'],
+            'united arab emirates': ['uae', 'united arab emirates', 'dubai', 'abu dhabi'],
+            'saudi arabia': ['sa', 'saudi', 'saudi arabia', 'ksa'],
+            'egypt': ['egypt', 'eg', 'cairo'],
+            'india': ['india', 'in'],
+            'canada': ['canada', 'ca'],
+            'germany': ['germany', 'de'],
+            'singapore': ['singapore', 'sg'],
+            'australia': ['australia', 'au', 'aus']
+        }
+        
+        # Check if search location is a known country
+        for country_name, aliases in country_mappings.items():
+            if search_lower in aliases or search_lower == country_name:
+                # Check if any alias matches this location
+                location_lower = self.format().lower()
+                for alias in aliases:
+                    if alias in location_lower:
+                        return True
+        
+        # Fallback to substring matching
         if self.city and search_lower in self.city.lower():
             return True
         

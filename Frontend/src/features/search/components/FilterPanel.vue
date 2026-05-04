@@ -22,21 +22,12 @@
       <!-- Location Search -->
       <div class="space-y-3">
         <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">Location</label>
-        <div class="relative group">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="w-4 h-4 text-gray-400 group-focus-within:text-[#0078d4] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </div>
-          <input
-            v-model="location"
-            type="text"
-            placeholder="City, State or Remote"
-            class="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-transparent focus:border-[#0078d4] rounded text-sm focus:ring-4 focus:ring-[#0078d4]/10 dark:text-white transition-all shadow-inner"
-            @input="updateLocation"
-          />
-        </div>
+        <FormSelect
+          v-model="location"
+          :options="locationOptions"
+          placeholder="All Locations"
+          @update:model-value="updateLocation"
+        />
       </div>
 
       <!-- Salary Range -->
@@ -188,6 +179,20 @@ const dateOptions = [
   { value: '7', label: 'Last 7 days' },
   { value: '30', label: 'Last 30 days' },
   { value: '90', label: 'Last 90 days' }
+]
+
+const locationOptions = [
+  { value: '', label: 'All Locations' },
+  { value: 'United States', label: '🇺🇸 United States' },
+  { value: 'United Kingdom', label: '🇬🇧 United Kingdom' },
+  { value: 'Canada', label: '🇨🇦 Canada' },
+  { value: 'Germany', label: '🇩🇪 Germany' },
+  { value: 'United Arab Emirates', label: '🇦🇪 UAE (Dubai)' },
+  { value: 'Saudi Arabia', label: '🇸🇦 Saudi Arabia' },
+  { value: 'Egypt', label: '🇪🇬 Egypt' },
+  { value: 'India', label: '🇮🇳 India' },
+  { value: 'Singapore', label: '🇸🇬 Singapore' },
+  { value: 'Australia', label: '🇦🇺 Australia' }
 ]
 
 const hasActiveFilters = computed(() => {
