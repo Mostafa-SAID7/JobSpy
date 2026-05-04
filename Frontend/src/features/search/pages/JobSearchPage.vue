@@ -266,13 +266,19 @@ const searchJobs = async () => {
     console.log('🔍 Starting job search...', { 
       searchQuery: searchQuery.value, 
       currentPage: currentPage.value, 
-      pageSize: pageSize.value 
+      pageSize: pageSize.value,
+      filterState: filterState.value
     })
 
     // Determine which endpoint to use
-    const advancedKeys = ['location', 'job_type', 'experience_level', 'salary_min', 'salary_max', 'is_remote']
-    const hasAdvancedParams = Object.keys(filterState.value).some(key => 
-      advancedKeys.includes(key) && filterState.value[key as keyof typeof filterState.value] !== undefined && filterState.value[key as keyof typeof filterState.value] !== null && filterState.value[key as keyof typeof filterState.value] !== ''
+    const hasAdvancedParams = (
+      (filterState.value.location && filterState.value.location !== '') ||
+      (filterState.value.jobTypes && filterState.value.jobTypes.length > 0) ||
+      (filterState.value.experienceLevel && filterState.value.experienceLevel !== '') ||
+      (filterState.value.minSalary > 0) ||
+      (filterState.value.maxSalary < 500000) ||
+      (filterState.value.postedDate && filterState.value.postedDate !== '') ||
+      (filterState.value.remote && filterState.value.remote.length > 0)
     )
 
     let endpoint = '/jobs'
@@ -281,11 +287,25 @@ const searchJobs = async () => {
       limit: pageSize.value
     }
 
+    console.log('🔎 Has advanced params:', hasAdvancedParams)
+
     // Determine endpoint: advanced search if filters, basic search if query, list all if neither
     if (hasAdvancedParams) {
       endpoint = '/jobs/search/advanced'
       if (searchQuery.value.trim()) {
         params.query = searchQuery.value.trim()
+      }
+      // Add location filter
+      if (filterState.value.location) {
+        params.location = filterState.value.location
+      }
+      // Add experience level filter
+      if (filterState.value.experienceLevel) {
+        params.experience_level = filterState.value.experienceLevel
+      }
+      // Add posted date filter
+      if (filterState.value.postedDate) {
+        params.postedDate = filterState.value.postedDate
       }
     } else if (searchQuery.value.trim()) {
       endpoint = '/jobs/search'
@@ -294,7 +314,6 @@ const searchJobs = async () => {
 
     // Merge filter state into params
     Object.assign(params, {
-      ...filterState.value,
       salary_min: filterState.value.minSalary,
       salary_max: filterState.value.maxSalary,
     })
