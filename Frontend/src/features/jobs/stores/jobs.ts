@@ -40,7 +40,13 @@ export const useJobsStore = defineStore('jobs', () => {
         advancedKeys.includes(key) && searchParams.value[key as keyof SearchParams] !== undefined && searchParams.value[key as keyof SearchParams] !== null && searchParams.value[key as keyof SearchParams] !== ''
       )
 
-      const endpoint = hasAdvancedParams ? '/jobs/search/advanced' : '/jobs'
+      // Determine endpoint: advanced search if filters, basic search if query, list all if neither
+      let endpoint = '/jobs'
+      if (hasAdvancedParams) {
+        endpoint = '/jobs/search/advanced'
+      } else if (searchParams.value.query && searchParams.value.query.trim() !== '') {
+        endpoint = '/jobs/search'
+      }
       const response = await apiClient.get(endpoint, {
         params: searchParams.value,
       })

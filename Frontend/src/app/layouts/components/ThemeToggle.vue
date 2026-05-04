@@ -28,33 +28,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed } from 'vue'
+import { useUIStore } from '@/stores/ui'
 
-const isDark = ref(false)
+const uiStore = useUIStore()
+
+const isDark = computed(() => uiStore.theme === 'dark')
 
 const toggleTheme = () => {
-  isDark.value = !isDark.value
-  
-  if (isDark.value) {
-    document.documentElement.classList.add('dark')
-    localStorage.setItem('theme', 'dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-    localStorage.setItem('theme', 'light')
-  }
+  const newTheme = uiStore.theme === 'dark' ? 'light' : 'dark'
+  uiStore.setTheme(newTheme)
 }
-
-onMounted(() => {
-  // Check localStorage or system preference
-  const savedTheme = localStorage.getItem('theme')
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-
-  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-    isDark.value = true
-    document.documentElement.classList.add('dark')
-  } else {
-    isDark.value = false
-    document.documentElement.classList.remove('dark')
-  }
-})
 </script>

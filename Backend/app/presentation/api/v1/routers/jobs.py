@@ -108,12 +108,44 @@ async def scrape_jobs_trigger(
         
         result = await use_case.execute(scrape_request)
         
+        # Convert domain Job objects to JobResponse DTOs
+        job_responses = []
+        for job in result.processed_jobs:
+            job_responses.append(JobResponse(
+                id=job.id,
+                title=job.title,
+                company=job.company,
+                location=job.location.format() if job.location else "Location not specified",
+                source=job.source,
+                salary_min=job.salary.min_amount if job.salary else None,
+                salary_max=job.salary.max_amount if job.salary else None,
+                salary_currency=job.salary.currency if job.salary else None,
+                job_type=job.job_type.value if job.job_type else None,
+                description=job.description,
+                requirements=job.requirements,
+                benefits=job.benefits,
+                source_url=job.source_url,
+                source_job_id=job.source_job_id,
+                posted_date=job.posted_date,
+                deadline=job.deadline,
+                company_logo_url=job.company_logo_url,
+                company_website=job.company_website,
+                experience_level=job.experience_level.value if job.experience_level else None,
+                skills=job.skills,
+                is_remote=1 if job.is_remote() else 0,
+                view_count=job.view_count,
+                apply_count=job.apply_count,
+                created_at=job.created_at,
+                updated_at=job.updated_at,
+                scraped_at=job.scraped_at
+            ))
+        
         return ScrapeResponse(
             saved_count=result.saved_count,
             duplicate_count=result.duplicate_count,
             error_count=result.error_count,
             total_processed=result.total_processed,
-            jobs=result.processed_jobs
+            jobs=job_responses
         )
 
     except Exception as e:
@@ -126,7 +158,7 @@ async def scrape_jobs_trigger(
 
 @router.get("/search/advanced", response_model=JobListResponse)
 async def advanced_search(
-    query: str = Query(..., description="Search query"),
+    query: Optional[str] = Query(None, description="Search query"),
     location: Optional[str] = Query(None, description="Job location"),
     job_type: Optional[str] = Query(None, description="Job type (fulltime, parttime, etc.)"),
     experience_level: Optional[str] = Query(None, description="Experience level required"),
@@ -143,7 +175,7 @@ async def advanced_search(
     """
     try:
         request = AdvancedSearchRequest(
-            query=query,
+            query=query or "",
             location=location,
             job_type=job_type,
             experience_level=experience_level,
@@ -156,11 +188,43 @@ async def advanced_search(
         )
         result = await use_case.execute(request)
 
+        # Convert domain Job objects to JobResponse DTOs
+        job_responses = []
+        for job in result.jobs:
+            job_responses.append(JobResponse(
+                id=job.id,
+                title=job.title,
+                company=job.company,
+                location=job.location.format() if job.location else "Location not specified",
+                source=job.source,
+                salary_min=job.salary.min_amount if job.salary else None,
+                salary_max=job.salary.max_amount if job.salary else None,
+                salary_currency=job.salary.currency if job.salary else None,
+                job_type=job.job_type.value if job.job_type else None,
+                description=job.description,
+                requirements=job.requirements,
+                benefits=job.benefits,
+                source_url=job.source_url,
+                source_job_id=job.source_job_id,
+                posted_date=job.posted_date,
+                deadline=job.deadline,
+                company_logo_url=job.company_logo_url,
+                company_website=job.company_website,
+                experience_level=job.experience_level.value if job.experience_level else None,
+                skills=job.skills,
+                is_remote=1 if job.is_remote() else 0,
+                view_count=job.view_count,
+                apply_count=job.apply_count,
+                created_at=job.created_at,
+                updated_at=job.updated_at,
+                scraped_at=job.scraped_at
+            ))
+
         return JobListResponse(
             total=result.total_count,
             page=skip // limit + 1,
             page_size=limit,
-            items=result.jobs
+            items=job_responses
         )
 
     except Exception as e:
@@ -188,11 +252,43 @@ async def search_jobs(
             limit=limit
         )
 
+        # Convert domain Job objects to JobResponse DTOs
+        job_responses = []
+        for job in result.jobs:
+            job_responses.append(JobResponse(
+                id=job.id,
+                title=job.title,
+                company=job.company,
+                location=job.location.format() if job.location else "Location not specified",
+                source=job.source,
+                salary_min=job.salary.min_amount if job.salary else None,
+                salary_max=job.salary.max_amount if job.salary else None,
+                salary_currency=job.salary.currency if job.salary else None,
+                job_type=job.job_type.value if job.job_type else None,
+                description=job.description,
+                requirements=job.requirements,
+                benefits=job.benefits,
+                source_url=job.source_url,
+                source_job_id=job.source_job_id,
+                posted_date=job.posted_date,
+                deadline=job.deadline,
+                company_logo_url=job.company_logo_url,
+                company_website=job.company_website,
+                experience_level=job.experience_level.value if job.experience_level else None,
+                skills=job.skills,
+                is_remote=1 if job.is_remote() else 0,
+                view_count=job.view_count,
+                apply_count=job.apply_count,
+                created_at=job.created_at,
+                updated_at=job.updated_at,
+                scraped_at=job.scraped_at
+            ))
+
         return JobListResponse(
             total=result.total_count,
             page=skip // limit + 1,
             page_size=limit,
-            items=result.jobs
+            items=job_responses
         )
 
     except Exception as e:
@@ -220,11 +316,43 @@ async def list_jobs(
             source=source
         )
 
+        # Convert domain Job objects to JobResponse DTOs
+        job_responses = []
+        for job in result.jobs:
+            job_responses.append(JobResponse(
+                id=job.id,
+                title=job.title,
+                company=job.company,
+                location=job.location.format() if job.location else "Location not specified",
+                source=job.source,
+                salary_min=job.salary.min_amount if job.salary else None,
+                salary_max=job.salary.max_amount if job.salary else None,
+                salary_currency=job.salary.currency if job.salary else None,
+                job_type=job.job_type.value if job.job_type else None,
+                description=job.description,
+                requirements=job.requirements,
+                benefits=job.benefits,
+                source_url=job.source_url,
+                source_job_id=job.source_job_id,
+                posted_date=job.posted_date,
+                deadline=job.deadline,
+                company_logo_url=job.company_logo_url,
+                company_website=job.company_website,
+                experience_level=job.experience_level.value if job.experience_level else None,
+                skills=job.skills,
+                is_remote=1 if job.is_remote() else 0,
+                view_count=job.view_count,
+                apply_count=job.apply_count,
+                created_at=job.created_at,
+                updated_at=job.updated_at,
+                scraped_at=job.scraped_at
+            ))
+
         return JobListResponse(
             total=result.total_count,
             page=skip // limit + 1,
             page_size=limit,
-            items=result.jobs
+            items=job_responses
         )
 
     except Exception as e:
@@ -252,7 +380,35 @@ async def get_job(
                 detail="Job not found"
             )
 
-        return job
+        # Convert domain Job object to JobResponse DTO
+        return JobResponse(
+            id=job.id,
+            title=job.title,
+            company=job.company,
+            location=job.location.format() if job.location else "Location not specified",
+            source=job.source,
+            salary_min=job.salary.min_amount if job.salary else None,
+            salary_max=job.salary.max_amount if job.salary else None,
+            salary_currency=job.salary.currency if job.salary else None,
+            job_type=job.job_type.value if job.job_type else None,
+            description=job.description,
+            requirements=job.requirements,
+            benefits=job.benefits,
+            source_url=job.source_url,
+            source_job_id=job.source_job_id,
+            posted_date=job.posted_date,
+            deadline=job.deadline,
+            company_logo_url=job.company_logo_url,
+            company_website=job.company_website,
+            experience_level=job.experience_level.value if job.experience_level else None,
+            skills=job.skills,
+            is_remote=1 if job.is_remote() else 0,
+            view_count=job.view_count,
+            apply_count=job.apply_count,
+            created_at=job.created_at,
+            updated_at=job.updated_at,
+            scraped_at=job.scraped_at
+        )
 
     except HTTPException:
         raise

@@ -14,6 +14,7 @@ export interface Job {
   source?: string
   site_name?: string
   source_url?: string
+  source_url_direct?: string
   job_url?: string
   source_job_id?: string
   posted_date: string

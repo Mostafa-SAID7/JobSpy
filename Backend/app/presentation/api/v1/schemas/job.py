@@ -20,6 +20,7 @@ class JobCreate(JobBase):
     requirements: Optional[List[str]] = None
     benefits: Optional[List[str]] = None
     source_url: str
+    source_url_direct: Optional[str] = None
     source_job_id: Optional[str] = None
     posted_date: Optional[datetime] = None
     deadline: Optional[datetime] = None
@@ -49,6 +50,7 @@ class JobResponse(JobBase):
     requirements: Optional[List[str]] = None
     benefits: Optional[List[str]] = None
     source_url: str
+    source_url_direct: Optional[str] = None
     source_job_id: Optional[str] = None
     posted_date: Optional[datetime] = None
     deadline: Optional[datetime] = None

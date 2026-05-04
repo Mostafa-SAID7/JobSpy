@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     
     # Initialize database
     try:
-        await init_db()
+        await init_db()  # Re-enabled
         logger.info("Ã¢Å“â€¦ Database initialized successfully")
     except Exception as e:
         logger.warning(f"Ã¢Å¡Â Ã¯Â¸Â  Database initialization warning: {e}")

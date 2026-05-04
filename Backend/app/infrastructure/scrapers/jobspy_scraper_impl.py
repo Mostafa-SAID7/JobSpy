@@ -9,7 +9,7 @@ import asyncio
 import pandas as pd
 from typing import List, Dict, Any, Optional
 from datetime import datetime
-from jobspy import scrape_jobs
+from app.jobspy import scrape_jobs
 
 from app.domain.interfaces.scraper_interface import IJobScraper, ScraperConfig
 
@@ -77,11 +77,12 @@ class JobSpyLibraryScraper(IJobScraper):
         """
         jobs = []
         for _, row in df.iterrows():
+            # Basic fields
             job = {
                 "source": str(row.get("site", "JobSpy")),
                 "title": str(row.get("title", "No Title")),
                 "company": str(row.get("company", "Unknown Company")),
-                "location": f"{row.get('city', '')}, {row.get('state', '')}, {row.get('country', '')}".strip(", "),
+                "location": str(row.get("location", "")) if pd.notna(row.get("location")) else "Remote",
                 "description": str(row.get("description", "")) if pd.notna(row.get("description")) else "",
                 "source_url": str(row.get("job_url", "")),
                 "job_type": str(row.get("job_type", "")) if pd.notna(row.get("job_type")) else None,
@@ -94,19 +95,31 @@ class JobSpyLibraryScraper(IJobScraper):
                 "posted_date": row.get("date_posted"),
                 "company_logo_url": str(row.get("company_logo", "")) if pd.notna(row.get("company_logo")) else None,
                 "source_job_id": str(row.get("id", "")) if pd.notna(row.get("id")) else None,
-                # Site specific fields
+                
+                # Additional fields from JobPost
+                "job_url_direct": str(row.get("job_url_direct", "")) if pd.notna(row.get("job_url_direct")) else None,
+                "emails": row.get("emails") if isinstance(row.get("emails"), list) else [],
+                "job_level": str(row.get("job_level", "")) if pd.notna(row.get("job_level")) else None,
+                "company_industry": str(row.get("company_industry", "")) if pd.notna(row.get("company_industry")) else None,
+                "company_addresses": str(row.get("company_addresses", "")) if pd.notna(row.get("company_addresses")) else None,
+                "company_num_employees": str(row.get("company_num_employees", "")) if pd.notna(row.get("company_num_employees")) else None,
+                "company_revenue": str(row.get("company_revenue", "")) if pd.notna(row.get("company_revenue")) else None,
+                "company_description": str(row.get("company_description", "")) if pd.notna(row.get("company_description")) else None,
+                "company_rating": float(row.get("company_rating")) if pd.notna(row.get("company_rating")) else None,
+                "company_reviews_count": int(row.get("company_reviews_count")) if pd.notna(row.get("company_reviews_count")) else None,
+                "banner_photo_url": str(row.get("banner_photo_url", "")) if pd.notna(row.get("banner_photo_url")) else None,
+                "job_function": str(row.get("job_function", "")) if pd.notna(row.get("job_function")) else None,
                 "experience_range": str(row.get("experience_range", "")) if pd.notna(row.get("experience_range")) else None,
                 "vacancy_count": int(row.get("vacancy_count")) if pd.notna(row.get("vacancy_count")) else None,
-                "company_rating": float(row.get("company_rating")) if pd.notna(row.get("company_rating")) else None,
-                "job_level": str(row.get("job_level", "")) if pd.notna(row.get("job_level")) else None,
+                "work_from_home_type": str(row.get("work_from_home_type", "")) if pd.notna(row.get("work_from_home_type")) else None,
             }
             
-            # If posted_date is a string or timestamp, ensure it's ISO format or datetime
+            # Date handling
             if pd.isna(job["posted_date"]):
                 job["posted_date"] = datetime.utcnow().isoformat()
             elif hasattr(job["posted_date"], "isoformat"):
                 job["posted_date"] = job["posted_date"].isoformat()
-                
+            
             jobs.append(job)
             
         return jobs

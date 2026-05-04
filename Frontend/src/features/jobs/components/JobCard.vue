@@ -1,5 +1,5 @@
 <template>
-  <div class="fluent-card bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 transition-all group">
+  <div class="fluent-card bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 p-6 transition-all group hover:shadow-fluent-lg">
     <!-- Header -->
     <div class="flex justify-between items-start gap-4 mb-4">
       <div class="flex-1 min-w-0">
@@ -7,13 +7,13 @@
         <div class="flex items-center gap-2">
           <span class="text-sm font-medium text-brand dark:text-blue-400">{{ job.company }}</span>
           <span class="text-gray-300 dark:text-gray-700">•</span>
-          <span class="text-xs text-gray-500 dark:text-gray-400 font-medium px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">{{ job.site_name }}</span>
+          <span class="text-xs text-gray-500 dark:text-gray-400 font-medium px-2.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-lg">{{ getSourceName(job.source) }}</span>
         </div>
       </div>
       <button
         @click="toggleSave"
         :class="[
-          'p-2 rounded-lg transition-all active:scale-90',
+          'p-2.5 rounded-xl transition-all active:scale-90',
           isSaved
             ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
             : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -35,7 +35,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
         <span class="truncate max-w-[150px]">{{ job.location }}</span>
-        <span v-if="job.is_remote" class="ml-2 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 text-success dark:text-green-400 text-[10px] font-bold uppercase tracking-wider rounded-md border border-green-200 dark:border-green-800/50">Remote</span>
+        <span v-if="job.is_remote" class="ml-2 px-2 py-0.5 bg-green-50 dark:bg-green-900/20 text-success dark:text-green-400 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-green-200 dark:border-green-800/50">Remote</span>
       </div>
 
       <!-- Job Type -->
@@ -61,19 +61,19 @@
     </p>
 
     <!-- Actions -->
-    <div class="flex gap-3 pt-2 border-t border-gray-100 dark:border-gray-800/50">
+    <div class="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-800/50">
       <FormButton
         label="Quick View"
         variant="secondary"
         size="sm"
-        class="flex-1"
+        class="flex-1 rounded-xl"
         @click="$emit('view-details')"
       />
       <a
-        :href="job.job_url"
+        :href="getApplyUrl()"
         target="_blank"
         rel="noopener noreferrer"
-        class="flex-1 bg-brand hover:bg-brand-hover text-white px-4 py-2 rounded-lg transition-all text-center text-xs font-bold shadow-sm active:scale-95 flex items-center justify-center gap-2"
+        class="flex-1 bg-brand hover:bg-brand-hover text-white px-4 py-2 rounded-xl transition-all text-center text-xs font-bold shadow-fluent-sm active:scale-95 flex items-center justify-center gap-2"
       >
         Apply Now
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,6 +117,37 @@ const getJobTypeLabel = (type: string): string => {
   return labels[type] || type
 }
 
+const getSourceName = (source: string): string => {
+  // First check if we have a source_url to extract the platform from
+  const sourceUrl = props.job.source_url || source
+  
+  if (!sourceUrl) return 'Unknown'
+  
+  // Extract platform name from URL
+  if (sourceUrl.includes('linkedin.com')) return 'LinkedIn'
+  if (sourceUrl.includes('indeed.com')) return 'Indeed'
+  if (sourceUrl.includes('glassdoor.com')) return 'Glassdoor'
+  if (sourceUrl.includes('google.com')) return 'Google Jobs'
+  if (sourceUrl.includes('wuzzuf.net')) return 'Wuzzuf'
+  if (sourceUrl.includes('bayt.com')) return 'Bayt'
+  if (sourceUrl.includes('monster.com')) return 'Monster'
+  if (sourceUrl.includes('ziprecruiter.com')) return 'ZipRecruiter'
+  
+  // If source is not "JobSpy Engine", return it
+  if (source && source !== 'JobSpy Engine') {
+    return source
+  }
+  
+  // Try to extract domain from URL as fallback
+  try {
+    const url = new URL(sourceUrl)
+    const domain = url.hostname.replace('www.', '')
+    return domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1)
+  } catch {
+    return 'Unknown'
+  }
+}
+
 const formatSalary = (salary?: number): string => {
   if (!salary) return 'Not specified'
   return new Intl.NumberFormat('en-US', {
@@ -124,6 +155,11 @@ const formatSalary = (salary?: number): string => {
     currency: 'USD',
     maximumFractionDigits: 0
   }).format(salary)
+}
+
+const getApplyUrl = (): string => {
+  // Prefer direct company URL, fallback to source URL (platform listing)
+  return props.job.source_url_direct || props.job.source_url || props.job.job_url || '#'
 }
 
 </script>

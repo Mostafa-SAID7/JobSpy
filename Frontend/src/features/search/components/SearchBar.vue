@@ -87,6 +87,16 @@
     <transition name="slide-down">
       <div v-if="showAdvanced" class="fluent-card mt-2 p-6 bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 shadow-xl">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <!-- Location -->
+          <div class="space-y-3">
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Location</label>
+            <FormSelect
+              v-model="filters.location"
+              :options="locationOptions"
+              placeholder="All Locations"
+            />
+          </div>
+
           <!-- Job Type -->
           <div class="space-y-3">
             <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Job Type</label>
@@ -195,6 +205,7 @@ import FormButton from '@/shared/components/ui/FormButton.vue'
 import FormSelect from '@/shared/components/ui/FormSelect.vue'
 
 interface SearchFilters {
+  location: string
   jobTypes: string[]
   remote: string[]
   experienceLevel: string
@@ -214,6 +225,7 @@ const props = withDefaults(
     modelValue: '',
     site: '',
     filters: () => ({
+      location: '',
       jobTypes: [],
       remote: [],
       experienceLevel: '',
@@ -248,6 +260,20 @@ const siteOptions = [
   { value: 'bayt', label: 'Bayt' },
   { value: 'naukri', label: 'Naukri' },
   { value: 'bdjobs', label: 'BDJobs' }
+]
+
+const locationOptions = [
+  { value: '', label: 'All Locations' },
+  { value: 'United States', label: '🇺🇸 United States' },
+  { value: 'United Kingdom', label: '🇬🇧 United Kingdom' },
+  { value: 'Canada', label: '🇨🇦 Canada' },
+  { value: 'Germany', label: '🇩🇪 Germany' },
+  { value: 'United Arab Emirates', label: '🇦🇪 UAE (Dubai)' },
+  { value: 'Saudi Arabia', label: '🇸🇦 Saudi Arabia' },
+  { value: 'Egypt', label: '🇪🇬 Egypt' },
+  { value: 'India', label: '🇮🇳 India' },
+  { value: 'Singapore', label: '🇸🇬 Singapore' },
+  { value: 'Australia', label: '🇦🇺 Australia' }
 ]
 
 const experienceOptions = [
@@ -289,6 +315,7 @@ const toggleAdvanced = () => {
 
 const clearFilters = () => {
   filters.value = {
+    location: '',
     jobTypes: [],
     remote: [],
     experienceLevel: '',

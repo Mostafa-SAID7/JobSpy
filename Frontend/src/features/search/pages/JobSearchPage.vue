@@ -142,6 +142,7 @@ const searchQuery = ref((route.query.q as string) || '')
 const selectedSite = ref((route.query.site as string) || '')
 
 const searchFilters = ref({
+  location: '',
   jobTypes: [],
   remote: [],
   experienceLevel: '',
@@ -280,11 +281,15 @@ const searchJobs = async () => {
       limit: pageSize.value
     }
 
-    if (searchQuery.value.trim()) {
-      endpoint = hasAdvancedParams ? '/jobs/search/advanced' : '/jobs/search'
-      params.query = searchQuery.value.trim()
-    } else if (hasAdvancedParams) {
+    // Determine endpoint: advanced search if filters, basic search if query, list all if neither
+    if (hasAdvancedParams) {
       endpoint = '/jobs/search/advanced'
+      if (searchQuery.value.trim()) {
+        params.query = searchQuery.value.trim()
+      }
+    } else if (searchQuery.value.trim()) {
+      endpoint = '/jobs/search'
+      params.query = searchQuery.value.trim()
     }
 
     // Merge filter state into params

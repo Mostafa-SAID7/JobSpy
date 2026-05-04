@@ -39,24 +39,26 @@ export default {
         info: '#0078d4',
       },
       boxShadow: {
-        'fluent-sm': '0 2px 4px rgba(0, 0, 0, 0.04)',
-        'fluent-md': '0 4px 12px rgba(0, 0, 0, 0.08)',
-        'fluent-lg': '0 8px 24px rgba(0, 0, 0, 0.12)',
-        'fluent-xl': '0 16px 48px rgba(0, 0, 0, 0.16)',
+        'fluent-sm': '0 2px 8px rgba(0, 0, 0, 0.04)',
+        'fluent-md': '0 8px 20px rgba(0, 0, 0, 0.06)',
+        'fluent-lg': '0 12px 32px rgba(0, 0, 0, 0.1)',
+        'fluent-xl': '0 24px 64px rgba(0, 0, 0, 0.14)',
+        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
       },
       borderRadius: {
         'none': '0',
-        'sm': '0.375rem',
-        'DEFAULT': '0.75rem', // 12px
-        'md': '0.875rem',
-        'lg': '1rem', // 16px
-        'xl': '1.25rem', // 20px
-        '2xl': '1.5rem', // 24px
-        '3xl': '2rem',
+        'xs': '0.25rem',
+        'sm': '0.5rem',
+        'DEFAULT': '1rem', // 16px
+        'md': '1.25rem',
+        'lg': '1.5rem',
+        'xl': '2rem',
+        '2xl': '2.5rem',
+        '3xl': '3rem',
         'full': '9999px',
-        'fluent': '4px',
-        'fluent-lg': '8px',
-        'fluent-xl': '12px',
+        'fluent': '8px',
+        'fluent-lg': '16px',
+        'fluent-xl': '24px',
       },
       animation: {
         'fade-in': 'fadeIn 0.2s ease-out',

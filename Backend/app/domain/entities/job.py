@@ -57,15 +57,34 @@ class Job:
     # Source tracking
     source: str  # LinkedIn, Indeed, Wuzzuf, Bayt
     source_url: str
-    source_job_id: Optional[str]
     
     # Dates
     posted_date: datetime
-    deadline: Optional[datetime]
+    
+    # Optional fields with defaults
+    deadline: Optional[datetime] = None
+    source_url_direct: Optional[str] = None
+    source_job_id: Optional[str] = None
     
     # Company info
     company_logo_url: Optional[str] = None
     company_website: Optional[str] = None
+    company_industry: Optional[str] = None
+    company_addresses: Optional[str] = None
+    company_num_employees: Optional[str] = None
+    company_revenue: Optional[str] = None
+    company_description: Optional[str] = None
+    company_rating: Optional[float] = None
+    company_reviews_count: Optional[int] = None
+    
+    # Additional Details
+    job_level: Optional[str] = None
+    job_function: Optional[str] = None
+    experience_range: Optional[str] = None
+    emails: Optional[List[str]] = None
+    banner_photo_url: Optional[str] = None
+    vacancy_count: Optional[int] = None
+    work_from_home_type: Optional[str] = None
     
     # Metrics
     view_count: int = 0

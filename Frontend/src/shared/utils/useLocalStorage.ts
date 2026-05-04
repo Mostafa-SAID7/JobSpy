@@ -45,21 +45,29 @@ export function getLocalStorage<T>(key: string, defaultValue?: T): T | null {
     const item = localStorage.getItem(key)
     if (!item) return defaultValue ?? null
 
-    const data: StorageData<T> = JSON.parse(item)
-
-    // Check if data has expired
-    if (data.expiresAt && Date.now() > data.expiresAt) {
-      localStorage.removeItem(key)
-      return defaultValue ?? null
+    try {
+      const parsed = JSON.parse(item)
+      
+      // Check if it matches our StorageData structure
+      if (parsed && typeof parsed === 'object' && 'value' in parsed) {
+        const data = parsed as StorageData<T>
+        // Check if data has expired
+        if (data.expiresAt && Date.now() > data.expiresAt) {
+          localStorage.removeItem(key)
+          return defaultValue ?? null
+        }
+        return data.value
+      }
+      
+      // If it's valid JSON but not our structure, return as is (could be a direct boolean/number/array)
+      return parsed as T
+    } catch {
+      // If parsing fails, it's likely a plain string value
+      return item as unknown as T
     }
-
-    return data.value
   } catch (error) {
-    if (error instanceof SyntaxError) {
-      console.error(`Corrupted data in localStorage for key: ${key}`)
-      localStorage.removeItem(key)
-    } else if (error instanceof Error) {
-      console.error(`Error retrieving data from localStorage: ${error.message}`)
+    if (error instanceof Error) {
+      console.error(`Error retrieving data from localStorage for key ${key}: ${error.message}`)
     }
     return defaultValue ?? null
   }
