@@ -287,14 +287,27 @@ const searchJobs = async () => {
       limit: pageSize.value
     }
 
-    console.log('🔎 Has advanced params:', hasAdvancedParams)
+    console.log('🔎 Has advanced params:', hasAdvancedParams, {
+      location: filterState.value.location,
+      postedDate: filterState.value.postedDate,
+      experienceLevel: filterState.value.experienceLevel,
+      minSalary: filterState.value.minSalary,
+      maxSalary: filterState.value.maxSalary
+    })
 
-    // Determine endpoint: advanced search if filters, basic search if query, list all if neither
-    if (hasAdvancedParams) {
-      endpoint = '/jobs/search/advanced'
+    // Determine endpoint: advanced search if filters OR query, list all if neither
+    if (hasAdvancedParams || searchQuery.value.trim()) {
+      // Use advanced search if we have filters, or basic search if only query
+      if (hasAdvancedParams) {
+        endpoint = '/jobs/search/advanced'
+      } else {
+        endpoint = '/jobs/search'
+      }
+      
       if (searchQuery.value.trim()) {
         params.query = searchQuery.value.trim()
       }
+      
       // Add location filter
       if (filterState.value.location) {
         params.location = filterState.value.location
@@ -307,9 +320,6 @@ const searchJobs = async () => {
       if (filterState.value.postedDate) {
         params.posted_date = parseInt(filterState.value.postedDate)
       }
-    } else if (searchQuery.value.trim()) {
-      endpoint = '/jobs/search'
-      params.query = searchQuery.value.trim()
     }
 
     // Merge filter state into params
