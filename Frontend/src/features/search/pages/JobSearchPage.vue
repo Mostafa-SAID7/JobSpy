@@ -305,7 +305,7 @@ const searchJobs = async () => {
       }
       // Add posted date filter
       if (filterState.value.postedDate) {
-        params.postedDate = filterState.value.postedDate
+        params.posted_date = parseInt(filterState.value.postedDate)
       }
     } else if (searchQuery.value.trim()) {
       endpoint = '/jobs/search'

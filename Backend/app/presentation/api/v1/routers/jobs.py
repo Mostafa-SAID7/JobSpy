@@ -166,6 +166,7 @@ async def advanced_search(
     salary_max: Optional[float] = Query(None, description="Maximum salary"),
     is_remote: Optional[bool] = Query(None, description="Is remote job"),
     source: Optional[str] = Query(None, description="Job source (LinkedIn, Indeed, etc.)"),
+    posted_date: Optional[int] = Query(None, description="Posted within days (1, 7, 30, 90)"),
     skip: int = Query(0, ge=0, description="Number of results to skip"),
     limit: int = Query(20, ge=1, le=100, description="Maximum number of results"),
     use_case: AdvancedSearchUseCase = Depends(get_advanced_search_use_case),
@@ -183,6 +184,7 @@ async def advanced_search(
             salary_max=salary_max,
             is_remote=is_remote,
             source=source,
+            posted_date=posted_date,
             skip=skip,
             limit=limit
         )

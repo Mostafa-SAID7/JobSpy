@@ -33,6 +33,7 @@ class AdvancedSearchRequest:
     is_remote: Optional[bool] = None
     source: Optional[str] = None
     skills: Optional[List[str]] = None
+    posted_date: Optional[int] = None  # Number of days (1, 7, 30, 90)
     skip: int = 0
     limit: int = 20
 
@@ -228,6 +229,15 @@ class AdvancedSearchUseCase:
                 if job.matches_skills(request.skills)
             ]
         
+        # Posted date filter
+        if request.posted_date:
+            from datetime import datetime, timedelta
+            cutoff_date = datetime.utcnow() - timedelta(days=request.posted_date)
+            filtered = [
+                job for job in filtered
+                if job.posted_date >= cutoff_date
+            ]
+        
         return filtered
     
     def _generate_cache_key(self, request: AdvancedSearchRequest) -> str:
@@ -279,5 +289,7 @@ class AdvancedSearchUseCase:
             filters["source"] = request.source
         if request.skills:
             filters["skills"] = request.skills
+        if request.posted_date is not None:
+            filters["posted_date"] = request.posted_date
         
         return filters
